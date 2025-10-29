@@ -1,0 +1,76 @@
+<?php
+
+/**
+ * Static content controller.
+ *
+ * This file will render views from views/pages/
+ *
+ * PHP 5
+ *
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
+ * @package       app.Controller
+ * @since         CakePHP(tm) v 0.2.9
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ */
+App::uses('AppController', 'Controller');
+
+/**
+ * Static content controller
+ *
+ * Override this controller by placing a copy in controllers directory of an application
+ *
+ * @package       app.Controller
+ * @link http://book.cakephp.org/2.0/en/controllers/pages-controller.html
+ */
+class VendedorController extends AppController {
+
+    /**
+     * Displays a view
+     *
+     * @param mixed What page to display
+     * @return void
+     */
+    
+    var $components = array('RequestHandler');
+    public $helpers = array('JavascriptHelper');
+    
+    public function select2() {
+        $this->Vendedor->recursive = 0;
+        $this->set('vendedor', $this->paginate());
+    }
+
+    public function search() {
+        $this->autoRender = false;
+
+
+        // Consultando pelo que o usuário está digitando
+        $term = $this->request->query['q'];
+        $clientes = $this->Vendedor->find('all', array(
+            'fields' => array('cd_usu','nm_pessoa'),
+            'conditions' => array(
+                'nm_fant LIKE' => mb_strtoupper($term) . '%'
+            )
+        ));
+
+
+        // Formatar resultado
+        $result = array();
+        foreach ($clientes as $key => $cliente) {
+            $result[$key]['id'] = (int) $cliente['Cliente']['cd_pessoa'];
+            $result[$key]['text'] = $cliente['Cliente']['nm_fant'];
+        }
+
+        $clientes = $result;
+
+        echo json_encode($clientes);
+    }
+
+}
