@@ -14,26 +14,44 @@ class Usuario {
      * Busca usuário por login
      */
     public function findByLogin($login) {
+        error_log("=== Usuario::findByLogin() CHAMADO ===");
+        error_log("Login recebido: " . $login);
+        
         $login = $this->db->escape(strtolower($login));
         
         $sql = "SELECT cd_usuario 
                 FROM sysapp_config_user 
                 WHERE LOWER(ds_login) = '$login'";
         
-        return $this->db->fetchOne($sql);
+        error_log("SQL: " . $sql);
+        
+        $result = $this->db->fetchOne($sql);
+        
+        error_log("Resultado: " . print_r($result, true));
+        
+        return $result;
     }
     
     /**
      * Busca dados do usuário para autenticação
      */
     public function findForAuth($cd_usuario) {
+        error_log("=== Usuario::findForAuth() CHAMADO ===");
+        error_log("cd_usuario: " . $cd_usuario);
+        
         $cd_usuario = (int)$cd_usuario;
         
         $sql = "SELECT cd_usuario, nm_usuario as nome_usuario, ds_senha as senha_usuario 
                 FROM vw_login 
                 WHERE cd_usuario = $cd_usuario";
         
-        return $this->db->fetchOne($sql);
+        error_log("SQL: " . $sql);
+        
+        $result = $this->db->fetchOne($sql);
+        
+        error_log("Resultado: " . print_r($result, true));
+        
+        return $result;
     }
     
     /**

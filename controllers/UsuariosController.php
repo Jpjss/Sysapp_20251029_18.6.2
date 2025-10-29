@@ -51,18 +51,26 @@ class UsuariosController extends Controller {
             // Busca usuário
             $configUser = $this->Usuario->findByLogin($email);
             
+            error_log("Resultado findByLogin: " . print_r($configUser, true));
+            
             if (!$configUser) {
+                error_log("ERRO: Usuário não encontrado");
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
             }
             
             $cd_usuario = $configUser['cd_usuario'];
+            error_log("cd_usuario encontrado: " . $cd_usuario);
             
             // Busca dados completos do usuário
+            error_log("Buscando dados de autenticação...");
             $usuario = $this->Usuario->findForAuth($cd_usuario);
             
+            error_log("Resultado findForAuth: " . print_r($usuario, true));
+            
             if (!$usuario) {
+                error_log("ERRO: Dados de autenticação não encontrados");
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
@@ -71,16 +79,25 @@ class UsuariosController extends Controller {
             // Verifica senha
             $senhaHash = Security::hash($senha, 'md5', SECURITY_SALT);
             
+            error_log("Senha fornecida (hash): " . $senhaHash);
+            error_log("Senha no banco: " . $usuario['senha_usuario']);
+            
             if ($senhaHash !== $usuario['senha_usuario']) {
+                error_log("ERRO: Senha incorreta");
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
             }
             
+            error_log("Senha correta! Buscando empresas...");
+            
             // Busca empresas do usuário
             $empresas = $this->Usuario->getEmpresas($cd_usuario);
             
+            error_log("Empresas encontradas: " . count($empresas));
+            
             if (empty($empresas)) {
+                error_log("ERRO: Usuário sem empresas configuradas");
                 Session::setFlash('Usuário sem empresas configuradas!', 'error');
                 $this->render();
                 return;
@@ -433,5 +450,83 @@ class UsuariosController extends Controller {
         }
         
         exit;
+    }
+    
+    /**
+     * Adicionar banco de dados
+     */
+    public function adiciona_database() {
+        $this->requireAuth();
+        
+        if ($this->isPost()) {
+            $this->layout = false;
+            
+            // Validações
+            $erros = [];
+            
+            if (empty($_POST['nome_empresa'])) {
+                $erros[] = 'Nome da empresa é obrigatório';
+            }
+            
+            if (empty($_POST['hostname'])) {
+                $erros[] = 'Host é obrigatório';
+            }
+            
+            if (empty($_POST['nome_banco'])) {
+                $erros[] = 'Nome do banco é obrigatório';
+            }
+            
+            if (empty($_POST['usuario_banco'])) {
+                $erros[] = 'Usuário é obrigatório';
+            }
+            
+            if (empty($_POST['senha_banco'])) {
+                $erros[] = 'Senha é obrigatória';
+            }
+            
+            if (empty($_POST['porta_banco'])) {
+                $erros[] = 'Porta é obrigatória';
+            }
+            
+            if (!empty($erros)) {
+                echo "0";
+                exit;
+            }
+            
+            // Busca próximo código de empresa
+            $cd_empresa = $this->Empresa->getNextCodigo();
+            
+            // Prepara dados
+            $dados = [
+                'cd_empresa' => $cd_empresa,
+                'nome_empresa' => $_POST['nome_empresa'],
+                'hostname' => strtolower($_POST['hostname']),
+                'nome_banco' => strtolower($_POST['nome_banco']),
+                'usuario_banco' => strtolower($_POST['usuario_banco']),
+                'senha_banco' => Security::encrypt($_POST['senha_banco']),
+                'porta_banco' => $_POST['porta_banco']
+            ];
+            
+            // Salva banco de dados
+            if ($this->Empresa->salvar($dados)) {
+                echo "1";
+            } else {
+                echo "0";
+            }
+            
+            exit;
+        }
+        
+        // Busca próximo código de empresa para exibir no form
+        $cd_empresa = [
+            [
+                [
+                    'cd_empresa' => $this->Empresa->getNextCodigo()
+                ]
+            ]
+        ];
+        
+        $this->set('cd_empresa', $cd_empresa);
+        $this->render();
     }
 }

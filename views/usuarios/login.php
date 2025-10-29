@@ -4,7 +4,7 @@
             <img src="<?= BASE_URL ?>/public/images/login.png" alt="<?= APP_NAME ?>" class="login-logo">
         </div>
         
-        <form method="POST" action="<?= BASE_URL ?>/usuarios/login" class="login-form">
+        <form method="POST" action="<?= BASE_URL ?>/usuarios/login" class="login-form" id="loginForm">
             <div class="form-group">
                 <label for="email">Usuário:</label>
                 <input type="text" 
@@ -27,7 +27,7 @@
             </div>
             
             <div class="form-group">
-                <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+                <button type="submit" class="btn btn-primary btn-block" id="btnLogin">Entrar</button>
             </div>
         </form>
         
@@ -37,3 +37,15 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    console.log('Formulário sendo enviado...');
+    console.log('Email:', document.getElementById('email').value);
+    console.log('Senha:', document.getElementById('senha').value ? '***' : 'vazio');
+});
+
+document.getElementById('btnLogin').addEventListener('click', function(e) {
+    console.log('Botão clicado!');
+});
+</script>

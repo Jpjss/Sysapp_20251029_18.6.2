@@ -13,7 +13,7 @@ class Database {
     private $port = '5432';
     private $database = 'sysapp';
     private $username = 'postgres';
-    private $password = '';
+    private $password = 'systec';
     
     private function __construct() {
         // Construtor privado para Singleton
@@ -31,13 +31,18 @@ class Database {
             $p = $password ?? $this->password;
             $pt = $port ?? $this->port;
             
+            error_log("=== TENTANDO CONECTAR AO BANCO ===");
+            error_log("Host: $h, Database: $d, User: $u, Port: $pt");
+            
             $conn_string = "host=$h port=$pt dbname=$d user=$u password=$p";
             $this->conn = pg_connect($conn_string);
             
             if (!$this->conn) {
+                error_log("ERRO: Falha ao conectar ao banco de dados");
                 throw new Exception("Erro ao conectar ao banco de dados");
             }
             
+            error_log("SUCESSO: Conectado ao banco de dados");
             return $this->conn;
         } catch (Exception $e) {
             error_log("Erro de conexão: " . $e->getMessage());

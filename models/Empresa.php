@@ -14,9 +14,9 @@ class Empresa {
      * Lista todas empresas
      */
     public function listar() {
-        $sql = "SELECT cd_empresa, nome_empresa 
+        $sql = "SELECT cd_empresa, nm_empresa as nome_empresa 
                 FROM sysapp_config_empresas 
-                ORDER BY nome_empresa";
+                ORDER BY nm_empresa";
         
         return $this->db->fetchAll($sql);
     }
@@ -46,17 +46,17 @@ class Empresa {
      */
     public function salvar($dados) {
         $cd_empresa = (int)$dados['cd_empresa'];
-        $nome_empresa = $this->db->escape(ucwords($dados['nome_empresa']));
-        $hostname = $this->db->escape($dados['hostname']);
-        $nome_banco = $this->db->escape($dados['nome_banco']);
-        $usuario_banco = $this->db->escape($dados['usuario_banco']);
-        $senha_banco = $this->db->escape($dados['senha_banco']);
-        $porta_banco = $this->db->escape($dados['porta_banco']);
+        $nm_empresa = $this->db->escape(ucwords($dados['nome_empresa']));
+        $ds_host = $this->db->escape($dados['hostname']);
+        $ds_banco = $this->db->escape($dados['nome_banco']);
+        $ds_usuario = $this->db->escape($dados['usuario_banco']);
+        $ds_senha = $this->db->escape($dados['senha_banco']);
+        $ds_porta = $this->db->escape($dados['porta_banco']);
         
         $sql = "INSERT INTO sysapp_config_empresas 
-                (cd_empresa, nome_empresa, hostname_banco, nome_banco, usuario_banco, senha_banco, porta_banco) 
-                VALUES ($cd_empresa, '$nome_empresa', '$hostname', '$nome_banco', 
-                        '$usuario_banco', '$senha_banco', '$porta_banco')";
+                (cd_empresa, nm_empresa, ds_host, ds_banco, ds_usuario, ds_senha, ds_porta) 
+                VALUES ($cd_empresa, '$nm_empresa', '$ds_host', '$ds_banco', 
+                        '$ds_usuario', '$ds_senha', '$ds_porta')";
         
         return $this->db->query($sql);
     }
@@ -66,20 +66,20 @@ class Empresa {
      */
     public function atualizar($dados) {
         $cd_empresa = (int)$dados['cd_empresa'];
-        $nome_empresa = $this->db->escape(ucwords($dados['nome_empresa']));
-        $hostname = $this->db->escape($dados['hostname']);
-        $nome_banco = $this->db->escape($dados['nome_banco']);
-        $usuario_banco = $this->db->escape($dados['usuario_banco']);
-        $senha_banco = $this->db->escape($dados['senha_banco']);
-        $porta_banco = $this->db->escape($dados['porta_banco']);
+        $nm_empresa = $this->db->escape(ucwords($dados['nome_empresa']));
+        $ds_host = $this->db->escape($dados['hostname']);
+        $ds_banco = $this->db->escape($dados['nome_banco']);
+        $ds_usuario = $this->db->escape($dados['usuario_banco']);
+        $ds_senha = $this->db->escape($dados['senha_banco']);
+        $ds_porta = $this->db->escape($dados['porta_banco']);
         
         $sql = "UPDATE sysapp_config_empresas 
-                SET nome_empresa = '$nome_empresa',
-                    hostname_banco = '$hostname',
-                    nome_banco = '$nome_banco',
-                    usuario_banco = '$usuario_banco',
-                    senha_banco = '$senha_banco',
-                    porta_banco = '$porta_banco'
+                SET nm_empresa = '$nm_empresa',
+                    ds_host = '$ds_host',
+                    ds_banco = '$ds_banco',
+                    ds_usuario = '$ds_usuario',
+                    ds_senha = '$ds_senha',
+                    ds_porta = '$ds_porta'
                 WHERE cd_empresa = $cd_empresa";
         
         return $this->db->query($sql);

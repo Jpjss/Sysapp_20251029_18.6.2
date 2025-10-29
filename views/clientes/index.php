@@ -17,41 +17,43 @@
         </div>
     </form>
     
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Nome Fantasia</th>
-                <th>Razão Social</th>
-                <th>CPF/CNPJ</th>
-                <th>Telefone</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (!empty($clientes)): ?>
-                <?php foreach ($clientes as $cliente): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($cliente['cd_pessoa']) ?></td>
-                        <td><?= htmlspecialchars($cliente['nm_fant']) ?></td>
-                        <td><?= htmlspecialchars($cliente['nm_razao'] ?? '-') ?></td>
-                        <td><?= htmlspecialchars($cliente['cpf_cnpj'] ?? '-') ?></td>
-                        <td><?= htmlspecialchars($cliente['fone'] ?? '-') ?></td>
-                        <td>
-                            <a href="<?= BASE_URL ?>/clientes/view/<?= $cliente['cd_pessoa'] ?>" 
-                               class="btn btn-sm btn-info">Ver</a>
-                            <a href="<?= BASE_URL ?>/questionarios/historico/<?= $cliente['cd_pessoa'] ?>" 
-                               class="btn btn-sm btn-primary">Histórico</a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td colspan="6" class="text-center">Nenhum cliente encontrado</td>
+                    <th>Código</th>
+                    <th>Nome Fantasia</th>
+                    <th>Razão Social</th>
+                    <th>CPF/CNPJ</th>
+                    <th>Telefone</th>
+                    <th>Ações</th>
                 </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php if (!empty($clientes)): ?>
+                    <?php foreach ($clientes as $cliente): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($cliente['cd_pessoa']) ?></td>
+                            <td><?= htmlspecialchars($cliente['nm_fant']) ?></td>
+                            <td><?= htmlspecialchars($cliente['nm_razao'] ?? '-') ?></td>
+                            <td><?= htmlspecialchars($cliente['cpf_cnpj'] ?? '-') ?></td>
+                            <td><?= htmlspecialchars($cliente['fone'] ?? '-') ?></td>
+                            <td>
+                                <a href="<?= BASE_URL ?>/clientes/view/<?= $cliente['cd_pessoa'] ?>" 
+                                   class="btn btn-sm btn-info">Ver</a>
+                                <a href="<?= BASE_URL ?>/questionarios/historico/<?= $cliente['cd_pessoa'] ?>" 
+                                   class="btn btn-sm btn-primary">Histórico</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="6" class="text-center">Nenhum cliente encontrado</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
     
     <?php if ($totalPages > 1): ?>
         <div class="pagination">
@@ -65,6 +67,6 @@
     <?php endif; ?>
     
     <div class="table-info">
-        Total de registros: <?= $total ?>
+        <strong>Total de registros:</strong> <?= number_format($total, 0, ',', '.') ?> cliente<?= $total != 1 ? 's' : '' ?>
     </div>
 </div>

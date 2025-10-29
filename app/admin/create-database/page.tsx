@@ -26,7 +26,7 @@ export default function CreateDatabasePage() {
       // CakePHP espera os dados aninhados em um array com o nome do Model (ou 'data' genérico)
       formData.append('data[dbName]', dbName);
 
-      const response = await fetch("/admin/admin/create_database", {
+      const response = await fetch("/api/admin/admin/create_database", {
         method: "POST",
         body: formData,
       });

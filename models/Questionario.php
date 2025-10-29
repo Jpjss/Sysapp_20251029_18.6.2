@@ -8,6 +8,17 @@ class Questionario {
     
     public function __construct() {
         $this->db = Database::getInstance();
+        
+        // Reconecta ao banco da empresa se estiver configurado na sessão
+        if (Session::check('Config.database')) {
+            $host = Session::read('Config.host');
+            $database = Session::read('Config.database');
+            $user = Session::read('Config.user');
+            $password = Session::read('Config.password');
+            $port = Session::read('Config.porta');
+            
+            $this->db->connect($host, $database, $user, $password, $port);
+        }
     }
     
     /**
@@ -127,14 +138,54 @@ class Questionario {
         $cd_pessoa = (int)$cd_pessoa;
         $limit = (int)$limit;
         
-        $sql = "SELECT qrh.*, q.ds_questionario, u.nome_usuario
-                FROM glb_questionario_resposta_historico qrh
-                INNER JOIN glb_questionario q ON qrh.cd_questionario = q.cd_questionario
-                LEFT JOIN vw_login u ON qrh.cd_usuario = u.cd_usuario
-                WHERE qrh.cd_pessoa = $cd_pessoa
-                ORDER BY qrh.dt_resposta DESC
-                LIMIT $limit";
+        // Verifica qual tabela usar baseado na estrutura do banco
+        $tabelaHistorico = $this->detectarTabelaHistorico();
+        
+        if ($tabelaHistorico === 'glb_questionario_resposta_historico') {
+            // Estrutura antiga (sistema original)
+            $sql = "SELECT qrh.*, q.ds_questionario, u.nome_usuario
+                    FROM glb_questionario_resposta_historico qrh
+                    INNER JOIN glb_questionario q ON qrh.cd_questionario = q.cd_questionario
+                    LEFT JOIN vw_login u ON qrh.cd_usuario = u.cd_usuario
+                    WHERE qrh.cd_pessoa = $cd_pessoa
+                    ORDER BY qrh.dt_resposta DESC
+                    LIMIT $limit";
+        } else {
+            // Estrutura Propasso (glb_questionario_resposta)
+            $sql = "SELECT qr.*, q.ds_questionario, 
+                           qr.dt_cad as dt_resposta,
+                           CASE 
+                               WHEN qr.cd_usu_cad IS NOT NULL THEN 
+                                   (SELECT nome_usuario FROM vw_login WHERE cd_usuario = qr.cd_usu_cad LIMIT 1)
+                               ELSE 'Sistema'
+                           END as nome_usuario,
+                           qr.protocolo as ds_resposta
+                    FROM glb_questionario_resposta qr
+                    INNER JOIN glb_questionario q ON qr.cd_questionario = q.cd_questionario
+                    WHERE qr.cd_pessoa = $cd_pessoa
+                    ORDER BY qr.dt_cad DESC
+                    LIMIT $limit";
+        }
         
         return $this->db->fetchAll($sql);
+    }
+    
+    /**
+     * Detecta qual tabela de histórico usar
+     */
+    private function detectarTabelaHistorico() {
+        $sql = "SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'glb_questionario_resposta_historico'
+        ) as existe";
+        
+        $result = $this->db->fetchOne($sql);
+        
+        if ($result && $result['existe'] === 't') {
+            return 'glb_questionario_resposta_historico';
+        }
+        
+        return 'glb_questionario_resposta';
     }
 }

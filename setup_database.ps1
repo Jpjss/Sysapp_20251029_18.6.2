@@ -34,7 +34,7 @@ $env:PGPASSWORD = $pgPasswordPlain
 # Testar conexão
 Write-Host ""
 Write-Host "Testando conexao com PostgreSQL..." -ForegroundColor Yellow
-$testResult = & $psqlPath -U postgres -h localhost -p 5432 -c "SELECT version();"
+& $psqlPath -U postgres -h localhost -p 5432 -c "SELECT version();" | Out-Null
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERRO] Nao foi possivel conectar ao PostgreSQL!" -ForegroundColor Red
