@@ -11,6 +11,25 @@ class Controller {
     public function __construct() {
         $this->db = Database::getInstance();
         $this->db->connect(DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT);
+        
+        // Se houver configuração de empresa na sessão, reconecta automaticamente
+        $this->reconectarBancoEmpresaSeNecessario();
+    }
+    
+    /**
+     * Reconecta ao banco da empresa se houver configuração na sessão
+     */
+    protected function reconectarBancoEmpresaSeNecessario() {
+        if (Session::check('Config.database')) {
+            $host = Session::read('Config.host');
+            $database = Session::read('Config.database');
+            $user = Session::read('Config.user');
+            $password = Session::read('Config.password');
+            $port = Session::read('Config.porta');
+            
+            // Reconecta ao banco da empresa
+            $this->db->connect($host, $database, $user, $password, $port);
+        }
     }
     
     /**

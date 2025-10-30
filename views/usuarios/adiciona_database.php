@@ -610,22 +610,37 @@
                 url: '<?php echo BASE_URL; ?>/usuarios/adiciona_database',
                 type: 'POST',
                 data: $(this).serialize(),
+                dataType: 'json',
                 success: function(response) {
                     document.getElementById('loadingOverlay').classList.remove('active');
                     document.getElementById('submitBtn').disabled = false;
 
-                    if (response == "1") {
-                        showAlert('✓ Banco de dados cadastrado com sucesso!', 'success');
+                    // Se retornou string "1" (sucesso antigo)
+                    if (response == "1" || response === 1 || response.success === true) {
+                        showAlert('✓ Banco de dados cadastrado e testado com sucesso!', 'success');
                         setTimeout(() => {
                             window.location.href = '<?php echo BASE_URL; ?>/relatorios/index';
                         }, 2000);
+                    } else if (response.success === false && response.message) {
+                        // Mensagem específica do servidor
+                        showAlert('✗ ' + response.message, 'error');
                     } else {
                         showAlert('✗ Erro ao cadastrar banco de dados. Tente novamente.', 'error');
                     }
                 },
-                error: function() {
+                error: function(xhr) {
                     document.getElementById('loadingOverlay').classList.remove('active');
                     document.getElementById('submitBtn').disabled = false;
+                    
+                    // Tentar parsear resposta de erro
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.message) {
+                            showAlert('✗ ' + response.message, 'error');
+                            return;
+                        }
+                    } catch(e) {}
+                    
                     showAlert('✗ Erro ao processar solicitação. Verifique sua conexão.', 'error');
                 }
             });

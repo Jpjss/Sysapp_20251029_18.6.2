@@ -17,6 +17,8 @@ class Database {
     
     private function __construct() {
         // Construtor privado para Singleton
+        // Conecta automaticamente ao banco padrão
+        $this->connect();
     }
     
     /**

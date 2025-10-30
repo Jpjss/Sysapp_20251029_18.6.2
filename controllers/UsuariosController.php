@@ -466,6 +466,36 @@ class UsuariosController extends Controller {
                 exit;
             }
             
+            // TESTA A CONEXÃO ANTES DE SALVAR
+            $testHost = strtolower($_POST['hostname']);
+            $testDb = strtolower($_POST['nome_banco']);
+            $testUser = strtolower($_POST['usuario_banco']);
+            $testPass = $_POST['senha_banco'];
+            $testPort = $_POST['porta_banco'];
+            
+            $connTest = @pg_connect("host=$testHost port=$testPort dbname=$testDb user=$testUser password=$testPass", PGSQL_CONNECT_FORCE_NEW);
+            
+            if (!$connTest) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Não foi possível conectar ao banco de dados. Verifique as credenciais e tente novamente.'
+                ]);
+                exit;
+            }
+            
+            // Testa se a tabela glb_pessoa existe (validação de banco ERP)
+            $testQuery = @pg_query($connTest, "SELECT COUNT(*) as total FROM glb_pessoa LIMIT 1");
+            if (!$testQuery) {
+                pg_close($connTest);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Banco conectado, mas não é um banco ERP válido (tabela glb_pessoa não encontrada).'
+                ]);
+                exit;
+            }
+            
+            pg_close($connTest);
+            
             // Busca próximo código de empresa
             $cd_empresa = $this->Empresa->getNextCodigo();
             
@@ -473,43 +503,51 @@ class UsuariosController extends Controller {
             $dados = [
                 'cd_empresa' => $cd_empresa,
                 'nome_empresa' => $_POST['nome_empresa'],
-                'hostname' => strtolower($_POST['hostname']),
-                'nome_banco' => strtolower($_POST['nome_banco']),
-                'usuario_banco' => strtolower($_POST['usuario_banco']),
-                'senha_banco' => Security::encrypt($_POST['senha_banco']),
-                'porta_banco' => $_POST['porta_banco']
+                'hostname' => $testHost,
+                'nome_banco' => $testDb,
+                'usuario_banco' => $testUser,
+                'senha_banco' => Security::encrypt($testPass),
+                'porta_banco' => $testPort
             ];
             
             // Salva banco de dados
-            if ($this->Empresa->salvar($dados)) {
+            $resultado = $this->Empresa->salvar($dados);
+            
+            if ($resultado) {
                 // Pega o usuário logado
                 $cd_usuario = Session::read('Questionarios.cd_usu');
                 
                 if ($cd_usuario) {
-                    // Vincula empresa ao usuário logado
-                    $sqlVincular = "INSERT INTO sysapp_config_user_empresas (cd_empresa, cd_usuario) 
-                                    VALUES ($cd_empresa, $cd_usuario)";
-                    $this->db->query($sqlVincular);
-                    
-                    // Busca todas as interfaces disponíveis
-                    $sqlInterfaces = "SELECT cd_interface FROM sysapp_interfaces";
-                    $interfaces = $this->db->fetchAll($sqlInterfaces);
-                    
-                    // Dá todas as permissões para o usuário nesta empresa
-                    if ($interfaces) {
-                        foreach ($interfaces as $interface) {
-                            $cd_interface = (int)$interface['cd_interface'];
-                            $sqlPermissao = "INSERT INTO sysapp_config_user_empresas_interfaces 
-                                            (cd_empresa, cd_usuario, cd_interface) 
-                                            VALUES ($cd_empresa, $cd_usuario, $cd_interface)";
-                            $this->db->query($sqlPermissao);
+                    try {
+                        // Vincula empresa ao usuário logado
+                        $sqlVincular = "INSERT INTO sysapp_config_user_empresas (cd_empresa, cd_usuario) 
+                                        VALUES ($cd_empresa, $cd_usuario)";
+                        $this->db->query($sqlVincular);
+                        
+                        // Busca todas as interfaces disponíveis
+                        $sqlInterfaces = "SELECT cd_interface FROM sysapp_interfaces";
+                        $interfaces = $this->db->fetchAll($sqlInterfaces);
+                        
+                        // Dá todas as permissões para o usuário nesta empresa
+                        if ($interfaces) {
+                            foreach ($interfaces as $interface) {
+                                $cd_interface = (int)$interface['cd_interface'];
+                                $sqlPermissao = "INSERT INTO sysapp_config_user_empresas_interfaces 
+                                                (cd_empresa, cd_usuario, cd_interface) 
+                                                VALUES ($cd_empresa, $cd_usuario, $cd_interface)";
+                                $this->db->query($sqlPermissao);
+                            }
                         }
+                    } catch (Exception $e) {
+                        error_log("Erro ao vincular usuário à empresa: " . $e->getMessage());
                     }
                 }
                 
-                echo "1";
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'message' => 'Banco de dados cadastrado com sucesso!']);
             } else {
-                echo "0";
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Erro ao salvar banco de dados no sistema.']);
             }
             
             exit;
