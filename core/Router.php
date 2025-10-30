@@ -75,10 +75,6 @@ class Router {
      * Redireciona para uma URL
      */
     public static function redirect($url) {
-        // LOG DE DEBUG
-        error_log("=== REDIRECT DEBUG ===");
-        error_log("URL recebida: " . $url);
-        
         if (strpos($url, 'http') !== 0) {
             // Garante que a URL relativa comece com /
             $url = '/' . ltrim($url, '/');
@@ -91,13 +87,8 @@ class Router {
             $scriptName = $_SERVER['SCRIPT_NAME'];
             $baseDir = dirname($scriptName);
             
-            error_log("SCRIPT_NAME: " . $scriptName);
-            error_log("baseDir antes: " . $baseDir);
-            
             // Remove /index.php do baseDir se existir
             $baseDir = str_replace('/index.php', '', $baseDir);
-            
-            error_log("baseDir depois: " . $baseDir);
             
             // Monta URL final
             if ($baseDir !== '/') {

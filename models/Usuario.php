@@ -14,20 +14,13 @@ class Usuario {
      * Busca usuário por login
      */
     public function findByLogin($login) {
-        error_log("=== Usuario::findByLogin() CHAMADO ===");
-        error_log("Login recebido: " . $login);
-        
         $login = $this->db->escape(strtolower($login));
         
         $sql = "SELECT cd_usuario 
                 FROM sysapp_config_user 
-                WHERE LOWER(ds_login) = '$login'";
-        
-        error_log("SQL: " . $sql);
+                WHERE LOWER(ds_login) = '$login' OR LOWER(nm_usuario) = '$login'";
         
         $result = $this->db->fetchOne($sql);
-        
-        error_log("Resultado: " . print_r($result, true));
         
         return $result;
     }
@@ -36,20 +29,13 @@ class Usuario {
      * Busca dados do usuário para autenticação
      */
     public function findForAuth($cd_usuario) {
-        error_log("=== Usuario::findForAuth() CHAMADO ===");
-        error_log("cd_usuario: " . $cd_usuario);
-        
         $cd_usuario = (int)$cd_usuario;
         
         $sql = "SELECT cd_usuario, nm_usuario as nome_usuario, ds_senha as senha_usuario 
                 FROM vw_login 
                 WHERE cd_usuario = $cd_usuario";
         
-        error_log("SQL: " . $sql);
-        
         $result = $this->db->fetchOne($sql);
-        
-        error_log("Resultado: " . print_r($result, true));
         
         return $result;
     }
@@ -129,9 +115,9 @@ class Usuario {
         $limit = (int)$limit;
         $offset = (int)$offset;
         
-        $sql = "SELECT cd_usuario, nome_usuario, login_usuario, cd_usu_erp 
+        $sql = "SELECT cd_usuario, nm_usuario as nome_usuario, ds_login as login_usuario, cd_usu_erp 
                 FROM sysapp_config_user 
-                ORDER BY nome_usuario 
+                ORDER BY nm_usuario 
                 LIMIT $limit OFFSET $offset";
         
         return $this->db->fetchAll($sql);
@@ -161,7 +147,7 @@ class Usuario {
     public function findById($cd_usuario) {
         $cd_usuario = (int)$cd_usuario;
         
-        $sql = "SELECT cd_usuario, nome_usuario, login_usuario, cd_usu_erp 
+        $sql = "SELECT cd_usuario, nm_usuario as nome_usuario, ds_login as login_usuario, cd_usu_erp 
                 FROM sysapp_config_user 
                 WHERE cd_usuario = $cd_usuario";
         
@@ -179,7 +165,7 @@ class Usuario {
         $cd_usu_erp = isset($dados['cd_usu_erp']) ? (int)$dados['cd_usu_erp'] : 'NULL';
         
         $sql = "INSERT INTO sysapp_config_user 
-                (cd_usuario, nome_usuario, login_usuario, senha_usuario, cd_usu_erp) 
+                (cd_usuario, nm_usuario, ds_login, ds_senha, cd_usu_erp) 
                 VALUES ($cd_usuario, '$nome_usuario', '$login_usuario', '$senha_usuario', $cd_usu_erp)";
         
         return $this->db->query($sql);
@@ -195,14 +181,14 @@ class Usuario {
         $cd_usu_erp = isset($dados['cd_usu_erp']) ? (int)$dados['cd_usu_erp'] : 'NULL';
         
         $sql = "UPDATE sysapp_config_user 
-                SET nome_usuario = '$nome_usuario', 
-                    login_usuario = '$login_usuario', 
+                SET nm_usuario = '$nome_usuario', 
+                    ds_login = '$login_usuario', 
                     cd_usu_erp = $cd_usu_erp";
         
         // Atualiza senha se fornecida
         if (!empty($dados['senha_usuario'])) {
             $senha_usuario = $this->db->escape($dados['senha_usuario']);
-            $sql .= ", senha_usuario = '$senha_usuario'";
+            $sql .= ", ds_senha = '$senha_usuario'";
         }
         
         $sql .= " WHERE cd_usuario = $cd_usuario";
@@ -325,6 +311,6 @@ class Usuario {
         }
         
         $result = $this->db->fetchOne($sql);
-        return $result !== null;
+        return $result !== false && $result !== null;
     }
 }

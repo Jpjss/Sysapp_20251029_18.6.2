@@ -12,10 +12,11 @@ class Security {
         $salt = $salt ?? SECURITY_SALT;
         
         if ($type === 'md5') {
-            return md5($string . $salt);
+            // Formato CakePHP: salt + string + salt
+            return md5($salt . $string . $salt);
         }
         
-        return hash($type, $string . $salt);
+        return hash($type, $salt . $string . $salt);
     }
     
     /**

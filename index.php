@@ -30,18 +30,11 @@ if (Session::check('Config.database')) {
     $password = Session::read('Config.password');
     $port = Session::read('Config.porta');
     
-    error_log("=== USANDO BANCO DA SESSÃO ===");
-    error_log("Database: $database, Host: $host");
-    
     $db->connect($host, $database, $user, $password, $port);
 } else {
     // Senão, conecta ao banco padrão (sysapp)
-    error_log("=== USANDO BANCO PADRÃO (sysapp) ===");
     $db->connect();
 }
-
-error_log("=== APLICAÇÃO INICIADA ===");
-error_log("Banco de dados conectado: " . ($db->getConnection() ? "SIM" : "NÃO"));
 
 // Cria e executa o router
 $router = new Router();

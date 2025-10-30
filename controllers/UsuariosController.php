@@ -23,54 +23,38 @@ class UsuariosController extends Controller {
      * Página de login
      */
     public function login() {
-        error_log("=== MÉTODO LOGIN CHAMADO ===");
-        
         // Se já está logado, redireciona
         if (Session::isValid()) {
-            error_log("Usuário já logado, redirecionando para relatorios/empresa");
             $this->redirect('relatorios/empresa');
         }
         
         $this->layout = 'login';
         
         if ($this->isPost()) {
-            error_log("=== POST RECEBIDO NO LOGIN ===");
             $email = $_POST['email'] ?? '';
             $senha = $_POST['senha'] ?? '';
             
-            error_log("Email: " . $email);
-            
             if (empty($email) || empty($senha)) {
-                error_log("Email ou senha vazios");
                 Session::setFlash('Usuário e senha são necessários!', 'error');
                 $this->render();
                 return;
             }
             
-            error_log("Buscando usuário...");
             // Busca usuário
             $configUser = $this->Usuario->findByLogin($email);
             
-            error_log("Resultado findByLogin: " . print_r($configUser, true));
-            
             if (!$configUser) {
-                error_log("ERRO: Usuário não encontrado");
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
             }
             
             $cd_usuario = $configUser['cd_usuario'];
-            error_log("cd_usuario encontrado: " . $cd_usuario);
             
             // Busca dados completos do usuário
-            error_log("Buscando dados de autenticação...");
             $usuario = $this->Usuario->findForAuth($cd_usuario);
             
-            error_log("Resultado findForAuth: " . print_r($usuario, true));
-            
             if (!$usuario) {
-                error_log("ERRO: Dados de autenticação não encontrados");
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
@@ -79,25 +63,17 @@ class UsuariosController extends Controller {
             // Verifica senha
             $senhaHash = Security::hash($senha, 'md5', SECURITY_SALT);
             
-            error_log("Senha fornecida (hash): " . $senhaHash);
-            error_log("Senha no banco: " . $usuario['senha_usuario']);
-            
+            // Verifica se a senha está correta
             if ($senhaHash !== $usuario['senha_usuario']) {
-                error_log("ERRO: Senha incorreta");
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
             }
             
-            error_log("Senha correta! Buscando empresas...");
-            
             // Busca empresas do usuário
             $empresas = $this->Usuario->getEmpresas($cd_usuario);
             
-            error_log("Empresas encontradas: " . count($empresas));
-            
             if (empty($empresas)) {
-                error_log("ERRO: Usuário sem empresas configuradas");
                 Session::setFlash('Usuário sem empresas configuradas!', 'error');
                 $this->render();
                 return;
@@ -130,19 +106,11 @@ class UsuariosController extends Controller {
             $hora = date("H:i:s");
             Session::write('Questionarios.hora_login', date("d/m/Y") . " as " . $hora);
             
-            // LOG DE DEBUG
-            error_log("=== LOGIN BEM-SUCEDIDO ===");
-            error_log("cd_usuario: " . $cd_usuario);
-            error_log("nome: " . $usuario['nome_usuario']);
-            error_log("Quantidade de empresas: " . count($infoDb));
-            
             // Se tem múltiplas empresas, salva e redireciona para seleção
             if (count($infoDb) > 1) {
                 Session::write('Dados.database', $infoDb);
-                error_log("Múltiplas empresas - redirecionando para relatorios/empresa");
                 $this->redirect('relatorios/empresa');
             } else {
-                error_log("Uma única empresa - configurando e redirecionando para relatorios/index");
                 // Uma única empresa, configura direto
                 $empresa = $infoDb[0];
                 Session::write('Config.database', $empresa['nome_banco']);
@@ -438,9 +406,14 @@ class UsuariosController extends Controller {
     public function verificaEmail() {
         $this->layout = false;
         
-        if ($this->isAjax() && $this->isPost()) {
+        if ($this->isPost()) {
             $email = $_POST['login_usuario'] ?? '';
             $cd_usuario = $_POST['cd_usuario'] ?? null;
+            
+            if (empty($email)) {
+                echo '';
+                exit;
+            }
             
             if ($this->Usuario->emailExiste($email, $cd_usuario)) {
                 echo 'Email já em uso, escolha outro!';
@@ -509,6 +482,31 @@ class UsuariosController extends Controller {
             
             // Salva banco de dados
             if ($this->Empresa->salvar($dados)) {
+                // Pega o usuário logado
+                $cd_usuario = Session::read('Questionarios.cd_usu');
+                
+                if ($cd_usuario) {
+                    // Vincula empresa ao usuário logado
+                    $sqlVincular = "INSERT INTO sysapp_config_user_empresas (cd_empresa, cd_usuario) 
+                                    VALUES ($cd_empresa, $cd_usuario)";
+                    $this->db->query($sqlVincular);
+                    
+                    // Busca todas as interfaces disponíveis
+                    $sqlInterfaces = "SELECT cd_interface FROM sysapp_interfaces";
+                    $interfaces = $this->db->fetchAll($sqlInterfaces);
+                    
+                    // Dá todas as permissões para o usuário nesta empresa
+                    if ($interfaces) {
+                        foreach ($interfaces as $interface) {
+                            $cd_interface = (int)$interface['cd_interface'];
+                            $sqlPermissao = "INSERT INTO sysapp_config_user_empresas_interfaces 
+                                            (cd_empresa, cd_usuario, cd_interface) 
+                                            VALUES ($cd_empresa, $cd_usuario, $cd_interface)";
+                            $this->db->query($sqlPermissao);
+                        }
+                    }
+                }
+                
                 echo "1";
             } else {
                 echo "0";

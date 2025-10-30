@@ -17,9 +17,6 @@ class Cliente {
             $password = Session::read('Config.password');
             $port = Session::read('Config.porta');
             
-            error_log("=== Cliente::__construct() - Reconectando ao banco da sessão ===");
-            error_log("Database: $database, Host: $host, Port: $port");
-            
             $this->db->connect($host, $database, $user, $password, $port);
         }
     }
@@ -28,15 +25,11 @@ class Cliente {
      * Busca clientes com paginação
      */
     public function listar($limit = 20, $offset = 0, $filtro = '') {
-        error_log("=== Cliente::listar() CHAMADO ===");
-        error_log("Limit: $limit, Offset: $offset, Filtro: $filtro");
-        
         $limit = (int)$limit;
         $offset = (int)$offset;
         
         // Detecta qual estrutura de banco está sendo usada
         $estrutura = $this->detectarEstrutura();
-        error_log("Estrutura detectada: $estrutura");
         
         $where = '';
         if (!empty($filtro)) {
@@ -74,14 +67,7 @@ class Cliente {
                     LIMIT $limit OFFSET $offset";
         }
         
-        error_log("SQL: $sql");
-        
         $result = $this->db->fetchAll($sql);
-        error_log("Quantidade de clientes retornados: " . count($result));
-        
-        if (!empty($result)) {
-            error_log("Primeiro cliente: " . print_r($result[0], true));
-        }
         
         return $result;
     }
@@ -111,8 +97,6 @@ class Cliente {
      * Conta total de clientes
      */
     public function count($filtro = '') {
-        error_log("=== Cliente::count() CHAMADO ===");
-        
         $estrutura = $this->detectarEstrutura();
         
         $where = '';
@@ -126,12 +110,9 @@ class Cliente {
         }
         
         $sql = "SELECT COUNT(*) as total FROM glb_pessoa $where";
-        error_log("SQL COUNT: $sql");
         
         $result = $this->db->fetchOne($sql);
         $total = $result ? (int)$result['total'] : 0;
-        
-        error_log("Total de clientes: $total");
         
         return $total;
     }

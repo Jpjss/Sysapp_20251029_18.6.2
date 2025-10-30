@@ -103,13 +103,6 @@ class RelatoriosController extends Controller {
             }
             
             if ($empresaSelecionada) {
-                error_log("=== SELEÇÃO DE EMPRESA ===");
-                error_log("Empresa: " . $empresaSelecionada['nome_empresa']);
-                error_log("Banco: " . $empresaSelecionada['nome_banco']);
-                error_log("Host: " . $empresaSelecionada['hostname_banco']);
-                error_log("User: " . $empresaSelecionada['usuario_banco']);
-                error_log("Porta: " . $empresaSelecionada['porta_banco']);
-                
                 // Configura empresa na sessão
                 Session::write('Config.database', $empresaSelecionada['nome_banco']);
                 Session::write('Config.databasename', $empresaSelecionada['nome_banco']);
@@ -119,10 +112,7 @@ class RelatoriosController extends Controller {
                 Session::write('Config.porta', $empresaSelecionada['porta_banco']);
                 Session::write('Config.empresa', $empresaSelecionada['nome_empresa']);
                 
-                error_log("Configurações salvas na sessão");
-                
                 // Reconecta ao banco da empresa
-                error_log("Reconectando ao banco da empresa...");
                 $result = $this->db->connect(
                     $empresaSelecionada['hostname_banco'],
                     $empresaSelecionada['nome_banco'],
@@ -130,8 +120,6 @@ class RelatoriosController extends Controller {
                     Security::decrypt($empresaSelecionada['senha_banco']),
                     $empresaSelecionada['porta_banco']
                 );
-                
-                error_log("Resultado da reconexão: " . ($result ? "SUCESSO" : "FALHA"));
                 
                 $this->redirect('relatorios/index');
             }
