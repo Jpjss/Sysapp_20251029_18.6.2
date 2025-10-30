@@ -45,6 +45,39 @@ class RelatoriosController extends Controller {
     }
     
     /**
+     * API: Retorna estatísticas em JSON (para atualização automática)
+     */
+    public function getEstatisticasJson() {
+        $this->requireAuth();
+        $this->layout = false;
+        
+        header('Content-Type: application/json');
+        
+        // Verifica se tem empresa configurada
+        if (!Session::check('Config.database')) {
+            echo json_encode(['error' => 'Nenhuma empresa selecionada']);
+            exit;
+        }
+        
+        $stats = $this->Relatorio->getEstatisticas();
+        $topClientes = $this->Relatorio->getTopClientes(5);
+        
+        // Atendimentos dos últimos 7 dias
+        $dt_inicio = date('Y-m-d', strtotime('-7 days'));
+        $dt_fim = date('Y-m-d');
+        $atendimentosPeriodo = $this->Relatorio->getAtendimentosPorPeriodo($dt_inicio, $dt_fim);
+        
+        echo json_encode([
+            'success' => true,
+            'timestamp' => date('Y-m-d H:i:s'),
+            'stats' => $stats,
+            'topClientes' => $topClientes,
+            'atendimentosPeriodo' => $atendimentosPeriodo
+        ]);
+        exit;
+    }
+    
+    /**
      * Seleção de empresa (quando usuário tem múltiplas empresas)
      */
     public function empresa() {

@@ -231,4 +231,177 @@ new Chart(ctx, {
         }
     }
 });
+
+// ========================================
+// AUTO-REFRESH: Atualiza dados a cada 30 segundos
+// ========================================
+let isUpdating = false;
+const updateInterval = 30000; // 30 segundos (pode ajustar: 60000 = 1 minuto)
+
+// Função para formatar números
+function formatNumber(num) {
+    return new Intl.NumberFormat('pt-BR').format(num);
+}
+
+// Função para formatar moeda
+function formatMoney(value) {
+    return new Intl.NumberFormat('pt-BR', { 
+        style: 'currency', 
+        currency: 'BRL' 
+    }).format(value);
+}
+
+// Função para atualizar estatísticas
+async function updateStats() {
+    if (isUpdating) return;
+    
+    isUpdating = true;
+    
+    // Mostra indicador de atualização
+    const updateIndicator = document.getElementById('update-indicator');
+    if (updateIndicator) {
+        updateIndicator.style.display = 'flex';
+    }
+    
+    try {
+        const response = await fetch('<?= BASE_URL ?>/relatorios/getEstatisticasJson');
+        const data = await response.json();
+        
+        if (data.success) {
+            // Atualiza cards de estatísticas
+            const stats = data.stats;
+            
+            // Total de Clientes
+            const totalClientesEl = document.querySelector('.stat-card:nth-child(1) h3');
+            if (totalClientesEl) {
+                totalClientesEl.textContent = formatNumber(stats.total_clientes);
+            }
+            
+            // Total de Vendas
+            const totalVendasEl = document.querySelector('.stat-card:nth-child(2) h3');
+            const totalVendasValorEl = document.querySelector('.stat-card:nth-child(2) small');
+            if (totalVendasEl) {
+                totalVendasEl.textContent = formatNumber(stats.total_respostas);
+            }
+            if (totalVendasValorEl && stats.valor_total_vendas) {
+                totalVendasValorEl.textContent = formatMoney(stats.valor_total_vendas);
+            }
+            
+            // Vendas Hoje
+            const vendasHojeEl = document.querySelector('.stat-card:nth-child(3) h3');
+            const vendasHojeValorEl = document.querySelector('.stat-card:nth-child(3) small');
+            if (vendasHojeEl) {
+                vendasHojeEl.textContent = formatNumber(stats.atendimentos_hoje);
+            }
+            if (vendasHojeValorEl && stats.valor_vendas_hoje) {
+                vendasHojeValorEl.textContent = formatMoney(stats.valor_vendas_hoje);
+            }
+            
+            // Vendas no Mês
+            const vendasMesEl = document.querySelector('.stat-card:nth-child(4) h3');
+            const vendasMesValorEl = document.querySelector('.stat-card:nth-child(4) small');
+            if (vendasMesEl) {
+                vendasMesEl.textContent = formatNumber(stats.atendimentos_mes);
+            }
+            if (vendasMesValorEl && stats.valor_vendas_mes) {
+                vendasMesValorEl.textContent = formatMoney(stats.valor_vendas_mes);
+            }
+            
+            // Atualiza timestamp
+            const timestampEl = document.getElementById('last-update');
+            if (timestampEl) {
+                const now = new Date();
+                timestampEl.textContent = 'Última atualização: ' + now.toLocaleTimeString('pt-BR');
+            }
+            
+            // Animação de "flash" nos cards atualizados
+            document.querySelectorAll('.stat-card').forEach(card => {
+                card.style.animation = 'pulse 0.5s ease';
+                setTimeout(() => {
+                    card.style.animation = '';
+                }, 500);
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar estatísticas:', error);
+    } finally {
+        isUpdating = false;
+        
+        // Esconde indicador de atualização
+        const updateIndicator = document.getElementById('update-indicator');
+        if (updateIndicator) {
+            updateIndicator.style.display = 'none';
+        }
+    }
+}
+
+// Inicia atualização automática
+setInterval(updateStats, updateInterval);
+
+// Adiciona animação CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    
+    #update-indicator {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(52, 152, 219, 0.95);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    #update-indicator .spinner {
+        border: 3px solid rgba(255,255,255,0.3);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    #last-update {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(30, 41, 59, 0.9);
+        color: #94a3b8;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        z-index: 9998;
+    }
+`;
+document.head.appendChild(style);
+
+// Adiciona elementos visuais
+const updateIndicator = document.createElement('div');
+updateIndicator.id = 'update-indicator';
+updateIndicator.innerHTML = '<div class="spinner"></div><span>Atualizando dados...</span>';
+document.body.appendChild(updateIndicator);
+
+const lastUpdate = document.createElement('div');
+lastUpdate.id = 'last-update';
+lastUpdate.textContent = 'Última atualização: ' + new Date().toLocaleTimeString('pt-BR');
+document.body.appendChild(lastUpdate);
+
+console.log('✅ Auto-refresh ativado! Atualizando a cada ' + (updateInterval/1000) + ' segundos');
 </script>
+

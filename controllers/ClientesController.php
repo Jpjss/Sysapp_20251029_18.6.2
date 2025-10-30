@@ -59,11 +59,13 @@ class ClientesController extends Controller {
         
         $telefones = $this->Cliente->getTelefones($cd_pessoa);
         $observacoes = $this->Cliente->getObservacoes($cd_pessoa);
+        $historico = $this->Cliente->getHistorico($cd_pessoa);
         
         $this->set([
             'cliente' => $cliente,
             'telefones' => $telefones,
-            'observacoes' => $observacoes
+            'observacoes' => $observacoes,
+            'historico' => $historico
         ]);
         
         $this->render();

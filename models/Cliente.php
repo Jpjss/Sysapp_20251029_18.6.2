@@ -142,7 +142,33 @@ class Cliente {
     public function findById($cd_pessoa) {
         $cd_pessoa = (int)$cd_pessoa;
         
-        $sql = "SELECT * FROM glb_pessoa WHERE cd_pessoa = $cd_pessoa";
+        $estrutura = $this->detectarEstrutura();
+        
+        if ($estrutura === 'propasso') {
+            // Banco Propasso: usa nm_pessoa e cpf_cgc
+            $sql = "SELECT cd_pessoa,
+                           nm_pessoa as nm_fant,
+                           nm_pessoa as nm_razao,
+                           cpf_cgc as cpf_cnpj,
+                           '' as endereco,
+                           '' as bairro,
+                           '' as cidade,
+                           '' as uf
+                    FROM glb_pessoa 
+                    WHERE cd_pessoa = $cd_pessoa";
+        } else {
+            // Banco teste: estrutura completa
+            $sql = "SELECT cd_pessoa,
+                           COALESCE(nm_fant, nm_pessoa) as nm_fant,
+                           nm_pessoa as nm_razao,
+                           nr_cpf_cnpj as cpf_cnpj,
+                           COALESCE(ds_endereco, '') as endereco,
+                           COALESCE(ds_bairro, '') as bairro,
+                           COALESCE(ds_cidade, '') as cidade,
+                           COALESCE(ds_uf, '') as uf
+                    FROM glb_pessoa 
+                    WHERE cd_pessoa = $cd_pessoa";
+        }
         
         return $this->db->fetchOne($sql);
     }
@@ -169,21 +195,21 @@ class Cliente {
     public function getTelefones($cd_pessoa) {
         $cd_pessoa = (int)$cd_pessoa;
         
-        // Tenta buscar na tabela glb_pessoa_telefone (nova estrutura)
-        $sql = "SELECT cd_telefone as cd_fone, nr_telefone as fone, tp_telefone as tipo 
-                FROM glb_pessoa_telefone 
+        // Busca na tabela glb_pessoa_fone (estrutura Propasso)
+        $sql = "SELECT cd_fone,
+                       fone as nr_fone,
+                       CASE 
+                           WHEN tp_fone = 10 THEN 'Celular'
+                           WHEN tp_fone = 20 THEN 'Residencial'
+                           WHEN tp_fone = 30 THEN 'Comercial'
+                           ELSE tp_fone::text
+                       END as tp_fone,
+                       COALESCE(nm_contato, '') as nm_contato
+                FROM glb_pessoa_fone 
                 WHERE cd_pessoa = $cd_pessoa 
-                ORDER BY cd_telefone";
+                ORDER BY cd_fone";
         
-        $result = $this->db->fetchAll($sql);
-        
-        // Se não encontrar, tenta na estrutura antiga
-        if (empty($result)) {
-            $sql = "SELECT * FROM glb_pessoa_fone WHERE cd_pessoa = $cd_pessoa ORDER BY cd_fone";
-            $result = $this->db->fetchAll($sql);
-        }
-        
-        return $result;
+        return $this->db->fetchAll($sql);
     }
     
     /**
@@ -192,9 +218,48 @@ class Cliente {
     public function getObservacoes($cd_pessoa) {
         $cd_pessoa = (int)$cd_pessoa;
         
-        $sql = "SELECT * FROM glb_pessoa_obs_contato 
-                WHERE cd_pessoa = $cd_pessoa 
-                ORDER BY dt_obs DESC";
+        // Verifica se tabela existe
+        $check_sql = "SELECT EXISTS (
+            SELECT 1 FROM information_schema.tables 
+            WHERE table_name = 'glb_pessoa_obs_contato'
+        ) as existe";
+        
+        $existe = $this->db->fetchOne($check_sql);
+        
+        if ($existe && $existe['existe'] === 't') {
+            $sql = "SELECT * FROM glb_pessoa_obs_contato 
+                    WHERE cd_pessoa = $cd_pessoa 
+                    ORDER BY dt_obs DESC";
+            return $this->db->fetchAll($sql);
+        }
+        
+        return [];
+    }
+    
+    /**
+     * Busca histórico de vendas/atendimentos do cliente
+     */
+    public function getHistorico($cd_pessoa) {
+        $cd_pessoa = (int)$cd_pessoa;
+        
+        // Busca pedidos do cliente (ped_vd)
+        $sql = "SELECT 
+                    pv.cd_ped,
+                    pv.dt_hr_ped,
+                    pv.vlr_vd,
+                    pv.vlr_entrada,
+                    pv.qtd_pecas,
+                    pv.sit_ped,
+                    CASE 
+                        WHEN pv.sit_ped = 0 THEN 'Ativo'
+                        WHEN pv.sit_ped = 1 THEN 'Finalizado'
+                        WHEN pv.sit_ped = 2 THEN 'Cancelado'
+                        ELSE 'Outros'
+                    END as ds_situacao
+                FROM ped_vd pv
+                WHERE pv.cd_cli = $cd_pessoa
+                ORDER BY pv.dt_hr_ped DESC
+                LIMIT 50";
         
         return $this->db->fetchAll($sql);
     }
