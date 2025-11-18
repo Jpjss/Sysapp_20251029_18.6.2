@@ -76,30 +76,15 @@ class Router {
      */
     public static function redirect($url) {
         if (strpos($url, 'http') !== 0) {
-            // Garante que a URL relativa comece com /
-            $url = '/' . ltrim($url, '/');
-            
-            // Monta a URL completa considerando o subdiretório
+            // Monta a URL completa
             $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
             $host = $_SERVER['HTTP_HOST'];
             
-            // Detecta o diretório base da aplicação
-            $scriptName = $_SERVER['SCRIPT_NAME'];
-            $baseDir = dirname($scriptName);
-            
-            // Remove /index.php do baseDir se existir
-            $baseDir = str_replace('/index.php', '', $baseDir);
-            
-            // Monta URL final
-            if ($baseDir !== '/') {
-                $url = $baseDir . $url;
-            }
+            // Remove barras extras
+            $url = '/' . trim($url, '/');
             
             $url = $protocol . '://' . $host . $url;
         }
-        
-        error_log("URL FINAL: " . $url);
-        error_log("===================");
         
         header('Location: ' . $url);
         exit;

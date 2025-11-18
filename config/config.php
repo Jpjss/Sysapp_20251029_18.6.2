@@ -34,4 +34,9 @@ define('DB_PASS', 'systec'); // Senha definida na instalação do PostgreSQL
 // URLs
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'];
-define('BASE_URL', $protocol . '://' . $host . dirname($_SERVER['SCRIPT_NAME']));
+
+// Para servidor embutido do PHP, dirname retorna '/' então não precisamos dele
+$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+$baseDir = ($scriptDir === '/' || $scriptDir === '\\') ? '' : $scriptDir;
+
+define('BASE_URL', $protocol . '://' . $host . $baseDir);
