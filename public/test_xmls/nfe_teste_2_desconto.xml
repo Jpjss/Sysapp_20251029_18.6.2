@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe">
+  <NFe>
+    <infNFe>
+      <det nItem="1">
+        <prod>
+          <cProd>003</cProd>
+          <xProd>Produto com Desconto</xProd>
+          <qCom>2.00</qCom>
+          <vUnCom>75.00</vUnCom>
+          <vProd>150.00</vProd>
+          <vDesc>10.00</vDesc>
+          <qTrib>2.00</qTrib>
+          <vUnTrib>75.00</vUnTrib>
+        </prod>
+      </det>
+      <det nItem="2">
+        <prod>
+          <cProd>004</cProd>
+          <xProd>Outro Produto</xProd>
+          <qCom>1.00</qCom>
+          <vUnCom>60.00</vUnCom>
+          <vProd>60.00</vProd>
+          <vDesc>5.00</vDesc>
+          <qTrib>1.00</qTrib>
+          <vUnTrib>60.00</vUnTrib>
+        </prod>
+      </det>
+      <total>
+        <ICMSTot>
+          <vProd>210.00</vProd>
+          <vDesc>15.00</vDesc>
+          <vNF>195.75</vNF>
+        </ICMSTot>
+      </total>
+    </infNFe>
+  </NFe>
+</nfeProc>

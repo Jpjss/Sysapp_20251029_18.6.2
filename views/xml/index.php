@@ -138,6 +138,13 @@
         </svg>
         Baixar XMLs Corrigidos
     </a>
+    
+    <button id="btnNovaCorrecao" class="btn-nova-correcao">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"></path>
+        </svg>
+        Nova Correção
+    </button>
 </div>
 
 <style>
@@ -484,6 +491,10 @@
 /* Download Button */
 .download-container {
     text-align: center;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .btn-download {
@@ -506,6 +517,27 @@
     box-shadow: 0 6px 20px rgba(14, 165, 233, 0.6);
 }
 
+.btn-nova-correcao {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 48px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-nova-correcao:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+}
+
 /* Responsivo */
 @media (max-width: 768px) {
     .stats-container {
@@ -520,6 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileLabel = document.getElementById('fileLabel');
     const fileList = document.getElementById('fileList');
     const btnProcessar = document.getElementById('btnProcessar');
+    const btnNovaCorrecao = document.getElementById('btnNovaCorrecao');
     const form = document.getElementById('xmlForm');
     
     // Atualiza lista de arquivos selecionados
@@ -647,5 +680,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 return '';
         }
     }
+    
+    // Botão Nova Correção - Resetar formulário
+    btnNovaCorrecao.addEventListener('click', function() {
+        // Limpar arquivos selecionados
+        fileInput.value = '';
+        fileLabel.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>Selecionar arquivos XML</span>
+        `;
+        fileList.innerHTML = '';
+        btnProcessar.disabled = true;
+        
+        // Esconder containers de resultado
+        document.getElementById('progressContainer').style.display = 'none';
+        document.getElementById('logsContainer').style.display = 'none';
+        document.getElementById('statsContainer').style.display = 'none';
+        document.getElementById('downloadContainer').style.display = 'none';
+        
+        // Resetar progress bar
+        document.getElementById('progressFill').style.width = '0%';
+        document.getElementById('progressPercent').textContent = '0%';
+        document.getElementById('progressText').textContent = 'Processando...';
+        
+        // Scroll suave para o topo
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 });
 </script>

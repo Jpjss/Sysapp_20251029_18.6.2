@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe">
+  <NFe>
+    <infNFe>
+      <det nItem="1">
+        <prod>
+          <cProd>001</cProd>
+          <xProd>Produto Teste 1</xProd>
+          <qCom>1.00</qCom>
+          <vUnCom>100.00</vUnCom>
+          <vProd>100.00</vProd>
+          <qTrib>1.00</qTrib>
+          <vUnTrib>100.00</vUnTrib>
+        </prod>
+      </det>
+      <det nItem="2">
+        <prod>
+          <cProd>002</cProd>
+          <xProd>Produto Teste 2</xProd>
+          <qCom>1.00</qCom>
+          <vUnCom>50.00</vUnCom>
+          <vProd>50.00</vProd>
+          <qTrib>1.00</qTrib>
+          <vUnTrib>50.00</vUnTrib>
+        </prod>
+      </det>
+      <total>
+        <ICMSTot>
+          <vProd>150.00</vProd>
+          <vDesc>0.00</vDesc>
+          <vNF>150.50</vNF>
+        </ICMSTot>
+      </total>
+    </infNFe>
+  </NFe>
+</nfeProc>
