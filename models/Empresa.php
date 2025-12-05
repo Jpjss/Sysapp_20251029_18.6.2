@@ -58,7 +58,18 @@ class Empresa {
                 VALUES ($cd_empresa, '$nm_empresa', '$ds_host', '$ds_banco', 
                         '$ds_usuario', '$ds_senha', '$ds_porta')";
         
-        return $this->db->query($sql);
+        error_log("SQL INSERT: " . $sql);
+        
+        $result = $this->db->query($sql);
+        
+        if (!$result) {
+            $error = pg_last_error($this->db->getConnection());
+            error_log("ERRO ao inserir empresa: " . $error);
+        } else {
+            error_log("Empresa inserida com sucesso! CD: $cd_empresa");
+        }
+        
+        return $result;
     }
     
     /**

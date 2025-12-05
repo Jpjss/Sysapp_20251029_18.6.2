@@ -1,10 +1,11 @@
 # Start PHP built-in server with router.php
 # Usage: Right-click -> Run with PowerShell OR Open PowerShell in project folder and run: .\start_php_server.ps1
 
-$phpExe = 'C:\xampp\php\php.exe'
-if (-not (Test-Path $phpExe)) {
-    Write-Host "PHP not found at $phpExe" -ForegroundColor Red
-    Write-Host "Update path in this script or install XAMPP" -ForegroundColor Yellow
+# Use PHP from PATH (installed via winget)
+$phpExe = (Get-Command php -ErrorAction SilentlyContinue).Source
+if (-not $phpExe) {
+    Write-Host "PHP not found in PATH" -ForegroundColor Red
+    Write-Host "Please install PHP or add it to PATH" -ForegroundColor Yellow
     exit 1
 }
 

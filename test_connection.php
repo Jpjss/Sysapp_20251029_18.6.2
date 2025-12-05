@@ -10,7 +10,7 @@ $host = 'localhost';
 $port = '5432';
 $database = 'sysapp';
 $username = 'postgres';
-$password = 'systec'; // Ajuste conforme sua senha
+$password = 'postgres'; // Ajuste conforme sua senha
 
 echo "<h2>Testando extensões PHP:</h2>";
 echo "<ul>";

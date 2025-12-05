@@ -467,18 +467,57 @@ class UsuariosController extends Controller {
             }
             
             // TESTA A CONEXÃO ANTES DE SALVAR
-            $testHost = strtolower($_POST['hostname']);
-            $testDb = strtolower($_POST['nome_banco']);
-            $testUser = strtolower($_POST['usuario_banco']);
-            $testPass = $_POST['senha_banco'];
-            $testPort = $_POST['porta_banco'];
+            $testHost = trim($_POST['hostname']);
+            $testDb = trim($_POST['nome_banco']);
+            $testUser = trim($_POST['usuario_banco']);
+            $testPass = $_POST['senha_banco']; // Não faz trim na senha para preservar espaços intencionais
+            $testPort = trim($_POST['porta_banco']);
+            
+            // LOG DETALHADO para debug
+            error_log("=== DEBUG CONEXÃO ===");
+            error_log("Host recebido: '" . $_POST['hostname'] . "' (length: " . strlen($_POST['hostname']) . ")");
+            error_log("DB recebido: '" . $_POST['nome_banco'] . "' (length: " . strlen($_POST['nome_banco']) . ")");
+            error_log("User recebido: '" . $_POST['usuario_banco'] . "' (length: " . strlen($_POST['usuario_banco']) . ")");
+            error_log("Pass recebido: '" . $_POST['senha_banco'] . "' (length: " . strlen($_POST['senha_banco']) . ")");
+            error_log("Port recebido: '" . $_POST['porta_banco'] . "' (length: " . strlen($_POST['porta_banco']) . ")");
+            error_log("Host após trim: '" . $testHost . "'");
+            error_log("DB após trim: '" . $testDb . "'");
+            error_log("User após trim: '" . $testUser . "'");
+            error_log("Pass sem trim: '" . $testPass . "'");
+            error_log("Port após trim: '" . $testPort . "'");
             
             $connTest = @pg_connect("host=$testHost port=$testPort dbname=$testDb user=$testUser password=$testPass", PGSQL_CONNECT_FORCE_NEW);
             
             if (!$connTest) {
+                $lastError = error_get_last();
+                $errorMsg = 'Não foi possível conectar ao banco de dados.';
+                
+                // Adiciona mais detalhes do erro se disponível
+                if ($lastError && strpos($lastError['message'], 'pg_connect') !== false) {
+                    // Extrai apenas a parte relevante do erro
+                    if (preg_match('/FATAL:\s*(.+)$/', $lastError['message'], $matches)) {
+                        $errorMsg .= ' ' . trim($matches[1]);
+                    } else {
+                        $errorMsg .= ' Verifique as credenciais.';
+                    }
+                }
+                
+                error_log("Erro de conexão PostgreSQL - Host: $testHost, DB: $testDb, User: $testUser, Port: $testPort");
+                if ($lastError) {
+                    error_log("Erro completo: " . $lastError['message']);
+                }
+                
+                header('Content-Type: application/json');
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Não foi possível conectar ao banco de dados. Verifique as credenciais e tente novamente.'
+                    'message' => $errorMsg,
+                    'debug' => [
+                        'host' => $testHost,
+                        'database' => $testDb,
+                        'user' => $testUser,
+                        'port' => $testPort,
+                        'senha_length' => strlen($testPass)
+                    ]
                 ]);
                 exit;
             }
@@ -486,10 +525,15 @@ class UsuariosController extends Controller {
             // Testa se a tabela glb_pessoa existe (validação de banco ERP)
             $testQuery = @pg_query($connTest, "SELECT COUNT(*) as total FROM glb_pessoa LIMIT 1");
             if (!$testQuery) {
+                $pgError = pg_last_error($connTest);
                 pg_close($connTest);
+                
+                error_log("Tabela glb_pessoa não encontrada - Erro: $pgError");
+                
+                header('Content-Type: application/json');
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Banco conectado, mas não é um banco ERP válido (tabela glb_pessoa não encontrada).'
+                    'message' => 'Banco conectado, mas não é um banco ERP válido (tabela glb_pessoa não encontrada). Erro: ' . $pgError
                 ]);
                 exit;
             }
@@ -509,6 +553,8 @@ class UsuariosController extends Controller {
                 'senha_banco' => Security::encrypt($testPass),
                 'porta_banco' => $testPort
             ];
+            
+            error_log("Tentando salvar empresa com cd_empresa: $cd_empresa");
             
             // Salva banco de dados
             $resultado = $this->Empresa->salvar($dados);
@@ -546,8 +592,14 @@ class UsuariosController extends Controller {
                 header('Content-Type: application/json');
                 echo json_encode(['success' => true, 'message' => 'Banco de dados cadastrado com sucesso!']);
             } else {
+                $dbError = pg_last_error($this->db->getConnection());
+                error_log("Falha ao salvar empresa. Erro PostgreSQL: " . $dbError);
+                
                 header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'Erro ao salvar banco de dados no sistema.']);
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Erro ao salvar banco de dados no sistema. ' . ($dbError ? 'Erro: ' . $dbError : 'Verifique os logs.')
+                ]);
             }
             
             exit;

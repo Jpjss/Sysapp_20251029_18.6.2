@@ -3,6 +3,9 @@
  * Controller para Correção de XMLs de NFe
  */
 
+// Carrega configurações otimizadas para XML
+require_once BASE_PATH . '/config/xml_config.php';
+
 class XmlController extends Controller {
     
     public function __construct() {
@@ -22,6 +25,10 @@ class XmlController extends Controller {
      * Upload e processamento de XMLs
      */
     public function processar() {
+        // Aumenta limites para processar grandes volumes
+        ini_set('max_execution_time', 600); // 10 minutos
+        ini_set('memory_limit', '512M'); // 512MB de memória
+        
         if (!$this->isPost()) {
             $this->redirect('xml/index');
             return;
@@ -54,14 +61,31 @@ class XmlController extends Controller {
                 mkdir($uploadDir, 0755, true);
             }
             
-            // Processa cada arquivo
-            for ($i = 0; $i < $total; $i++) {
+            // Limpa arquivos antigos (mais de 1 hora)
+            $this->limparArquivosAntigos($uploadDir, 3600);
+            
+            // Processa em lotes para economizar memória
+            $loteTamanho = 100; // Processa 100 arquivos por vez
+            $logsDetalhados = []; // Apenas primeiros e últimos logs para economizar memória
+            
+            for ($lote = 0; $lote < ceil($total / $loteTamanho); $lote++) {
+                $inicio = $lote * $loteTamanho;
+                $fim = min($inicio + $loteTamanho, $total);
+                
+                // Processa cada arquivo do lote
+                for ($i = $inicio; $i < $fim; $i++) {
+                // Processa cada arquivo do lote
+                for ($i = $inicio; $i < $fim; $i++) {
                 if ($files['error'][$i] !== UPLOAD_ERR_OK) {
-                    $response['logs'][] = [
+                    $log = [
                         'tipo' => 'erro',
                         'arquivo' => $files['name'][$i],
                         'mensagem' => 'Erro no upload do arquivo'
                     ];
+                    // Só guarda logs se for dos primeiros 50 ou últimos 50
+                    if ($i < 50 || $i >= $total - 50) {
+                        $logsDetalhados[] = $log;
+                    }
                     $response['stats']['erros']++;
                     continue;
                 }
@@ -71,11 +95,14 @@ class XmlController extends Controller {
                 
                 // Valida extensão
                 if (strtolower(pathinfo($nomeArquivo, PATHINFO_EXTENSION)) !== 'xml') {
-                    $response['logs'][] = [
+                    $log = [
                         'tipo' => 'erro',
                         'arquivo' => $nomeArquivo,
                         'mensagem' => 'Arquivo não é XML'
                     ];
+                    if ($i < 50 || $i >= $total - 50) {
+                        $logsDetalhados[] = $log;
+                    }
                     $response['stats']['erros']++;
                     continue;
                 }
@@ -90,27 +117,59 @@ class XmlController extends Controller {
                     
                     if ($resultado['corrigido']) {
                         $response['stats']['corrigidos']++;
-                        $response['logs'][] = [
+                        $log = [
                             'tipo' => 'sucesso',
                             'arquivo' => $nomeArquivo,
                             'mensagem' => sprintf('Corrigido: diferença ajustada R$ %.2f', $resultado['diferenca'])
                         ];
+                        if ($i < 50 || $i >= $total - 50) {
+                            $logsDetalhados[] = $log;
+                        }
                     } else {
                         $response['stats']['sem_divergencia']++;
-                        $response['logs'][] = [
+                        $log = [
                             'tipo' => 'info',
                             'arquivo' => $nomeArquivo,
                             'mensagem' => 'Sem divergência'
                         ];
+                        if ($i < 50 || $i >= $total - 50) {
+                            $logsDetalhados[] = $log;
+                        }
                     }
                 } else {
                     $response['stats']['erros']++;
-                    $response['logs'][] = [
+                    $log = [
                         'tipo' => 'erro',
                         'arquivo' => $nomeArquivo,
                         'mensagem' => $resultado['erro']
                     ];
+                    if ($i < 50 || $i >= $total - 50) {
+                        $logsDetalhados[] = $log;
+                    }
                 }
+                
+                // Libera memória a cada 50 arquivos
+                if ($i % 50 == 0) {
+                    gc_collect_cycles();
+                }
+            }
+            
+            // Após processar o lote, libera memória
+            gc_collect_cycles();
+            }
+            
+            // Após processar o lote, libera memória
+            gc_collect_cycles();
+            }
+            
+            // Se houver muitos logs, adiciona mensagem resumida
+            if ($total > 100) {
+                $response['logs'] = array_merge(
+                    [['tipo' => 'info', 'arquivo' => '', 'mensagem' => "Mostrando primeiros e últimos 50 logs de $total arquivos"]],
+                    $logsDetalhados
+                );
+            } else {
+                $response['logs'] = $logsDetalhados;
             }
             
             $response['success'] = true;
@@ -144,9 +203,9 @@ class XmlController extends Controller {
         ];
         
         try {
-            // Carrega o XML
+            // Carrega o XML com opções otimizadas
             libxml_use_internal_errors(true);
-            $xml = simplexml_load_file($caminhoArquivo);
+            $xml = simplexml_load_file($caminhoArquivo, 'SimpleXMLElement', LIBXML_COMPACT | LIBXML_NOBLANKS);
             
             if ($xml === false) {
                 $erros = libxml_get_errors();
@@ -229,15 +288,38 @@ class XmlController extends Controller {
             
             // Gera XML corrigido
             $dom = dom_import_simplexml($xml)->ownerDocument;
-            $dom->formatOutput = true;
+            $dom->formatOutput = false; // Desabilita formatação para economia de memória
             $resultado['xml'] = $dom->saveXML();
             $resultado['success'] = true;
+            
+            // Libera memória
+            unset($xml, $dom);
             
         } catch (Exception $e) {
             $resultado['erro'] = $e->getMessage();
         }
         
         return $resultado;
+    }
+    
+    /**
+     * Limpa arquivos antigos do diretório temporário
+     */
+    private function limparArquivosAntigos($dir, $tempoSegundos) {
+        if (!is_dir($dir)) {
+            return;
+        }
+        
+        $arquivos = glob($dir . '*');
+        $agora = time();
+        
+        foreach ($arquivos as $arquivo) {
+            if (is_file($arquivo)) {
+                if ($agora - filemtime($arquivo) >= $tempoSegundos) {
+                    @unlink($arquivo);
+                }
+            }
+        }
     }
     
     /**

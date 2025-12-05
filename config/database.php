@@ -9,11 +9,11 @@ class Database {
     private $conn;
     
     // Configurações padrão do banco
-    private $host = 'localhost';
+    private $host = 'banco.propasso.systec.ftp.sh';
     private $port = '5432';
-    private $database = 'sysapp';
-    private $username = 'postgres';
-    private $password = 'systec';
+    private $database = 'bd_propasso';
+    private $username = 'admin';
+    private $password = 'systec2011.';
     
     private function __construct() {
         // Construtor privado para Singleton
