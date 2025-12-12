@@ -1,0 +1,113 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #e0e0e0;
+  transition: background 0.3s ease;
+}
+
+[data-theme="light"] body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #333;
+}
+
+.login {
+  background: #2a2a3a;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  padding: 30px;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="light"] .login {
+  background: white;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.login img {
+  max-width: 200px;
+  height: auto;
+}
+
+.error {
+  color: #ff6b6b;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+#simplificado {
+  margin: 20px 0;
+}
+
+#simplificado input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  font-size: 14px;
+  background: #333;
+  color: #e0e0e0;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+[data-theme="light"] #simplificado input {
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+#simplificado input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+#simplificado label {
+  display: block;
+  margin-bottom: 5px;
+  color: #e0e0e0;
+  font-weight: 500;
+  text-align: left;
+  transition: color 0.3s;
+}
+
+[data-theme="light"] #simplificado label {
+  color: #333;
+}
+
+input[type="submit"] {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #667eea;
+  color: white;
+  width: 100%;
+}
+
+input[type="submit"]:hover {
+  background: #5568d3;
+}
+
+#versao {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: bold;
+  margin: 5px 0;
+}
