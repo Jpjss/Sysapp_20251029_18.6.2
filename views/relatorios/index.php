@@ -105,6 +105,19 @@
     <canvas id="chartAtendimentos" width="400" height="100"></canvas>
 </div>
 
+<!-- Gráficos Adicionais -->
+<div class="grid-2">
+    <div class="card">
+        <h3>Distribuição por Tipo</h3>
+        <canvas id="chartTipos" height="200"></canvas>
+    </div>
+    
+    <div class="card">
+        <h3>Tendência Mensal</h3>
+        <canvas id="chartTendencia" height="200"></canvas>
+    </div>
+</div>
+
 <!-- Top Clientes -->
 <div class="card">
     <h3><?= $stats['total_questionarios'] == 0 ? 'Top 5 Clientes com Mais Compras' : 'Top 5 Clientes Mais Atendidos' ?></h3>
@@ -219,7 +232,12 @@ new Chart(ctx, {
             borderColor: '#3498db',
             backgroundColor: 'rgba(52, 152, 219, 0.1)',
             tension: 0.4,
-            fill: true
+            fill: true,
+            pointBackgroundColor: '#3498db',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6
         }]
     },
     options: {
@@ -227,6 +245,14 @@ new Chart(ctx, {
         plugins: {
             legend: {
                 display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                titleFont: { size: 14, weight: 'bold' },
+                bodyFont: { size: 13 },
+                padding: 12,
+                borderColor: 'rgba(102, 126, 234, 0.3)',
+                borderWidth: 1
             }
         },
         scales: {
@@ -234,11 +260,118 @@ new Chart(ctx, {
                 beginAtZero: true,
                 ticks: {
                     stepSize: 1
+                },
+                grid: {
+                    color: 'rgba(203, 213, 225, 0.3)',
+                    drawBorder: false
+                }
+            },
+            x: {
+                grid: {
+                    display: false
                 }
             }
         }
     }
 });
+
+// Gráfico de Distribuição por Tipo (Pizza)
+const ctxTipos = document.getElementById('chartTipos');
+if (ctxTipos) {
+    new Chart(ctxTipos.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Clientes Ativos', 'Atendimentos Hoje', 'Atendimentos no Mês'],
+            datasets: [{
+                data: [
+                    <?= $stats['total_clientes'] ?>,
+                    <?= $stats['atendimentos_hoje'] ?>,
+                    <?= $stats['atendimentos_mes'] ?>
+                ],
+                backgroundColor: [
+                    'rgba(52, 152, 219, 0.8)',
+                    'rgba(231, 76, 60, 0.8)',
+                    'rgba(243, 156, 18, 0.8)'
+                ],
+                borderColor: [
+                    '#3498db',
+                    '#e74c3c',
+                    '#f39c12'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    padding: 12
+                }
+            }
+        }
+    });
+}
+
+// Gráfico de Tendência (Barras)
+const ctxTendencia = document.getElementById('chartTendencia');
+if (ctxTendencia) {
+    new Chart(ctxTendencia.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total',
+                data: data,
+                backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                borderColor: '#2ecc71',
+                borderWidth: 2,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    padding: 12
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(203, 213, 225, 0.3)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
 
 // ========================================
 // AUTO-REFRESH: Atualiza dados a cada 30 segundos

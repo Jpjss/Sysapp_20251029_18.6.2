@@ -24,6 +24,20 @@ body {
   flex-direction: column;
 }
 
+/* Grid de 2 colunas */
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

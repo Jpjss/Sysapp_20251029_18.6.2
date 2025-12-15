@@ -18,7 +18,9 @@ class Usuario {
         
         $sql = "SELECT cd_usuario 
                 FROM sysapp_config_user 
-                WHERE LOWER(ds_login) = '$login' OR LOWER(nm_usuario) = '$login'";
+                WHERE LOWER(ds_email) = '$login' 
+                   OR LOWER(ds_login) = '$login' 
+                   OR LOWER(nm_usuario) = '$login'";
         
         $result = $this->db->fetchOne($sql);
         
@@ -32,8 +34,8 @@ class Usuario {
         $cd_usuario = (int)$cd_usuario;
         
         $sql = "SELECT cd_usuario, nm_usuario as nome_usuario, ds_senha as senha_usuario 
-                FROM vw_login 
-                WHERE cd_usuario = $cd_usuario";
+                FROM sysapp_config_user 
+                WHERE cd_usuario = $cd_usuario AND fg_ativo = 'S'";
         
         $result = $this->db->fetchOne($sql);
         

@@ -56,7 +56,6 @@
                                name="email" 
                                placeholder="Digite seu e-mail ou usuário" 
                                required
-                               autofocus
                                autocomplete="username"
                                class="form-input">
                     </div>

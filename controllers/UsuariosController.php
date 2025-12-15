@@ -62,9 +62,16 @@ class UsuariosController extends Controller {
             
             // Verifica senha
             $senhaHash = Security::hash($senha, 'md5', SECURITY_SALT);
+            $md5Senha = md5($senha);
             
-            // Verifica se a senha está correta
-            if ($senhaHash !== $usuario['senha_usuario']) {
+            // Verifica se a senha está correta (suporta: texto plano, MD5, ou hash com SALT)
+            $senhaCorreta = (
+                $senha === $usuario['senha_usuario'] ||                  // Texto plano
+                $md5Senha === $usuario['senha_usuario'] ||                // MD5 simples
+                $senhaHash === $usuario['senha_usuario']                  // Hash com SALT
+            );
+            
+            if (!$senhaCorreta) {
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
