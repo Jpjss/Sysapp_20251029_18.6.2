@@ -60,18 +60,8 @@ class UsuariosController extends Controller {
                 return;
             }
             
-            // Verifica senha
-            $senhaHash = Security::hash($senha, 'md5', SECURITY_SALT);
-            $md5Senha = md5($senha);
-            
-            // Verifica se a senha está correta (suporta: texto plano, MD5, ou hash com SALT)
-            $senhaCorreta = (
-                $senha === $usuario['senha_usuario'] ||                  // Texto plano
-                $md5Senha === $usuario['senha_usuario'] ||                // MD5 simples
-                $senhaHash === $usuario['senha_usuario']                  // Hash com SALT
-            );
-            
-            if (!$senhaCorreta) {
+            // Verifica senha (texto plano apenas por enquanto)
+            if ($senha !== $usuario['senha_usuario']) {
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
@@ -79,12 +69,6 @@ class UsuariosController extends Controller {
             
             // Busca empresas do usuário
             $empresas = $this->Usuario->getEmpresas($cd_usuario);
-            
-            if (empty($empresas)) {
-                Session::setFlash('Usuário sem empresas configuradas!', 'error');
-                $this->render();
-                return;
-            }
             
             // Monta lista de códigos de empresa
             $cd_empresas = [];
@@ -120,13 +104,13 @@ class UsuariosController extends Controller {
             } else {
                 // Uma única empresa, configura direto
                 $empresa = $infoDb[0];
-                Session::write('Config.database', $empresa['ds_banco']);
-                Session::write('Config.databasename', $empresa['ds_banco']);
-                Session::write('Config.host', $empresa['ds_host']);
-                Session::write('Config.user', $empresa['ds_usuario']);
-                Session::write('Config.password', Security::decrypt($empresa['ds_senha']));
-                Session::write('Config.porta', $empresa['ds_porta']);
-                Session::write('Config.empresa', $empresa['nm_empresa']);
+                Session::write('Config.database', $empresa['nome_banco']);
+                Session::write('Config.databasename', $empresa['nome_banco']);
+                Session::write('Config.host', $empresa['hostname_banco']);
+                Session::write('Config.user', $empresa['usuario_banco']);
+                Session::write('Config.password', Security::decrypt($empresa['senha_banco']));
+                Session::write('Config.porta', $empresa['porta_banco']);
+                Session::write('Config.empresa', $empresa['nome_empresa']);
                 
                 $this->redirect('relatorios/index');
             }

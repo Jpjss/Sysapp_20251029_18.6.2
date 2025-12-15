@@ -86,8 +86,10 @@ class RelatoriosController extends Controller {
         $empresas = Session::read('Dados.database');
         
         if (empty($empresas)) {
-            // Se não tem empresas na sessão, redireciona para o dashboard
-            $this->redirect('relatorios/index');
+            // Se não tem empresas, mostra erro e faz logout
+            Session::setFlash('Seu usuário não possui empresas configuradas. Entre em contato com o administrador.', 'error');
+            $this->redirect('usuarios/logout');
+            return;
         }
         
         if ($this->isPost()) {

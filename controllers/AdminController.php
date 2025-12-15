@@ -81,44 +81,82 @@ class AdminController extends Controller {
                 'fg_ativo' => isset($_POST['fg_ativo']) ? 'S' : 'N'
             ];
             
+            // Validação: deve ter pelo menos uma empresa
+            $empresas_selecionadas = $_POST['empresas'] ?? [];
+            if (empty($empresas_selecionadas)) {
+                Session::setFlash('Selecione pelo menos uma empresa para o usuário!', 'error');
+                // Recarrega os dados do formulário
+                goto render_form;
+            }
+            
+            // Validação: deve ter pelo menos uma permissão
+            $permissoes_selecionadas = $_POST['permissoes'] ?? [];
+            if (empty($permissoes_selecionadas)) {
+                Session::setFlash('Selecione pelo menos uma permissão para o usuário!', 'error');
+                goto render_form;
+            }
+            
             // Se tem senha, atualiza
             if (!empty($_POST['senha_usuario'])) {
                 $dados['senha_usuario'] = $_POST['senha_usuario']; // Armazena plain text
             }
             
+            $cd_usuario_novo = null;
+            
             if ($cd_usuario) {
                 // Editar
                 $dados['cd_usuario'] = $cd_usuario;
                 if ($this->Usuario->update($dados)) {
-                    Session::setFlash('Usuário atualizado com sucesso!', 'success');
-                    $this->redirect('admin/usuarios');
+                    $cd_usuario_novo = $cd_usuario;
                 } else {
                     Session::setFlash('Erro ao atualizar usuário!', 'error');
                 }
             } else {
                 // Criar
-                if ($this->Usuario->create($dados)) {
-                    Session::setFlash('Usuário criado com sucesso!', 'success');
-                    $this->redirect('admin/usuarios');
-                } else {
+                $cd_usuario_novo = $this->Usuario->create($dados);
+                if (!$cd_usuario_novo) {
                     Session::setFlash('Erro ao criar usuário!', 'error');
                 }
             }
+            
+            // Se salvou com sucesso, atualiza empresas e permissões
+            if ($cd_usuario_novo) {
+                // Salva empresas (já validadas acima)
+                $this->Usuario->atualizarEmpresas($cd_usuario_novo, $empresas_selecionadas);
+                
+                // Salva permissões (já validadas acima)
+                $this->Usuario->atualizarPermissoes($cd_usuario_novo, $permissoes_selecionadas);
+                
+                Session::setFlash('Usuário salvo com sucesso!', 'success');
+                $this->redirect('admin/usuarios');
+            }
         }
         
+        render_form:
         // Buscar empresas disponíveis
         $empresas = $this->Empresa->listarTodas();
         
         // Buscar empresas do usuário (se editando)
-        $empresasUsuario = [];
+        $empresas_usuario = [];
+        $permissoes_usuario = [];
+        
         if ($cd_usuario) {
-            $empresasUsuario = $this->Usuario->getEmpresas($cd_usuario);
+            $empUsuario = $this->Usuario->getEmpresas($cd_usuario);
+            foreach ($empUsuario as $emp) {
+                $empresas_usuario[] = $emp['cd_empresa'];
+            }
+            
+            $permUsuario = $this->Usuario->getPermissoes($cd_usuario);
+            foreach ($permUsuario as $perm) {
+                $permissoes_usuario[] = $perm['nome_interface'];
+            }
         }
         
         $this->set([
             'usuario' => $usuario,
             'empresas' => $empresas,
-            'empresasUsuario' => $empresasUsuario
+            'empresas_usuario' => $empresas_usuario,
+            'permissoes_usuario' => $permissoes_usuario
         ]);
         
         $this->render();

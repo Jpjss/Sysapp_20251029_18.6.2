@@ -315,4 +315,52 @@ class Usuario {
         $result = $this->db->fetchOne($sql);
         return $result !== false && $result !== null;
     }
+    
+    /**
+     * Atualiza empresas do usuário
+     */
+    public function atualizarEmpresas($cd_usuario, $empresas) {
+        $cd_usuario = (int)$cd_usuario;
+        $conn = $this->db->getConnection();
+        
+        // Remove todas as empresas do usuário
+        $sql = "DELETE FROM sysapp_config_user_empresas WHERE cd_usuario = $cd_usuario";
+        pg_query($conn, $sql);
+        
+        // Adiciona as empresas selecionadas
+        if (!empty($empresas)) {
+            foreach ($empresas as $cd_empresa) {
+                $cd_empresa = (int)$cd_empresa;
+                $sql = "INSERT INTO sysapp_config_user_empresas (cd_usuario, cd_empresa) 
+                        VALUES ($cd_usuario, $cd_empresa)";
+                pg_query($conn, $sql);
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Atualiza permissões do usuário
+     */
+    public function atualizarPermissoes($cd_usuario, $permissoes) {
+        $cd_usuario = (int)$cd_usuario;
+        $conn = $this->db->getConnection();
+        
+        // Remove todas as permissões do usuário
+        $sql = "DELETE FROM sysapp_config_user_interfaces WHERE cd_usuario = $cd_usuario";
+        pg_query($conn, $sql);
+        
+        // Adiciona as permissões selecionadas
+        if (!empty($permissoes)) {
+            foreach ($permissoes as $nm_interface) {
+                $nm_interface = $this->db->escape($nm_interface);
+                $sql = "INSERT INTO sysapp_config_user_interfaces (cd_usuario, nm_interface) 
+                        VALUES ($cd_usuario, '$nm_interface')";
+                pg_query($conn, $sql);
+            }
+        }
+        
+        return true;
+    }
 }
