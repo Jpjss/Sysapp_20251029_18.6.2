@@ -11,12 +11,33 @@ class Empresa {
     }
     
     /**
-     * Lista todas empresas
+     * Lista todas empresas (sem paginação)
      */
-    public function listar() {
-        $sql = "SELECT cd_empresa, nm_empresa as nome_empresa 
+    public function listarTodas() {
+        $sql = "SELECT cd_empresa, nm_empresa as nome_empresa, ds_host, ds_banco, ds_usuario, ds_porta, fg_ativo 
                 FROM sysapp_config_empresas 
+                WHERE fg_ativo = 'S'
                 ORDER BY nm_empresa";
+        
+        return $this->db->fetchAll($sql);
+    }
+    
+    /**
+     * Lista empresas com paginação
+     */
+    public function listar($limit = null, $offset = 0) {
+        // Se limit for null, retorna todas sem paginação
+        if ($limit === null) {
+            return $this->listarTodas();
+        }
+        
+        $limit = (int)$limit;
+        $offset = (int)$offset;
+        
+        $sql = "SELECT cd_empresa, nm_empresa as nome_empresa, ds_host, ds_banco, ds_usuario, ds_porta, fg_ativo 
+                FROM sysapp_config_empresas 
+                ORDER BY nm_empresa 
+                LIMIT $limit OFFSET $offset";
         
         return $this->db->fetchAll($sql);
     }
@@ -113,5 +134,23 @@ class Empresa {
         $sql = "DELETE FROM sysapp_config_empresas WHERE cd_empresa = $cd_empresa";
         
         return $this->db->query($sql);
+    }
+    
+    /**
+     * Conta total de empresas
+     */
+    public function count() {
+        $sql = "SELECT COUNT(*) as total FROM sysapp_config_empresas";
+        $result = $this->db->fetchOne($sql);
+        return $result ? (int)$result['total'] : 0;
+    }
+    
+    /**
+     * Conta empresas ativas
+     */
+    public function countAtivas() {
+        $sql = "SELECT COUNT(*) as total FROM sysapp_config_empresas WHERE fg_ativo = 'S'";
+        $result = $this->db->fetchOne($sql);
+        return $result ? (int)$result['total'] : 0;
     }
 }

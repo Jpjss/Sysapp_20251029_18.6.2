@@ -78,7 +78,7 @@ class AdminController extends Controller {
                 'nome_usuario' => $_POST['nome_usuario'],
                 'ds_login' => $_POST['ds_login'],
                 'ds_email' => $_POST['ds_email'],
-                'fg_ativo' => isset($_POST['fg_ativo']) ? 'S' : 'N'
+                'fg_ativo' => isset($_POST['fg_ativo']) ? 'S' : 'S'  // Sempre ativo por padrão
             ];
             
             // Validação: deve ter pelo menos uma empresa
@@ -136,6 +136,11 @@ class AdminController extends Controller {
         // Buscar empresas disponíveis
         $empresas = $this->Empresa->listarTodas();
         
+        // DEBUG
+        error_log("=== DEBUG USUÁRIO FORM ===");
+        error_log("Empresas retornadas: " . count($empresas));
+        error_log("Empresas: " . print_r($empresas, true));
+        
         // Buscar empresas do usuário (se editando)
         $empresas_usuario = [];
         $permissoes_usuario = [];
@@ -146,10 +151,11 @@ class AdminController extends Controller {
                 $empresas_usuario[] = $emp['cd_empresa'];
             }
             
-            $permUsuario = $this->Usuario->getPermissoes($cd_usuario);
-            foreach ($permUsuario as $perm) {
-                $permissoes_usuario[] = $perm['nome_interface'];
-            }
+            error_log("Empresas do usuário: " . implode(', ', $empresas_usuario));
+            
+            $permissoes_usuario = $this->Usuario->getPermissoes($cd_usuario); // Já vem como array de strings
+            
+            error_log("Permissões do usuário: " . implode(', ', $permissoes_usuario));
         }
         
         $this->set([
@@ -188,6 +194,14 @@ class AdminController extends Controller {
     public function empresas() {
         $this->requireAuth();
         
+        // APENAS O USUÁRIO ADMIN PODE VER EMPRESAS/DATABASES
+        $cd_usuario_logado = Session::read('Questionarios.cd_usu');
+        if ($cd_usuario_logado != 1) {
+            Session::setFlash('Apenas o administrador pode gerenciar empresas/databases!', 'error');
+            $this->redirect('relatorios/index');
+            return;
+        }
+        
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $limit = 20;
         $offset = ($page - 1) * $limit;
@@ -211,6 +225,14 @@ class AdminController extends Controller {
      */
     public function empresaForm($cd_empresa = null) {
         $this->requireAuth();
+        
+        // APENAS O USUÁRIO ADMIN PODE CRIAR/EDITAR EMPRESAS
+        $cd_usuario_logado = Session::read('Questionarios.cd_usu');
+        if ($cd_usuario_logado != 1) {
+            Session::setFlash('Apenas o administrador pode gerenciar empresas/databases!', 'error');
+            $this->redirect('relatorios/index');
+            return;
+        }
         
         $empresa = null;
         if ($cd_empresa) {

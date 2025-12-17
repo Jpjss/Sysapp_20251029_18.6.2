@@ -129,6 +129,15 @@ class Session {
      * Verifica se a sessão é válida (usuário logado)
      */
     public static function isValid() {
-        return self::check('Questionarios.cd_usu');
+        $result = self::check('Questionarios.cd_usu');
+        $cd_usu = self::read('Questionarios.cd_usu');
+        
+        file_put_contents(__DIR__ . '/../login_debug.log', 
+            "[Session::isValid] Resultado: " . ($result ? 'TRUE' : 'FALSE') . 
+            " | cd_usu: " . ($cd_usu ?? 'NULL') . "\n", 
+            FILE_APPEND
+        );
+        
+        return $result;
     }
 }

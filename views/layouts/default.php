@@ -398,6 +398,7 @@
                                     </svg>
                                     Trocar Senha
                                 </a>
+                                <?php if (Session::read('Questionarios.cd_usu') == 1): ?>
                                 <a href="<?= BASE_URL ?>/usuarios/adiciona_database">
                                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
@@ -406,6 +407,7 @@
                                     </svg>
                                     Adicionar Database
                                 </a>
+                                <?php endif; ?>
                                 <div class="divider"></div>
                                 <a href="<?= BASE_URL ?>/usuarios/logout">
                                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">

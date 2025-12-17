@@ -17,8 +17,8 @@ class Database {
     
     private function __construct() {
         // Construtor privado para Singleton
-        // Conecta automaticamente ao banco padrão
-        $this->connect();
+        // NÃO conecta aqui - será conectado explicitamente no index.php
+        // $this->connect(); // REMOVIDO
     }
     
     /**
@@ -34,6 +34,10 @@ class Database {
             $pt = $port ?? $this->port;
             
             $conn_string = "host=$h port=$pt dbname=$d user=$u password=$p";
+            
+            // DEBUG: Log da conexão
+            file_put_contents(__DIR__ . '/../login_debug.log', "[DB] Conectando em: $h | DB: $d\n", FILE_APPEND);
+            
             $this->conn = pg_connect($conn_string);
             
             if (!$this->conn) {

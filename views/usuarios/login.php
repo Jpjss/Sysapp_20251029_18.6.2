@@ -42,6 +42,26 @@
                     <p>Entre com suas credenciais para acessar o sistema</p>
                 </div>
 
+                <?php
+                // Exibe mensagem flash se houver
+                $flash = Session::flash();
+                if ($flash):
+                ?>
+                    <div class="alert alert-<?= $flash['type'] ?>">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <?php if ($flash['type'] === 'error'): ?>
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            <?php else: ?>
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            <?php endif; ?>
+                        </svg>
+                        <span><?= htmlspecialchars($flash['message']) ?></span>
+                    </div>
+                <?php endif; ?>
+
                 <form method="POST" action="<?= BASE_URL ?>/usuarios/login" class="modern-form">
                     <div class="form-group">
                         <label for="email">
@@ -316,6 +336,51 @@ body {
 
 .form-input::placeholder {
     color: #a0aec0;
+}
+
+/* Alert Messages */
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert svg {
+    flex-shrink: 0;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.alert-info {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
 }
 
 .password-input-wrapper {

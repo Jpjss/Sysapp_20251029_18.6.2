@@ -13,14 +13,28 @@ class Usuario {
     /**
      * Busca usuário por login
      */
+    /**
+     * Busca usuário por login/email
+     * Atualizado: 2025-12-16 15:30
+     */
     public function findByLogin($login) {
         $login = $this->db->escape(strtolower($login));
         
+        // Busca APENAS por login ou email, NÃO por nome
+        // Prioriza ds_login sobre ds_email
         $sql = "SELECT cd_usuario 
                 FROM sysapp_config_user 
-                WHERE LOWER(ds_email) = '$login' 
-                   OR LOWER(ds_login) = '$login' 
-                   OR LOWER(nm_usuario) = '$login'";
+                WHERE LOWER(ds_login) = '$login' 
+                   OR LOWER(ds_email) = '$login'
+                ORDER BY 
+                    CASE 
+                        WHEN LOWER(ds_login) = '$login' THEN 1 
+                        WHEN LOWER(ds_email) = '$login' THEN 2 
+                    END
+                LIMIT 1";
+        
+        // DEBUG: Log da query
+        file_put_contents(__DIR__ . '/../login_debug.log', "[MODEL] SQL: $sql\n", FILE_APPEND);
         
         $result = $this->db->fetchOne($sql);
         
@@ -239,8 +253,9 @@ class Usuario {
         
         // Remove permissões antigas
         $this->db->query("DELETE FROM sysapp_config_user_empresas_interfaces WHERE cd_usuario = $cd_usuario");
+        $this->db->query("DELETE FROM sysapp_config_user_interfaces WHERE cd_usuario = $cd_usuario");
         
-        // Adiciona novas permissões
+        // Adiciona novas permissões na tabela empresas_interfaces
         if (!empty($empresas) && !empty($interfaces)) {
             foreach ($empresas as $cd_empresa) {
                 foreach ($interfaces as $cd_interface) {
@@ -252,6 +267,15 @@ class Usuario {
                     $this->db->query($sql);
                 }
             }
+        }
+        
+        // SEMPRE adiciona permissões na tabela sysapp_config_user_interfaces
+        // Esta tabela é necessária para o login funcionar
+        $permissoes_login = ['admin', 'clientes', 'questionarios', 'usuarios', 'relatorios'];
+        foreach ($permissoes_login as $nm_interface) {
+            $sql = "INSERT INTO sysapp_config_user_interfaces (cd_usuario, nm_interface) 
+                    VALUES ($cd_usuario, '$nm_interface')";
+            $this->db->query($sql);
         }
         
         return true;
@@ -362,5 +386,65 @@ class Usuario {
         }
         
         return true;
+    }
+    
+    /**
+     * Cria novo usuário
+     */
+    public function create($dados) {
+        $conn = $this->db->getConnection();
+        
+        // Busca próximo ID
+        $sql = "SELECT COALESCE(MAX(cd_usuario), 0) + 1 as next_id FROM sysapp_config_user";
+        $result = pg_query($conn, $sql);
+        $cd_usuario = pg_fetch_assoc($result)['next_id'];
+        
+        $nm_usuario = $this->db->escape($dados['nome_usuario']);
+        $ds_login = $this->db->escape($dados['ds_login']);
+        $ds_email = $this->db->escape($dados['ds_email']);
+        $ds_senha = $this->db->escape($dados['senha_usuario']);
+        $fg_ativo = $dados['fg_ativo'] ?? 'S';
+        
+        $sql = "INSERT INTO sysapp_config_user (cd_usuario, nm_usuario, ds_login, ds_email, ds_senha, fg_ativo) 
+                VALUES ($cd_usuario, '$nm_usuario', '$ds_login', '$ds_email', '$ds_senha', '$fg_ativo')
+                RETURNING cd_usuario";
+        
+        $result = pg_query($conn, $sql);
+        
+        if ($result) {
+            $row = pg_fetch_assoc($result);
+            return (int)$row['cd_usuario'];
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Atualiza usuário existente
+     */
+    public function update($dados) {
+        $conn = $this->db->getConnection();
+        
+        $cd_usuario = (int)$dados['cd_usuario'];
+        $nm_usuario = $this->db->escape($dados['nome_usuario']);
+        $ds_login = $this->db->escape($dados['ds_login']);
+        $ds_email = $this->db->escape($dados['ds_email']);
+        $fg_ativo = $dados['fg_ativo'] ?? 'S';
+        
+        $sql = "UPDATE sysapp_config_user 
+                SET nm_usuario = '$nm_usuario',
+                    ds_login = '$ds_login',
+                    ds_email = '$ds_email',
+                    fg_ativo = '$fg_ativo'";
+        
+        // Só atualiza senha se foi fornecida
+        if (!empty($dados['senha_usuario'])) {
+            $ds_senha = $this->db->escape($dados['senha_usuario']);
+            $sql .= ", ds_senha = '$ds_senha'";
+        }
+        
+        $sql .= " WHERE cd_usuario = $cd_usuario";
+        
+        return pg_query($conn, $sql);
     }
 }

@@ -10,7 +10,8 @@ class Controller {
     
     public function __construct() {
         $this->db = Database::getInstance();
-        $this->db->connect(DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT);
+        // REMOVIDO: Não conectar aqui, pois o index.php já conecta
+        // $this->db->connect(DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT);
         
         // Se houver configuração de empresa na sessão, reconecta automaticamente
         $this->reconectarBancoEmpresaSeNecessario();

@@ -15,8 +15,9 @@ class InterfaceModel {
      */
     public function listar() {
         $sql = "SELECT cd_interface, nm_interface as nome_interface 
-                FROM sysapp_interfaces 
-                ORDER BY nm_interface";
+                FROM sysapp_controle_interface 
+                WHERE fg_ativo = 'S'
+                ORDER BY nr_ordem, nm_interface";
         
         return $this->db->fetchAll($sql);
     }

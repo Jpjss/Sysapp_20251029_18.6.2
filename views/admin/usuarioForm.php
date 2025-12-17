@@ -77,8 +77,8 @@
                                value="<?= $empresa['cd_empresa'] ?>"
                                <?= in_array($empresa['cd_empresa'], $empresas_usuario ?? []) ? 'checked' : '' ?>>
                         <div class="checkbox-content">
-                            <strong><?= htmlspecialchars($empresa['nm_empresa']) ?></strong>
-                            <small><?= htmlspecialchars($empresa['ds_host']) ?> / <?= htmlspecialchars($empresa['ds_banco']) ?></small>
+                            <strong><?= htmlspecialchars($empresa['nm_empresa'] ?? $empresa['nome_empresa'] ?? 'Sem nome') ?></strong>
+                            <small><?= htmlspecialchars($empresa['ds_host'] ?? '') ?> / <?= htmlspecialchars($empresa['ds_banco'] ?? $empresa['nome_banco'] ?? '') ?></small>
                         </div>
                     </label>
                 <?php endforeach; ?>
@@ -263,15 +263,21 @@
 }
 
 .checkbox-content strong {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .checkbox-content small {
-    font-size: 12px;
-    color: #64748b;
+    font-size: 12px !important;
+    color: #64748b !important;
     line-height: 1.4;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .badge-danger {

@@ -23,18 +23,33 @@ class UsuariosController extends Controller {
      * Página de login
      */
     public function login() {
+        // DEBUG: Log da requisição
+        include_once BASE_PATH . '/log_request.php';
+        
+        file_put_contents(__DIR__ . '/../login_debug.log', "\n=== INÍCIO DO MÉTODO LOGIN ===\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../login_debug.log', "REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD'] . "\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../login_debug.log', "POST email: " . ($_POST['email'] ?? 'não definido') . "\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../login_debug.log', "Session::isValid(): " . (Session::isValid() ? 'TRUE' : 'FALSE') . "\n", FILE_APPEND);
+        
         // Se já está logado, redireciona
         if (Session::isValid()) {
+            file_put_contents(__DIR__ . '/../login_debug.log', "REDIRECIONANDO: Usuário já está logado\n", FILE_APPEND);
             $this->redirect('relatorios/empresa');
         }
+        
+        file_put_contents(__DIR__ . '/../login_debug.log', "Não está logado, continuando...\n", FILE_APPEND);
         
         $this->layout = 'login';
         
         if ($this->isPost()) {
-            $email = $_POST['email'] ?? '';
+            file_put_contents(__DIR__ . '/../login_debug.log', "É POST, processando login...\n", FILE_APPEND);
+            $email = trim($_POST['email'] ?? '');
             $senha = $_POST['senha'] ?? '';
             
+            file_put_contents(__DIR__ . '/../login_debug.log', "\n[PASSO 1] Email: '$email' (len: ".strlen($email).") | Senha: '$senha' (len: ".strlen($senha).")\n", FILE_APPEND);
+            
             if (empty($email) || empty($senha)) {
+                file_put_contents(__DIR__ . '/../login_debug.log', "[FALHA] Email ou senha vazios\n", FILE_APPEND);
                 Session::setFlash('Usuário e senha são necessários!', 'error');
                 $this->render();
                 return;
@@ -42,33 +57,46 @@ class UsuariosController extends Controller {
             
             // Busca usuário
             $configUser = $this->Usuario->findByLogin($email);
+            file_put_contents(__DIR__ . '/../login_debug.log', "[PASSO 2] findByLogin retornou: " . json_encode($configUser) . "\n", FILE_APPEND);
             
             if (!$configUser) {
+                file_put_contents(__DIR__ . '/../login_debug.log', "[FALHA] Usuário não encontrado\n", FILE_APPEND);
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
             }
             
             $cd_usuario = $configUser['cd_usuario'];
+            file_put_contents(__DIR__ . '/../login_debug.log', "[PASSO 3] cd_usuario: $cd_usuario\n", FILE_APPEND);
             
             // Busca dados completos do usuário
             $usuario = $this->Usuario->findForAuth($cd_usuario);
+            file_put_contents(__DIR__ . '/../login_debug.log', "[PASSO 4] findForAuth retornou: " . json_encode($usuario) . "\n", FILE_APPEND);
             
             if (!$usuario) {
+                file_put_contents(__DIR__ . '/../login_debug.log', "[FALHA] findForAuth retornou vazio\n", FILE_APPEND);
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
             }
             
-            // Verifica senha (texto plano apenas por enquanto)
-            if ($senha !== $usuario['senha_usuario']) {
+            file_put_contents(__DIR__ . '/../login_debug.log', "[PASSO 5] Comparando senhas usando password_verify\n", FILE_APPEND);
+            file_put_contents(__DIR__ . '/../login_debug.log', "[DEBUG] Senha digitada: '$senha'\n", FILE_APPEND);
+            file_put_contents(__DIR__ . '/../login_debug.log', "[DEBUG] Hash no banco: '{$usuario['senha_usuario']}'\n", FILE_APPEND);
+            
+            // Verifica senha usando password_verify
+            if (!password_verify($senha, $usuario['senha_usuario'])) {
+                file_put_contents(__DIR__ . '/../login_debug.log', "[FALHA] Senha incorreta (password_verify retornou false)\n", FILE_APPEND);
                 Session::setFlash('Usuário ou senha incorreta!', 'error');
                 $this->render();
                 return;
             }
+            
+            file_put_contents(__DIR__ . '/../login_debug.log', "[PASSO 6] Senha OK! Buscando empresas...\n", FILE_APPEND);
             
             // Busca empresas do usuário
             $empresas = $this->Usuario->getEmpresas($cd_usuario);
+            file_put_contents(__DIR__ . '/../login_debug.log', "[PASSO 7] Empresas encontradas: " . count($empresas) . "\n", FILE_APPEND);
             
             // Monta lista de códigos de empresa
             $cd_empresas = [];
@@ -82,6 +110,7 @@ class UsuariosController extends Controller {
             
             // Busca permissões
             $permissoes = $this->Usuario->getPermissoes($cd_usuario);
+            file_put_contents(__DIR__ . '/../login_debug.log', "[PASSO 8] Permissões encontradas: " . count($permissoes) . "\n", FILE_APPEND);
             
             if (empty($permissoes)) {
                 Session::setFlash('Usuário sem permissões configuradas!', 'error');
@@ -97,9 +126,13 @@ class UsuariosController extends Controller {
             $hora = date("H:i:s");
             Session::write('Questionarios.hora_login', date("d/m/Y") . " as " . $hora);
             
+            file_put_contents(__DIR__ . '/../login_debug.log', "[PASSO 9] Dados salvos na sessão. Verificando...\n", FILE_APPEND);
+            file_put_contents(__DIR__ . '/../login_debug.log', "[SESSION DUMP] " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+            
             // Se tem múltiplas empresas, salva e redireciona para seleção
             if (count($infoDb) > 1) {
                 Session::write('Dados.database', $infoDb);
+                file_put_contents(__DIR__ . '/../login_debug.log', "[SUCESSO] Redirecionando para seleção de empresa (múltiplas)\n", FILE_APPEND);
                 $this->redirect('relatorios/empresa');
             } else {
                 // Uma única empresa, configura direto
@@ -112,6 +145,7 @@ class UsuariosController extends Controller {
                 Session::write('Config.porta', $empresa['porta_banco']);
                 Session::write('Config.empresa', $empresa['nome_empresa']);
                 
+                file_put_contents(__DIR__ . '/../login_debug.log', "[SUCESSO] Redirecionando para dashboard (empresa única)\n", FILE_APPEND);
                 $this->redirect('relatorios/index');
             }
         }
@@ -206,6 +240,15 @@ class UsuariosController extends Controller {
     public function novo() {
         $this->requireAuth();
         
+        // DEBUG: Log do estado inicial
+        file_put_contents(__DIR__ . '/../debug_view.log', "\n=== NOVO USUARIO ===\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../debug_view.log', "Banco atual antes de reconectar: " . $this->db->getDatabase() . "\n", FILE_APPEND);
+        
+        // Força reconexão ao banco do sistema usando as constantes de config
+        $this->db->connect('banco.propasso.systec.ftp.sh', 'bd_propasso', 'admin', 'systec2011.', '5432');
+        
+        file_put_contents(__DIR__ . '/../debug_view.log', "Banco após reconectar: " . $this->db->getDatabase() . "\n", FILE_APPEND);
+        
         if ($this->isPost()) {
             // Validações
             $erros = [];
@@ -237,7 +280,7 @@ class UsuariosController extends Controller {
             } else {
                 // Salva usuário
                 $cd_usuario = $this->Usuario->getNextCodigo();
-                $senhaHash = Security::hash($_POST['senha_usuario'], 'md5', SECURITY_SALT);
+                $senhaHash = password_hash($_POST['senha_usuario'], PASSWORD_DEFAULT);
                 
                 $dados = [
                     'cd_usuario' => $cd_usuario,
@@ -264,13 +307,24 @@ class UsuariosController extends Controller {
         
         // Carrega dados para o formulário
         $cd_usuario = $this->Usuario->getNextCodigo();
+        
+        file_put_contents(__DIR__ . '/../debug_view.log', "Buscando empresas...\n", FILE_APPEND);
         $empresas = $this->Empresa->listar();
+        file_put_contents(__DIR__ . '/../debug_view.log', "Empresas encontradas: " . count($empresas) . "\n", FILE_APPEND);
+        
+        file_put_contents(__DIR__ . '/../debug_view.log', "Buscando interfaces...\n", FILE_APPEND);
         $interfaces = $this->Interface->listar();
+        file_put_contents(__DIR__ . '/../debug_view.log', "Interfaces encontradas: " . count($interfaces) . "\n", FILE_APPEND);
+        
+        // DEBUG: Log para verificar se os dados estão sendo carregados
+        file_put_contents(__DIR__ . '/../debug_view.log', "CD Usuario: $cd_usuario\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../debug_view.log', "Empresas: " . print_r($empresas, true) . "\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../debug_view.log', "Interfaces: " . print_r($interfaces, true) . "\n", FILE_APPEND);
         
         $this->set([
             'cd_usuario' => $cd_usuario,
-            'empresas' => $empresas,
-            'interfaces' => $interfaces
+            'empresas' => $empresas ?: [],
+            'interfaces' => $interfaces ?: []
         ]);
         
         $this->render();
@@ -286,6 +340,15 @@ class UsuariosController extends Controller {
             Session::setFlash('Usuário não encontrado!', 'error');
             $this->redirect('usuarios/visualizar');
         }
+        
+        // DEBUG: Log do estado inicial
+        file_put_contents(__DIR__ . '/../debug_view.log', "\n=== ALTERAR USUARIO ===\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../debug_view.log', "Banco atual antes de reconectar: " . $this->db->getDatabase() . "\n", FILE_APPEND);
+        
+        // Força reconexão ao banco do sistema usando as constantes de config
+        $this->db->connect('banco.propasso.systec.ftp.sh', 'bd_propasso', 'admin', 'systec2011.', '5432');
+        
+        file_put_contents(__DIR__ . '/../debug_view.log', "Banco após reconectar: " . $this->db->getDatabase() . "\n", FILE_APPEND);
         
         $usuario = $this->Usuario->findById($cd_usuario);
         
@@ -329,7 +392,7 @@ class UsuariosController extends Controller {
                 
                 // Atualiza senha se fornecida
                 if (!empty($_POST['senha_usuario'])) {
-                    $dados['senha_usuario'] = Security::hash($_POST['senha_usuario'], 'md5', SECURITY_SALT);
+                    $dados['senha_usuario'] = password_hash($_POST['senha_usuario'], PASSWORD_DEFAULT);
                 }
                 
                 if ($this->Usuario->atualizar($dados)) {
@@ -421,6 +484,14 @@ class UsuariosController extends Controller {
      */
     public function adiciona_database() {
         $this->requireAuth();
+        
+        // APENAS O USUÁRIO ADMIN PODE ADICIONAR DATABASES
+        $cd_usuario_logado = Session::read('Questionarios.cd_usu');
+        if ($cd_usuario_logado != 1) {
+            Session::setFlash('Apenas o administrador pode adicionar databases!', 'error');
+            $this->redirect('relatorios/index');
+            return;
+        }
         
         if ($this->isPost()) {
             $this->layout = false;
