@@ -200,6 +200,14 @@
             <span>📦 Estoque Detalhado</span>
         </a>
         
+        <a href="<?= BASE_URL ?>/marcasvendas/dashboard" class="action-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+            </svg>
+            <span>📊 Marcas Mais Vendidas</span>
+        </a>
+        
         <a href="<?= BASE_URL ?>/usuarios/adiciona_database" class="action-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>

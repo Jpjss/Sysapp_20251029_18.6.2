@@ -12,9 +12,9 @@ if (strpos($uri, '/api/') === 0) {
     return true;
 }
 
-// Arquivos estáticos (CSS, JS, imagens, etc) e arquivos PHP de teste
+// Arquivos estáticos (CSS, JS, imagens, HTML, etc) e arquivos PHP de teste
 // Verifica se é um arquivo estático/teste e se existe
-if (preg_match('/\.(?:png|jpg|jpeg|gif|ico|css|js|svg|woff|woff2|ttf|eot|php)$/', $uri)) {
+if (preg_match('/\.(?:png|jpg|jpeg|gif|ico|css|js|svg|woff|woff2|ttf|eot|html|htm|php)$/', $uri)) {
     // Normaliza o caminho para Windows
     $filePath = __DIR__ . str_replace('/', DIRECTORY_SEPARATOR, $uri);
     
