@@ -109,6 +109,17 @@ Sysapp_20251029_18.6.2/
 │   ├── theme-provider.tsx        # Context API para tema dark/light
 │   └── theme-toggle.tsx          # Toggle de tema
 │
+├── api/                          # ⭐ API REST Endpoints
+│   ├── index.php                 # Roteador principal da API
+│   ├── marcas_vendas.php         # ⭐ NOVO: API de marcas vendidas
+│   ├── auth.php                  # Autenticação
+│   ├── empresas.php              # Empresas
+│   ├── questionarios.php         # Questionários
+│   ├── relatorios.php            # Relatórios
+│   ├── usuarios.php              # Usuários
+│   ├── xml.php                   # XML
+│   └── clientes.php              # Clientes
+│
 ├── config/                       # Configurações PHP
 │   ├── config.php                # Constantes (DB, SECURITY_SALT, BASE_URL)
 │   └── database.php              # Singleton de conexão PostgreSQL
@@ -121,7 +132,8 @@ Sysapp_20251029_18.6.2/
 ├── controllers/                  # Controllers PHP Puro (Moderno)
 │   ├── ClientesController.php    # CRUD de clientes com paginação
 │   ├── UsuariosController.php    # Autenticação e gestão de usuários
-│   ├── XmlController.php         # ⭐ NOVO: Correção de XML NFe
+│   ├── XmlController.php         # ⭐ Correção de XML NFe
+│   ├── MarcasVendasController.php # ⭐ NOVO: Dashboard de marcas vendidas
 │   └── VendedorController.php    # Gestão de vendedores
 │
 ├── core/                         # Framework MVC Customizado
@@ -147,7 +159,9 @@ Sysapp_20251029_18.6.2/
 │   │   └── empresa.php           # Seleção de empresa (multi-tenant)
 │   ├── clientes/
 │   │   └── index.php             # Lista de clientes com filtros
-│   └── xml/                      # ⭐ NOVO: Sistema de XML
+│   ├── marcasvendas/             # ⭐ NOVO: Dashboard de marcas vendidas
+│   │   └── dashboard.php         # Interface com gráficos Chart.js
+│   └── xml/                      # ⭐ Sistema de XML
 │       └── index.php             # Interface de upload e correção
 │
 ├── public/                       # Assets Públicos
@@ -438,7 +452,112 @@ export async function getClientes(filtro: string) {
 
 ## 8. Funcionalidades Implementadas
 
-### 8.1 ⭐ Sistema de Correção de XML NFe (NOVO - Dez/2025)
+### 8.1 ⭐ Dashboard de Marcas Vendidas em Tempo Real (NOVO - Dez/2025)
+
+**Objetivo**: Acompanhar as marcas mais vendidas em tempo real com visualização gráfica interativa e atualização automática sem recarregar a página.
+
+**Localização**: `controllers/MarcasVendasController.php` + `views/marcasvendas/dashboard.php` + `api/marcas_vendas.php`
+
+**Capacidades:**
+- ✅ Visualização em tempo real das marcas mais vendidas
+- ✅ 3 gráficos interativos (Quantidade, Valor Total, Total de Vendas)
+- ✅ Atualização automática via AJAX (sem reload de página)
+- ✅ Filtros por período (7, 15, 30, 60, 90 dias)
+- ✅ Top N marcas configurável (5, 10, 15, 20, 25)
+- ✅ Intervalo de atualização configurável (5s a 60s)
+- ✅ Integração com sistema multi-tenant (por empresa)
+- ✅ API REST JSON para consumo externo
+- ✅ Interface responsiva com Chart.js
+
+**Tecnologias:**
+- **Backend**: PHP 8.3 com PDO PostgreSQL
+- **Frontend**: Chart.js 4.4.0 + Bootstrap 5.3
+- **Arquitetura**: MVC customizado com API REST
+
+**Endpoints:**
+
+| Método | URL | Descrição |
+|--------|-----|-----------|
+| GET | `/marcasvendas/dashboard` | Interface principal do dashboard |
+| GET | `/api/marcas_vendas` | API REST para dados das marcas |
+
+**Parâmetros API:**
+
+```
+GET /api/marcas_vendas?periodo=30&limite=10&cd_filial=1
+
+Resposta JSON:
+{
+  "success": true,
+  "periodo": 30,
+  "timestamp": "2025-12-22 01:30:45",
+  "data": {
+    "labels": ["FILEO", "SR", "V.T", ...],
+    "datasets": [
+      {
+        "label": "Quantidade Vendida",
+        "data": [2532, 869, 205, ...]
+      },
+      {
+        "label": "Valor Total (R$)",
+        "data": [232263.63, 59099.30, 69620.04, ...]
+      },
+      {
+        "label": "Total de Vendas",
+        "data": [431, 308, 128, ...]
+      }
+    ]
+  },
+  "marcas_detalhadas": [...]
+}
+```
+
+**Integração no Menu:**
+- Menu superior: Entre "Relatórios" e "Correção XML"
+- Dashboard principal: Card roxo em "Ações Rápidas"
+
+**Query Principal:**
+
+```sql
+SELECT 
+    dm_produto.cd_marca,
+    dm_produto.ds_marca,
+    COUNT(DISTINCT dm_venda.cd_pedido) as total_vendas,
+    SUM(COALESCE(dm_venda.qtde_produto, 0)) as quantidade_vendida,
+    SUM(COALESCE(dm_venda.vl_tot_it - dm_venda.vl_devol_proporcional, 0))::NUMERIC(14,2) as valor_total
+FROM dm_produto
+INNER JOIN dm_orcamento_vendas_consolidadas dm_venda
+    ON dm_venda.cd_cpl_tamanho = dm_produto.cd_cpl_tamanho
+WHERE dm_venda.dt_emi_pedido >= CURRENT_DATE - INTERVAL '30 days'
+    AND dm_produto.cd_marca IS NOT NULL
+    AND dm_produto.ds_marca IS NOT NULL
+GROUP BY dm_produto.cd_marca, dm_produto.ds_marca
+ORDER BY quantidade_vendida DESC
+LIMIT 10
+```
+
+**Autenticação:**
+- Requer login no sistema
+- Validação de empresa selecionada (multi-tenant)
+- Dados isolados por base de dados da empresa
+
+**Como Usar:**
+
+1. Faça login no sistema
+2. Selecione uma empresa
+3. Acesse "Marcas Vendidas" no menu superior
+4. Configure período, top marcas e intervalo de atualização
+5. Clique em "Atualizar Agora" para atualização manual
+6. Os gráficos atualizam automaticamente no intervalo definido
+
+**Correções Implementadas:**
+- ✅ Corrigido roteamento da API no `api/index.php`
+- ✅ Substituído `Session::init()` por `Session::start()`
+- ✅ Corrigido nomes de colunas (`cd_lanc_cpl` → `cd_pedido`, `dt_vd` → `dt_emi_pedido`)
+- ✅ Padronizado autenticação com `requireAuth()` e `Session::isValid()`
+- ✅ Renomeada pasta `marcas_vendas/` para `marcasvendas/` (convenção MVC)
+
+### 8.2 ⭐ Sistema de Correção de XML NFe (Dez/2025)
 
 **Objetivo**: Ajustar automaticamente divergências de valores em notas fiscais eletrônicas.
 
@@ -506,7 +625,7 @@ public/test_xmls/
 
 Consulte `GUIA_TESTE_XML.md` para cenários de teste detalhados.
 
-### 8.2 Sistema de Clientes (CRM)
+### 8.3 Sistema de Clientes (CRM)
 
 **Funcionalidades:**
 - Listagem paginada (20 registros por página)
@@ -522,7 +641,7 @@ Consulte `GUIA_TESTE_XML.md` para cenários de teste detalhados.
 - `POST /clientes/save`
 - `DELETE /clientes/delete/{id}`
 
-### 8.3 Sistema de Questionários
+### 8.4 Sistema de Questionários
 
 **Características:**
 - Questionários customizáveis por empresa
@@ -542,7 +661,7 @@ glb_questionario_respostas → Respostas
 glb_questionario_resposta_historicos → Histórico
 ```
 
-### 8.4 Relatórios e Análises
+### 8.5 Relatórios e Análises
 
 **Tipos de Relatórios:**
 - Clientes por período de cadastro
@@ -626,8 +745,9 @@ pnpm build && pnpm start
 - 🏠 **Home**: `http://localhost:8000/`
 - 🔐 **Login**: `http://localhost:8000/usuarios/login`
 - 👥 **Clientes**: `http://localhost:8000/clientes/index`
+- � **Marcas Vendidas**: `http://localhost:8000/marcasvendas/dashboard`
 - 📄 **Correção XML**: `http://localhost:8000/xml/index`
-- 📊 **Relatórios**: `http://localhost:8000/relatorios/index`
+- 📈 **Relatórios**: `http://localhost:8000/relatorios/index`
 
 **Credenciais Padrão:**
 - Usuário: `admin`
