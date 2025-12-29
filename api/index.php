@@ -76,6 +76,11 @@ try {
             require_once __DIR__ . '/marcas_vendas.php';
             break;
             
+        case 'marca_historico':
+        case 'marca_historico.php':
+            require_once __DIR__ . '/marca_historico.php';
+            break;
+            
         default:
             http_response_code(404);
             echo json_encode([

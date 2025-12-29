@@ -77,6 +77,7 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             margin-bottom: 20px;
             transition: transform 0.3s ease;
+            position: relative;
         }
         
         .chart-card:hover {
@@ -96,6 +97,125 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
         
         .chart-title i {
             color: #667eea;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .brand-selector-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            border: 1px solid #dee2e6;
+        }
+        
+        .brand-selector-box label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #495057;
+            margin: 0;
+            white-space: nowrap;
+        }
+        
+        .brand-selector-box select {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            min-width: 200px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .brand-selector-box select:hover {
+            border-color: #667eea;
+        }
+        
+        .brand-selector-box select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-back-overview {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-back-overview:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-back-overview i {
+            margin-right: 5px;
+        }
+        
+        .chart-subtitle {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+        
+        .stats-summary {
+            display: none;
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .stats-summary.active {
+            display: block;
+        }
+        
+        .stats-summary-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-label {
+            font-weight: 600;
+            color: #2e7d32;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            color: #1b5e20;
+            font-size: 1.1rem;
+            font-weight: 700;
         }
         
         .controls-section {
@@ -167,6 +287,61 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
         
         .table-marcas tbody tr:hover {
             background: #f8f9fa;
+        }
+        
+        .sortable-header {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 25px !important;
+            transition: background-color 0.2s ease;
+        }
+        
+        .sortable-header:hover {
+            background: #5a66d0 !important;
+        }
+        
+        .sort-icon {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            opacity: 0.4;
+            transition: opacity 0.2s ease;
+        }
+        
+        .sortable-header:hover .sort-icon {
+            opacity: 0.7;
+        }
+        
+        .sort-icon.active {
+            opacity: 1 !important;
+        }
+        
+        .sort-arrow {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+        }
+        
+        .sort-arrow-up {
+            border-bottom: 5px solid white;
+        }
+        
+        .sort-arrow-down {
+            border-top: 5px solid white;
+        }
+        
+        .sort-arrow.active-up {
+            border-bottom-color: #ffd700;
+        }
+        
+        .sort-arrow.active-down {
+            border-top-color: #ffd700;
         }
     </style>
 </head>
@@ -271,9 +446,41 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
             <div class="row">
                 <div class="col-lg-12">
                     <div class="chart-card">
-                        <div class="chart-title">
-                            <i class="fas fa-shopping-cart"></i>
-                            Total de Vendas por Marca
+                        <div class="chart-header">
+                            <div class="chart-title">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span id="chartVendasTitle">Total de Vendas por Marca</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <button class="btn-back-overview" id="btnBackOverview" onclick="voltarVisaoGeral()">
+                                    <i class="fas fa-arrow-left"></i> Voltar para visão geral
+                                </button>
+                                <div class="brand-selector-box" id="brandSelectorBox">
+                                    <label for="brandSelect">
+                                        <i class="fas fa-filter"></i> Selecionar Marca:
+                                    </label>
+                                    <select id="brandSelect" class="form-select-sm">
+                                        <option value="">Carregando marcas...</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-subtitle" id="chartVendasSubtitle"></div>
+                        <div class="stats-summary" id="statsSummary">
+                            <div class="stats-summary-content">
+                                <div class="stat-item">
+                                    <span class="stat-label">Total de Vendas</span>
+                                    <span class="stat-value" id="statTotalVendas">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Quantidade Total</span>
+                                    <span class="stat-value" id="statQuantidadeTotal">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Valor Total</span>
+                                    <span class="stat-value" id="statValorTotal">-</span>
+                                </div>
+                            </div>
                         </div>
                         <canvas id="chartVendas"></canvas>
                     </div>
@@ -293,9 +500,21 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
                                 <th>#</th>
                                 <th>Código</th>
                                 <th>Marca</th>
-                                <th class="text-end">Quantidade Vendida</th>
+                                <th class="text-end sortable-header" onclick="ordenarPorQuantidade()" id="headerQuantidade">
+                                    Quantidade Vendida
+                                    <span class="sort-icon" id="sortIconQuantidade">
+                                        <span class="sort-arrow sort-arrow-up"></span>
+                                        <span class="sort-arrow sort-arrow-down"></span>
+                                    </span>
+                                </th>
                                 <th class="text-end">Total de Vendas</th>
-                                <th class="text-end">Valor Total (R$)</th>
+                                <th class="text-end sortable-header" onclick="ordenarPorValor()" id="headerValorTotal">
+                                    Valor Total (R$)
+                                    <span class="sort-icon" id="sortIconValor">
+                                        <span class="sort-arrow sort-arrow-up"></span>
+                                        <span class="sort-arrow sort-arrow-down"></span>
+                                    </span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="tabelaMarcas">
@@ -319,6 +538,12 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
         // Variáveis globais
         let chartQuantidade, chartValor, chartVendas;
         let intervaloAtualizacao;
+        let marcasTop10 = []; // Armazena as Top 10 marcas
+        let modoVisualizacao = 'overview'; // 'overview' ou 'detalhado'
+        let marcaSelecionada = null;
+        let ordenacaoAtual = 'desc'; // 'desc' = maior para menor, 'asc' = menor para maior
+        let colunaOrdenacao = 'valor'; // 'valor' ou 'quantidade'
+        let marcasOriginais = []; // Armazena dados originais para ordenação
         
         // Configuração padrão dos gráficos
         const chartOptions = {
@@ -357,6 +582,10 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
                         minRotation: 45
                     }
                 }
+            },
+            animation: {
+                duration: 750,
+                easing: 'easeInOutQuart'
             }
         };
         
@@ -414,7 +643,7 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
             });
         }
         
-        // Atualizar dados dos gráficos
+        // Atualizar dados dos gráficos - Visão Geral
         async function atualizarDados() {
             const periodo = document.getElementById('periodoSelect').value;
             const limite = document.getElementById('limiteSelect').value;
@@ -427,23 +656,33 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
                 const result = await response.json();
                 
                 if (result.success) {
+                    // Armazenar Top 10
+                    marcasTop10 = result.marcas_detalhadas || [];
+                    
+                    // Atualizar dropdown de marcas
+                    atualizarDropdownMarcas();
+                    
                     // Atualizar gráficos
                     const labels = result.data.labels;
                     
                     // Gráfico de Quantidade
                     chartQuantidade.data.labels = labels;
                     chartQuantidade.data.datasets[0].data = result.data.datasets[0].data;
-                    chartQuantidade.update('none'); // Sem animação para atualização suave
+                    chartQuantidade.update('active');
                     
                     // Gráfico de Valor
                     chartValor.data.labels = labels;
                     chartValor.data.datasets[0].data = result.data.datasets[1].data;
-                    chartValor.update('none');
+                    chartValor.update('active');
                     
-                    // Gráfico de Vendas
+                    // Gráfico de Vendas - Modo Overview
                     chartVendas.data.labels = labels;
                     chartVendas.data.datasets[0].data = result.data.datasets[2].data;
-                    chartVendas.update('none');
+                    chartVendas.data.datasets[0].label = 'Total de Vendas';
+                    chartVendas.data.datasets[0].backgroundColor = 'rgba(255, 159, 64, 0.2)';
+                    chartVendas.data.datasets[0].borderColor = 'rgba(255, 159, 64, 1)';
+                    chartVendas.options.scales.x.title = { display: false };
+                    chartVendas.update('active');
                     
                     // Atualizar tabela
                     atualizarTabela(result.marcas_detalhadas);
@@ -463,17 +702,118 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
             }
         }
         
+        // Atualizar dropdown de marcas
+        function atualizarDropdownMarcas() {
+            const select = document.getElementById('brandSelect');
+            select.innerHTML = '<option value="">-- Selecione uma marca --</option>';
+            
+            marcasTop10.forEach(marca => {
+                const option = document.createElement('option');
+                option.value = marca.cd_marca;
+                option.textContent = marca.ds_marca;
+                select.appendChild(option);
+            });
+        }
+        
+        // Carregar dados históricos de uma marca específica
+        async function carregarHistoricoMarca(cd_marca) {
+            if (!cd_marca) {
+                voltarVisaoGeral();
+                return;
+            }
+            
+            const periodo = document.getElementById('periodoSelect').value;
+            
+            // Mostrar loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            try {
+                const response = await fetch(`/api/marca_historico.php?cd_marca=${cd_marca}&periodo=${periodo}&agrupamento=dia`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    marcaSelecionada = result;
+                    modoVisualizacao = 'detalhado';
+                    
+                    // Atualizar apenas o gráfico de vendas
+                    chartVendas.data.labels = result.data.labels;
+                    chartVendas.data.datasets[0].data = result.data.datasets[2].data; // Total de vendas
+                    chartVendas.data.datasets[0].label = `Vendas - ${result.ds_marca}`;
+                    chartVendas.data.datasets[0].backgroundColor = 'rgba(102, 126, 234, 0.2)';
+                    chartVendas.data.datasets[0].borderColor = 'rgba(102, 126, 234, 1)';
+                    chartVendas.options.scales.x.title = { 
+                        display: true, 
+                        text: 'Período',
+                        font: { size: 12, weight: 'bold' }
+                    };
+                    chartVendas.update('active');
+                    
+                    // Atualizar UI
+                    document.getElementById('chartVendasTitle').textContent = `Progresso de Vendas – ${result.ds_marca}`;
+                    document.getElementById('chartVendasSubtitle').textContent = `Acompanhamento diário nos últimos ${periodo} dias`;
+                    document.getElementById('btnBackOverview').style.display = 'inline-block';
+                    
+                    // Mostrar estatísticas
+                    const statsSummary = document.getElementById('statsSummary');
+                    statsSummary.classList.add('active');
+                    document.getElementById('statTotalVendas').textContent = result.totais.vendas.toLocaleString('pt-BR');
+                    document.getElementById('statQuantidadeTotal').textContent = result.totais.quantidade.toLocaleString('pt-BR') + ' unidades';
+                    document.getElementById('statValorTotal').textContent = 'R$ ' + result.totais.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                    
+                    // Atualizar timestamp
+                    document.getElementById('lastUpdate').textContent = result.timestamp;
+                } else {
+                    console.error('Erro ao carregar histórico:', result.error);
+                    alert('Erro ao carregar histórico da marca: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Erro na requisição:', error);
+                alert('Erro ao conectar com o servidor');
+            } finally {
+                // Esconder loading
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        }
+        
+        // Voltar para visão geral
+        function voltarVisaoGeral() {
+            modoVisualizacao = 'overview';
+            marcaSelecionada = null;
+            
+            // Resetar dropdown
+            document.getElementById('brandSelect').value = '';
+            
+            // Esconder botão voltar
+            document.getElementById('btnBackOverview').style.display = 'none';
+            
+            // Esconder estatísticas
+            document.getElementById('statsSummary').classList.remove('active');
+            
+            // Resetar título
+            document.getElementById('chartVendasTitle').textContent = 'Total de Vendas por Marca';
+            document.getElementById('chartVendasSubtitle').textContent = '';
+            
+            // Recarregar dados gerais
+            atualizarDados();
+        }
+        
         // Atualizar tabela
         function atualizarTabela(marcas) {
+            // Armazenar dados originais
+            marcasOriginais = [...marcas];
+            
+            // Aplicar ordenação atual
+            const marcasOrdenadas = ordenarMarcas(marcasOriginais, colunaOrdenacao, ordenacaoAtual);
+            
             const tbody = document.getElementById('tabelaMarcas');
             tbody.innerHTML = '';
             
-            if (marcas.length === 0) {
+            if (marcasOrdenadas.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma marca encontrada</td></tr>';
                 return;
             }
             
-            marcas.forEach((marca, index) => {
+            marcasOrdenadas.forEach((marca, index) => {
                 const row = `
                     <tr>
                         <td>${index + 1}</td>
@@ -486,6 +826,108 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
                 `;
                 tbody.innerHTML += row;
             });
+            
+            // Atualizar ícone de ordenação
+            atualizarIconeOrdenacao();
+        }
+        
+        // Ordenar marcas por valor total ou quantidade
+        function ordenarMarcas(marcas, coluna, ordem) {
+            const marcasClone = [...marcas];
+            
+            marcasClone.sort((a, b) => {
+                let valorA, valorB;
+                
+                if (coluna === 'valor') {
+                    valorA = parseFloat(a.valor_total);
+                    valorB = parseFloat(b.valor_total);
+                } else if (coluna === 'quantidade') {
+                    valorA = parseInt(a.quantidade_vendida);
+                    valorB = parseInt(b.quantidade_vendida);
+                }
+                
+                if (ordem === 'desc') {
+                    return valorB - valorA; // Maior para menor
+                } else {
+                    return valorA - valorB; // Menor para maior
+                }
+            });
+            
+            return marcasClone;
+        }
+        
+        // Função chamada ao clicar no cabeçalho da coluna Valor Total
+        function ordenarPorValor() {
+            // Se já estava ordenando por valor, alternar direção
+            if (colunaOrdenacao === 'valor') {
+                ordenacaoAtual = ordenacaoAtual === 'desc' ? 'asc' : 'desc';
+            } else {
+                // Se estava ordenando por outra coluna, definir valor como coluna e desc como padrão
+                colunaOrdenacao = 'valor';
+                ordenacaoAtual = 'desc';
+            }
+            
+            // Reordenar e atualizar tabela
+            atualizarTabela(marcasOriginais);
+        }
+        
+        // Função chamada ao clicar no cabeçalho da coluna Quantidade Vendida
+        function ordenarPorQuantidade() {
+            // Se já estava ordenando por quantidade, alternar direção
+            if (colunaOrdenacao === 'quantidade') {
+                ordenacaoAtual = ordenacaoAtual === 'desc' ? 'asc' : 'desc';
+            } else {
+                // Se estava ordenando por outra coluna, definir quantidade como coluna e desc como padrão
+                colunaOrdenacao = 'quantidade';
+                ordenacaoAtual = 'desc';
+            }
+            
+            // Reordenar e atualizar tabela
+            atualizarTabela(marcasOriginais);
+        }
+        
+        // Atualizar ícone de ordenação visual
+        function atualizarIconeOrdenacao() {
+            // Resetar todos os ícones
+            const sortIconValor = document.getElementById('sortIconValor');
+            const sortIconQuantidade = document.getElementById('sortIconQuantidade');
+            
+            // Remover classes ativas de ambos
+            if (sortIconValor) {
+                sortIconValor.classList.remove('active');
+                sortIconValor.querySelectorAll('.sort-arrow').forEach(arrow => {
+                    arrow.classList.remove('active-up', 'active-down');
+                });
+            }
+            
+            if (sortIconQuantidade) {
+                sortIconQuantidade.classList.remove('active');
+                sortIconQuantidade.querySelectorAll('.sort-arrow').forEach(arrow => {
+                    arrow.classList.remove('active-up', 'active-down');
+                });
+            }
+            
+            // Ativar o ícone correto
+            let sortIconAtivo;
+            if (colunaOrdenacao === 'valor') {
+                sortIconAtivo = sortIconValor;
+            } else if (colunaOrdenacao === 'quantidade') {
+                sortIconAtivo = sortIconQuantidade;
+            }
+            
+            if (sortIconAtivo) {
+                const arrowUp = sortIconAtivo.querySelector('.sort-arrow-up');
+                const arrowDown = sortIconAtivo.querySelector('.sort-arrow-down');
+                
+                sortIconAtivo.classList.add('active');
+                
+                // Adicionar classe ativa conforme ordenação
+                if (ordenacaoAtual === 'desc') {
+                    arrowDown.classList.add('active-down');
+                } else {
+                    arrowUp.classList.add('active-up');
+                }
+            }
         }
         
         // Configurar intervalo de atualização automática
@@ -495,13 +937,36 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
             }
             
             const intervalo = parseInt(document.getElementById('intervaloSelect').value) * 1000;
-            intervaloAtualizacao = setInterval(atualizarDados, intervalo);
+            intervaloAtualizacao = setInterval(() => {
+                if (modoVisualizacao === 'overview') {
+                    atualizarDados();
+                } else if (marcaSelecionada) {
+                    carregarHistoricoMarca(marcaSelecionada.cd_marca);
+                }
+            }, intervalo);
         }
         
         // Event Listeners
-        document.getElementById('periodoSelect').addEventListener('change', atualizarDados);
+        document.getElementById('periodoSelect').addEventListener('change', () => {
+            if (modoVisualizacao === 'overview') {
+                atualizarDados();
+            } else if (marcaSelecionada) {
+                carregarHistoricoMarca(marcaSelecionada.cd_marca);
+            }
+        });
+        
         document.getElementById('limiteSelect').addEventListener('change', atualizarDados);
         document.getElementById('intervaloSelect').addEventListener('change', configurarIntervalo);
+        
+        // Event listener para o dropdown de marcas
+        document.getElementById('brandSelect').addEventListener('change', function() {
+            const cd_marca = this.value;
+            if (cd_marca) {
+                carregarHistoricoMarca(cd_marca);
+            } else {
+                voltarVisaoGeral();
+            }
+        });
         
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {

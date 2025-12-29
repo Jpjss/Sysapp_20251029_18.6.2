@@ -651,3 +651,364 @@ Não está logado, continuando...
 [Session::isValid] Resultado: TRUE | cd_usu: 1
 [Session::isValid] Resultado: TRUE | cd_usu: 1
 [Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+
+[INDEX] Config.database: NÃO | Session::isValid: NÃO
+[INDEX] Conectando ao banco padrão do sistema
+[DB] Conectando em: banco.propasso.systec.ftp.sh | DB: bd_propasso
+
+=== 2025-12-28 20:31:25 ===
+Method: GET
+URI: /
+POST: []
+Session Before: []
+
+=== INÍCIO DO MÉTODO LOGIN ===
+REQUEST_METHOD: GET
+POST email: não definido
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+Session::isValid(): FALSE
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+Não está logado, continuando...
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+
+[INDEX] Config.database: NÃO | Session::isValid: NÃO
+[INDEX] Conectando ao banco padrão do sistema
+[DB] Conectando em: banco.propasso.systec.ftp.sh | DB: bd_propasso
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+
+[INDEX] Config.database: NÃO | Session::isValid: NÃO
+[INDEX] Conectando ao banco padrão do sistema
+[DB] Conectando em: banco.propasso.systec.ftp.sh | DB: bd_propasso
+
+=== 2025-12-28 20:31:58 ===
+Method: POST
+URI: /usuarios/login
+POST: {"email":"admin","senha":"admin"}
+Session Before: []
+
+=== INÍCIO DO MÉTODO LOGIN ===
+REQUEST_METHOD: POST
+POST email: admin
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+Session::isValid(): FALSE
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+Não está logado, continuando...
+É POST, processando login...
+
+[PASSO 1] Email: 'admin' (len: 5) | Senha: 'admin' (len: 5)
+[MODEL] SQL: SELECT cd_usuario 
+                FROM sysapp_config_user 
+                WHERE LOWER(ds_login) = 'admin' 
+                   OR LOWER(ds_email) = 'admin'
+                ORDER BY 
+                    CASE 
+                        WHEN LOWER(ds_login) = 'admin' THEN 1 
+                        WHEN LOWER(ds_email) = 'admin' THEN 2 
+                    END
+                LIMIT 1
+[PASSO 2] findByLogin retornou: {"cd_usuario":"1"}
+[PASSO 3] cd_usuario: 1
+[PASSO 4] findForAuth retornou: {"cd_usuario":"1","nome_usuario":"Administrador","senha_usuario":"$2y$10$DLvG0vqY2XVM.8q5LpZuqO6W0rOsa5JFa68fg00uJRekXEQQm6NIC"}
+[PASSO 5] Comparando senhas usando password_verify
+[DEBUG] Senha digitada: 'admin'
+[DEBUG] Hash no banco: '$2y$10$DLvG0vqY2XVM.8q5LpZuqO6W0rOsa5JFa68fg00uJRekXEQQm6NIC'
+[PASSO 6] Senha OK! Buscando empresas...
+[PASSO 7] Empresas encontradas: 4
+[PASSO 8] Permissões encontradas: 6
+[PASSO 9] Dados salvos na sessão. Verificando...
+[SESSION DUMP] Array
+(
+    [Questionarios] => Array
+        (
+            [cd_usu] => 1
+            [nm_usu] => Administrador
+            [permissoes] => Array
+                (
+                    [0] => relatorios
+                    [1] => usuarios
+                    [2] => clientes
+                    [3] => empresas
+                    [4] => questionarios
+                    [5] => admin
+                )
+
+            [hora_login] => 28/12/2025 as 20:31:59
+        )
+
+)
+
+[SUCESSO] Redirecionando para seleção de empresa (múltiplas)
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: NÃO | Session::isValid: SIM
+[INDEX] Conectando ao banco padrão do sistema
+[DB] Conectando em: banco.propasso.systec.ftp.sh | DB: bd_propasso
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: NÃO | Session::isValid: SIM
+[INDEX] Conectando ao banco padrão do sistema
+[DB] Conectando em: banco.propasso.systec.ftp.sh | DB: bd_propasso
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+
+[INDEX] Config.database: NÃO | Session::isValid: NÃO
+[INDEX] Conectando ao banco padrão do sistema
+[DB] Conectando em: banco.propasso.systec.ftp.sh | DB: bd_propasso
+
+=== 2025-12-28 20:46:32 ===
+Method: GET
+URI: /usuarios/login
+POST: []
+Session Before: []
+
+=== INÍCIO DO MÉTODO LOGIN ===
+REQUEST_METHOD: GET
+POST email: não definido
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+Session::isValid(): FALSE
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+Não está logado, continuando...
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+
+[INDEX] Config.database: NÃO | Session::isValid: NÃO
+[INDEX] Conectando ao banco padrão do sistema
+[DB] Conectando em: banco.propasso.systec.ftp.sh | DB: bd_propasso
+
+=== 2025-12-28 20:46:34 ===
+Method: POST
+URI: /usuarios/login
+POST: {"email":"admin","senha":"admin"}
+Session Before: []
+
+=== INÍCIO DO MÉTODO LOGIN ===
+REQUEST_METHOD: POST
+POST email: admin
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+Session::isValid(): FALSE
+[Session::isValid] Resultado: FALSE | cd_usu: NULL
+Não está logado, continuando...
+É POST, processando login...
+
+[PASSO 1] Email: 'admin' (len: 5) | Senha: 'admin' (len: 5)
+[MODEL] SQL: SELECT cd_usuario 
+                FROM sysapp_config_user 
+                WHERE LOWER(ds_login) = 'admin' 
+                   OR LOWER(ds_email) = 'admin'
+                ORDER BY 
+                    CASE 
+                        WHEN LOWER(ds_login) = 'admin' THEN 1 
+                        WHEN LOWER(ds_email) = 'admin' THEN 2 
+                    END
+                LIMIT 1
+[PASSO 2] findByLogin retornou: {"cd_usuario":"1"}
+[PASSO 3] cd_usuario: 1
+[PASSO 4] findForAuth retornou: {"cd_usuario":"1","nome_usuario":"Administrador","senha_usuario":"$2y$10$DLvG0vqY2XVM.8q5LpZuqO6W0rOsa5JFa68fg00uJRekXEQQm6NIC"}
+[PASSO 5] Comparando senhas usando password_verify
+[DEBUG] Senha digitada: 'admin'
+[DEBUG] Hash no banco: '$2y$10$DLvG0vqY2XVM.8q5LpZuqO6W0rOsa5JFa68fg00uJRekXEQQm6NIC'
+[PASSO 6] Senha OK! Buscando empresas...
+[PASSO 7] Empresas encontradas: 4
+[PASSO 8] Permissões encontradas: 6
+[PASSO 9] Dados salvos na sessão. Verificando...
+[SESSION DUMP] Array
+(
+    [Questionarios] => Array
+        (
+            [cd_usu] => 1
+            [nm_usu] => Administrador
+            [permissoes] => Array
+                (
+                    [0] => relatorios
+                    [1] => usuarios
+                    [2] => clientes
+                    [3] => empresas
+                    [4] => questionarios
+                    [5] => admin
+                )
+
+            [hora_login] => 28/12/2025 as 20:46:34
+        )
+
+)
+
+[SUCESSO] Redirecionando para seleção de empresa (múltiplas)
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: NÃO | Session::isValid: SIM
+[INDEX] Conectando ao banco padrão do sistema
+[DB] Conectando em: banco.propasso.systec.ftp.sh | DB: bd_propasso
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: NÃO | Session::isValid: SIM
+[INDEX] Conectando ao banco padrão do sistema
+[DB] Conectando em: banco.propasso.systec.ftp.sh | DB: bd_propasso
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+
+[INDEX] Config.database: SIM | Session::isValid: SIM
+[INDEX] Conectando ao banco da sessão: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[DB] Conectando em: systecsistemas.ftp.sh | DB: bd_diaazze
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
+[Session::isValid] Resultado: TRUE | cd_usu: 1
