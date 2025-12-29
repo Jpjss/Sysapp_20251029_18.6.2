@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { authApi } from "@/lib/api/auth"
 import { empresasApi } from "@/lib/api/empresas"
-import { relatoriosApi, type ProdutoEstoque, type VendaDia, type TopProduto } from "@/lib/api/relatorios"
+import { relatoriosApi, type ProdutoEstoque, type VendaDia, type TopProduto, type VendaPorMarca } from "@/lib/api/relatorios"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/components/ui/use-toast"
 import { Search, ArrowLeft, Package, TrendingUp, Calendar } from "lucide-react"
 import Link from "next/link"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 export default function RelatoriosPage() {
   const router = useRouter()
@@ -20,6 +22,8 @@ export default function RelatoriosPage() {
   const [produtos, setProdutos] = useState<ProdutoEstoque[]>([])
   const [vendas, setVendas] = useState<VendaDia[]>([])
   const [topProdutos, setTopProdutos] = useState<TopProduto[]>([])
+  const [selectedBrand, setSelectedBrand] = useState<string>("")
+  const [brandSalesData, setBrandSalesData] = useState<VendaPorMarca[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [dataInicio, setDataInicio] = useState(new Date().toISOString().split('T')[0].slice(0, 8) + '01') // Primeiro dia do mês
@@ -119,6 +123,31 @@ export default function RelatoriosPage() {
     await Promise.all([loadVendas(), loadTopProdutos()])
   }
 
+  const loadBrandSalesData = async (brand: string) => {
+    if (!brand) {
+      setBrandSalesData([])
+      return
+    }
+
+    try {
+      const response = await relatoriosApi.getVendasPorMarca(brand, dataInicio, dataFim)
+      setBrandSalesData(response.vendas)
+    } catch (error: any) {
+      toast({
+        title: "Erro ao carregar dados da marca",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Atualizar dados quando a marca selecionada mudar
+  useEffect(() => {
+    if (selectedBrand) {
+      loadBrandSalesData(selectedBrand)
+    }
+  }, [selectedBrand, dataInicio, dataFim])
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -162,6 +191,10 @@ export default function RelatoriosPage() {
             <TabsTrigger value="top-produtos">
               <TrendingUp className="h-4 w-4 mr-2" />
               Top Produtos
+            </TabsTrigger>
+            <TabsTrigger value="marcas-vendidas">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Marcas Vendidas
             </TabsTrigger>
           </TabsList>
 
@@ -300,6 +333,162 @@ export default function RelatoriosPage() {
                     </TableBody>
                   </Table>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="marcas-vendidas" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Análise de Vendas por Marca</CardTitle>
+                <CardDescription>Selecione uma marca para visualizar o histórico de vendas</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-2 block">Selecione a Marca</label>
+                    <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolha uma marca do top produtos" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {topProdutos
+                          .filter((p, idx, arr) => arr.findIndex(item => item.nm_marca === p.nm_marca) === idx)
+                          .map((produto) => (
+                            <SelectItem key={produto.nm_marca || 'sem-marca'} value={produto.nm_marca || 'Sem Marca'}>
+                              {produto.nm_marca || 'Sem Marca'}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Data Início</label>
+                      <Input
+                        type="date"
+                        value={dataInicio}
+                        onChange={(e) => setDataInicio(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Data Fim</label>
+                      <Input
+                        type="date"
+                        value={dataFim}
+                        onChange={(e) => setDataFim(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {selectedBrand && brandSalesData.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Total de Vendas</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">
+                            {formatCurrency(brandSalesData.reduce((sum, item) => sum + item.valor, 0))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Quantidade Total</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">
+                            {brandSalesData.reduce((sum, item) => sum + item.quantidade, 0)}
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Dias com Vendas</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">
+                            {brandSalesData.length}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Histórico de Vendas - {selectedBrand}</CardTitle>
+                        <CardDescription>Evolução diária de vendas e quantidade</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={400}>
+                          <LineChart data={brandSalesData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis 
+                              dataKey="data" 
+                              tickFormatter={(value) => {
+                                const date = new Date(value)
+                                return `${date.getDate()}/${date.getMonth() + 1}`
+                              }}
+                            />
+                            <YAxis yAxisId="left" />
+                            <YAxis yAxisId="right" orientation="right" />
+                            <Tooltip 
+                              formatter={(value: any, name: string) => {
+                                if (name === 'valor') return formatCurrency(value)
+                                return value
+                              }}
+                              labelFormatter={(label) => {
+                                const date = new Date(label)
+                                return date.toLocaleDateString('pt-BR')
+                              }}
+                            />
+                            <Legend />
+                            <Line 
+                              yAxisId="left"
+                              type="monotone" 
+                              dataKey="valor" 
+                              stroke="#8884d8" 
+                              strokeWidth={2}
+                              name="Valor (R$)"
+                              dot={{ r: 4 }}
+                              activeDot={{ r: 6 }}
+                            />
+                            <Line 
+                              yAxisId="right"
+                              type="monotone" 
+                              dataKey="quantidade" 
+                              stroke="#82ca9d" 
+                              strokeWidth={2}
+                              name="Quantidade"
+                              dot={{ r: 4 }}
+                              activeDot={{ r: 6 }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {selectedBrand && brandSalesData.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Nenhum dado de vendas encontrado para esta marca no período selecionado.</p>
+                  </div>
+                )}
+
+                {!selectedBrand && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Selecione uma marca para visualizar o histórico de vendas.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

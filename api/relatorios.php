@@ -343,5 +343,49 @@ if ($method === 'GET' && $action === 'top-produtos') {
     exit();
 }
 
+// GET /api/relatorios/vendas-por-marca - Vendas diárias de uma marca específica
+if ($method === 'GET' && $action === 'vendas-por-marca') {
+    $marca = $_GET['marca'] ?? '';
+    $dataInicio = $_GET['dataInicio'] ?? date('Y-m-01');
+    $dataFim = $_GET['dataFim'] ?? date('Y-m-d');
+    
+    if (!$marca) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Marca não informada']);
+        exit();
+    }
+    
+    $sql = "SELECT 
+                DATE(v.dt_pedido) as data,
+                SUM(vi.qt_produto) as quantidade,
+                SUM(vi.qt_produto * vi.vl_unitario) as valor
+            FROM ped_vd_it vi
+            INNER JOIN ped_vd v ON v.nr_pedido = vi.nr_pedido
+            INNER JOIN est_produto p ON p.cd_produto = vi.cd_produto
+            INNER JOIN est_produto_marca m ON m.cd_marca = p.cd_marca
+            WHERE v.dt_pedido BETWEEN $1 AND $2
+            AND m.nm_marca = $3
+            GROUP BY DATE(v.dt_pedido)
+            ORDER BY DATE(v.dt_pedido)";
+    
+    $result = pg_query_params($db->getConnection(), $sql, [$dataInicio, $dataFim, $marca]);
+    $vendas = [];
+    
+    while ($row = pg_fetch_assoc($result)) {
+        $vendas[] = [
+            'data' => $row['data'],
+            'quantidade' => (int)$row['quantidade'],
+            'valor' => (float)$row['valor']
+        ];
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'vendas' => $vendas,
+        'marca' => $marca
+    ]);
+    exit();
+}
+
 http_response_code(404);
 echo json_encode(['success' => false, 'error' => 'Endpoint não encontrado']);

@@ -48,6 +48,12 @@ export interface TopProduto {
   valor_total: number
 }
 
+export interface VendaPorMarca {
+  data: string
+  quantidade: number
+  valor: number
+}
+
 export const relatoriosApi = {
   // Dados do dashboard
   async getDashboard(): Promise<{ success: boolean; stats: DashboardStats }> {
@@ -89,5 +95,15 @@ export const relatoriosApi = {
     
     const query = queryParams.toString()
     return apiRequest(`/relatorios/top-produtos${query ? '?' + query : ''}`)
+  },
+
+  // Vendas por marca
+  async getVendasPorMarca(marca: string, dataInicio: string, dataFim: string): Promise<{ success: boolean; vendas: VendaPorMarca[]; marca: string }> {
+    const queryParams = new URLSearchParams()
+    queryParams.append('marca', marca)
+    queryParams.append('dataInicio', dataInicio)
+    queryParams.append('dataFim', dataFim)
+    
+    return apiRequest(`/relatorios/vendas-por-marca?${queryParams.toString()}`)
   },
 }
