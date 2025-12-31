@@ -1,7 +1,7 @@
 <!-- Cabeçalho -->
 <div style="margin-bottom: 30px;">
-    <h1 style="font-size: 32px; font-weight: 600; margin-bottom: 8px; color: #f1f5f9;">📊 Relatórios</h1>
-    <p style="color: #cbd5e1; font-size: 16px;">Selecione um relatório para visualizar análises detalhadas e gerar exportações</p>
+    <h1 style="font-size: 32px; font-weight: 600; margin-bottom: 8px; color: #000000;">📊 Relatórios</h1>
+    <p style="color: #1e293b; font-size: 16px;">Selecione um relatório para visualizar análises detalhadas e gerar exportações</p>
 </div>
 
 <!-- Grid de Relatórios -->
