@@ -336,4 +336,134 @@ class Relatorio {
 
         return $this->db->fetchAll($sql);
     }
+    
+    /**
+     * Busca atendimentos detalhados por dia
+     */
+    public function getAtendimentosDetalhados($dt_inicio, $dt_fim) {
+        // Detecta se é banco de questionários ou ERP comercial
+        $temQuestionarios = $this->detectarDadosQuestionarios();
+        
+        if ($temQuestionarios) {
+            $campoData = $this->detectarCampoData();
+            
+            $sql = "
+                SELECT 
+                    DATE($campoData) as data,
+                    COUNT(*) as total_atendimentos,
+                    COUNT(DISTINCT cd_pessoa) as clientes_unicos,
+                    COALESCE(SUM(EXTRACT(EPOCH FROM (dt_fim - dt_inicio))/3600), 0)::NUMERIC(10,2) as tempo_total_horas,
+                    COALESCE(SUM(vl_atendimento), 0)::NUMERIC(14,2) as valor_total
+                FROM glb_questionario_resposta
+                WHERE $campoData >= :dt_inicio::date 
+                  AND $campoData <= :dt_fim::date
+                GROUP BY DATE($campoData)
+                ORDER BY data ASC
+            ";
+        } else {
+            // Banco ERP - usa dados de ped_vd
+            $sql = "
+                SELECT 
+                    DATE(dt_hr_ped) as data,
+                    COUNT(*) as total_atendimentos,
+                    COUNT(DISTINCT cd_pessoa) as clientes_unicos,
+                    0 as tempo_total_horas,
+                    COALESCE(SUM(vlr_vd), 0)::NUMERIC(14,2) as valor_total
+                FROM ped_vd
+                WHERE DATE(dt_hr_ped) >= :dt_inicio::date 
+                  AND DATE(dt_hr_ped) <= :dt_fim::date
+                GROUP BY DATE(dt_hr_ped)
+                ORDER BY data ASC
+            ";
+        }
+        
+        $result = $this->db->fetchAll($sql, [
+            ':dt_inicio' => $dt_inicio,
+            ':dt_fim' => $dt_fim
+        ]);
+        
+        // Formatar tempo total
+        if ($result) {
+            foreach ($result as &$row) {
+                $horas = floor($row['tempo_total_horas']);
+                $minutos = round(($row['tempo_total_horas'] - $horas) * 60);
+                $row['tempo_total_formatado'] = sprintf('%02d:%02d', $horas, $minutos);
+            }
+        }
+        
+        return $result ?? [];
+    }
+    
+    /**
+     * Busca totais de atendimentos no período
+     */
+    public function getTotaisAtendimentos($dt_inicio, $dt_fim) {
+        $temQuestionarios = $this->detectarDadosQuestionarios();
+        
+        if ($temQuestionarios) {
+            $campoData = $this->detectarCampoData();
+            
+            $sql = "
+                SELECT 
+                    COUNT(*) as total_atendimentos,
+                    COUNT(DISTINCT cd_pessoa) as clientes_unicos,
+                    COALESCE(SUM(EXTRACT(EPOCH FROM (dt_fim - dt_inicio))/3600), 0)::NUMERIC(10,2) as tempo_total_horas,
+                    COALESCE(SUM(vl_atendimento), 0)::NUMERIC(14,2) as valor_total
+                FROM glb_questionario_resposta
+                WHERE $campoData >= :dt_inicio::date 
+                  AND $campoData <= :dt_fim::date
+            ";
+        } else {
+            // Banco ERP
+            $sql = "
+                SELECT 
+                    COUNT(*) as total_atendimentos,
+                    COUNT(DISTINCT cd_pessoa) as clientes_unicos,
+                    0 as tempo_total_horas,
+                    COALESCE(SUM(vlr_vd), 0)::NUMERIC(14,2) as valor_total
+                FROM ped_vd
+                WHERE DATE(dt_hr_ped) >= :dt_inicio::date 
+                  AND DATE(dt_hr_ped) <= :dt_fim::date
+            ";
+        }
+        
+        $result = $this->db->fetchOne($sql, [
+            ':dt_inicio' => $dt_inicio,
+            ':dt_fim' => $dt_fim
+        ]);
+        
+        if ($result) {
+            // Formatar tempo total
+            $horas = floor($result['tempo_total_horas']);
+            $minutos = round(($result['tempo_total_horas'] - $horas) * 60);
+            $result['tempo_total_formatado'] = sprintf('%02d:%02d', $horas, $minutos);
+            
+            // Calcular tempo médio
+            if ($result['total_atendimentos'] > 0) {
+                $tempo_medio_horas = $result['tempo_total_horas'] / $result['total_atendimentos'];
+                $horas_medio = floor($tempo_medio_horas);
+                $minutos_medio = round(($tempo_medio_horas - $horas_medio) * 60);
+                $result['tempo_medio_formatado'] = sprintf('%02d:%02d', $horas_medio, $minutos_medio);
+            } else {
+                $result['tempo_medio_formatado'] = '00:00';
+            }
+            
+            // Calcular ticket médio
+            if ($result['total_atendimentos'] > 0) {
+                $result['ticket_medio'] = $result['valor_total'] / $result['total_atendimentos'];
+            } else {
+                $result['ticket_medio'] = 0;
+            }
+        }
+        
+        return $result ?? [
+            'total_atendimentos' => 0,
+            'clientes_unicos' => 0,
+            'tempo_total_horas' => 0,
+            'tempo_total_formatado' => '00:00',
+            'tempo_medio_formatado' => '00:00',
+            'valor_total' => 0,
+            'ticket_medio' => 0
+        ];
+    }
 }

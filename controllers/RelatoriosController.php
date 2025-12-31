@@ -132,20 +132,27 @@ class RelatoriosController extends Controller {
     }
     
     /**
-     * Relatório de atendimentos
+     * Relatório de Atendimentos (versão completa)
      */
     public function atendimentos() {
         $this->requireAuth();
         
+        // Verifica se tem empresa configurada
+        if (!Session::check('Config.database')) {
+            $this->redirect('relatorios/empresa');
+            return;
+        }
+        
         $dt_inicio = $_GET['dt_inicio'] ?? date('Y-m-01');
         $dt_fim = $_GET['dt_fim'] ?? date('Y-m-d');
         
-        $atendimentos = $this->Relatorio->getAtendimentosPorPeriodo($dt_inicio, $dt_fim);
-        $atendimentosUsuario = $this->Relatorio->getAtendimentosPorUsuario($dt_inicio, $dt_fim);
+        // Buscar dados do relatório
+        $atendimentos = $this->Relatorio->getAtendimentosDetalhados($dt_inicio, $dt_fim);
+        $totais = $this->Relatorio->getTotaisAtendimentos($dt_inicio, $dt_fim);
         
         $this->set([
             'atendimentos' => $atendimentos,
-            'atendimentosUsuario' => $atendimentosUsuario,
+            'totais' => $totais,
             'dt_inicio' => $dt_inicio,
             'dt_fim' => $dt_fim
         ]);
@@ -368,6 +375,258 @@ class RelatoriosController extends Controller {
                 '100,00%'
             ], ';');
         }
+        
+        fclose($output);
+        exit;
+    }
+    
+    /**
+     * Exportar Relatório de Atendimentos em PDF
+     */
+    public function exportarPDF() {
+        $this->requireAuth();
+        $this->layout = false;
+        
+        // Verifica se tem empresa configurada
+        if (!Session::check('Config.database')) {
+            die('Erro: Nenhuma empresa selecionada');
+        }
+        
+        $dt_inicio = $_GET['dt_inicio'] ?? date('Y-m-01');
+        $dt_fim = $_GET['dt_fim'] ?? date('Y-m-d');
+        
+        // Buscar dados
+        $atendimentos = $this->Relatorio->getAtendimentosDetalhados($dt_inicio, $dt_fim);
+        $totais = $this->Relatorio->getTotaisAtendimentos($dt_inicio, $dt_fim);
+        $empresa = Session::read('Config.empresa');
+        
+        // Verificar se tem biblioteca TCPDF
+        if (!class_exists('TCPDF')) {
+            // Implementação simples com HTML/CSS para impressão
+            $this->gerarPDFSimples($atendimentos, $totais, $dt_inicio, $dt_fim, $empresa);
+            return;
+        }
+        
+        // Gerar PDF com TCPDF (implementar quando biblioteca estiver disponível)
+        $this->gerarPDFComTCPDF($atendimentos, $totais, $dt_inicio, $dt_fim, $empresa);
+    }
+    
+    /**
+     * Exportar Relatório de Atendimentos em Excel
+     */
+    public function exportarExcel() {
+        $this->requireAuth();
+        $this->layout = false;
+        
+        // Verifica se tem empresa configurada
+        if (!Session::check('Config.database')) {
+            die('Erro: Nenhuma empresa selecionada');
+        }
+        
+        $dt_inicio = $_GET['dt_inicio'] ?? date('Y-m-01');
+        $dt_fim = $_GET['dt_fim'] ?? date('Y-m-d');
+        
+        // Buscar dados
+        $atendimentos = $this->Relatorio->getAtendimentosDetalhados($dt_inicio, $dt_fim);
+        $totais = $this->Relatorio->getTotaisAtendimentos($dt_inicio, $dt_fim);
+        $empresa = Session::read('Config.empresa');
+        
+        // Verificar se tem PhpSpreadsheet
+        if (!class_exists('\\PhpOffice\\PhpSpreadsheet\\Spreadsheet')) {
+            // Exportar como CSV melhorado
+            $this->exportarCSV($atendimentos, $totais, $dt_inicio, $dt_fim);
+            return;
+        }
+        
+        // Gerar Excel com PhpSpreadsheet
+        $this->gerarExcelComPhpSpreadsheet($atendimentos, $totais, $dt_inicio, $dt_fim, $empresa);
+    }
+    
+    /**
+     * Gerar PDF simples usando HTML/CSS para impressão
+     */
+    private function gerarPDFSimples($atendimentos, $totais, $dt_inicio, $dt_fim, $empresa) {
+        header('Content-Type: text/html; charset=utf-8');
+        
+        echo '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Atendimentos</title>
+    <style>
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+        }
+        .header .empresa {
+            color: #64748b;
+            font-size: 14px;
+        }
+        .periodo {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        table thead {
+            background: #667eea;
+            color: white;
+        }
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+        table tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        table tfoot {
+            background: #f1f5f9;
+            font-weight: bold;
+        }
+        .text-right { text-align: right; }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+        }
+        .btn-print {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+    </div>
+    
+    <div class="header">
+        <h1>Relatório de Atendimentos</h1>
+        <div class="empresa">' . htmlspecialchars($empresa) . '</div>
+    </div>
+    
+    <div class="periodo">
+        <strong>Período:</strong> ' . date('d/m/Y', strtotime($dt_inicio)) . ' até ' . date('d/m/Y', strtotime($dt_fim)) . '<br>
+        <strong>Emitido em:</strong> ' . date('d/m/Y H:i:s') . '
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th class="text-right">Total de Atendimentos</th>
+                <th class="text-right">Clientes Únicos</th>
+                <th class="text-right">Tempo Total</th>
+                <th class="text-right">Valor Total (R$)</th>
+            </tr>
+        </thead>
+        <tbody>';
+        
+        foreach ($atendimentos as $item) {
+            echo '<tr>
+                <td>' . date('d/m/Y', strtotime($item['data'])) . '</td>
+                <td class="text-right">' . number_format($item['total_atendimentos'], 0, ',', '.') . '</td>
+                <td class="text-right">' . number_format($item['clientes_unicos'], 0, ',', '.') . '</td>
+                <td class="text-right">' . $item['tempo_total_formatado'] . '</td>
+                <td class="text-right">R$ ' . number_format($item['valor_total'], 2, ',', '.') . '</td>
+            </tr>';
+        }
+        
+        echo '</tbody>
+        <tfoot>
+            <tr>
+                <td><strong>TOTAL</strong></td>
+                <td class="text-right"><strong>' . number_format($totais['total_atendimentos'], 0, ',', '.') . '</strong></td>
+                <td class="text-right"><strong>' . number_format($totais['clientes_unicos'], 0, ',', '.') . '</strong></td>
+                <td class="text-right"><strong>' . $totais['tempo_total_formatado'] . '</strong></td>
+                <td class="text-right"><strong>R$ ' . number_format($totais['valor_total'], 2, ',', '.') . '</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <div class="footer">
+        SysApp - Sistema de Gestão | Relatório gerado automaticamente
+    </div>
+</body>
+</html>';
+        exit;
+    }
+    
+    /**
+     * Exportar como CSV melhorado
+     */
+    private function exportarCSV($atendimentos, $totais, $dt_inicio, $dt_fim) {
+        $filename = 'relatorio_atendimentos_' . date('Y-m-d_His') . '.csv';
+        
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        $output = fopen('php://output', 'w');
+        
+        // BOM para UTF-8
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Cabeçalho do relatório
+        fputcsv($output, ['RELATÓRIO DE ATENDIMENTOS'], ';');
+        fputcsv($output, ['Período:', date('d/m/Y', strtotime($dt_inicio)) . ' até ' . date('d/m/Y', strtotime($dt_fim))], ';');
+        fputcsv($output, ['Emitido em:', date('d/m/Y H:i:s')], ';');
+        fputcsv($output, [''], ';'); // Linha em branco
+        
+        // Cabeçalho da tabela
+        fputcsv($output, [
+            'Data',
+            'Total de Atendimentos',
+            'Clientes Únicos',
+            'Tempo Total',
+            'Valor Total (R$)'
+        ], ';');
+        
+        // Dados
+        foreach ($atendimentos as $item) {
+            fputcsv($output, [
+                date('d/m/Y', strtotime($item['data'])),
+                $item['total_atendimentos'],
+                $item['clientes_unicos'],
+                $item['tempo_total_formatado'],
+                number_format($item['valor_total'], 2, ',', '.')
+            ], ';');
+        }
+        
+        // Total
+        fputcsv($output, [
+            'TOTAL',
+            $totais['total_atendimentos'],
+            $totais['clientes_unicos'],
+            $totais['tempo_total_formatado'],
+            number_format($totais['valor_total'], 2, ',', '.')
+        ], ';');
         
         fclose($output);
         exit;
