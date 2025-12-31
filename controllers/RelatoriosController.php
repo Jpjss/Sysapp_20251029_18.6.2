@@ -17,6 +17,21 @@ class RelatoriosController extends Controller {
     }
     
     /**
+     * Listagem de relatórios disponíveis
+     */
+    public function lista() {
+        $this->requireAuth();
+        
+        // Verifica se tem empresa configurada
+        if (!Session::check('Config.database')) {
+            $this->redirect('relatorios/empresa');
+            return;
+        }
+        
+        $this->render();
+    }
+
+    /**
      * Dashboard principal
      */
     public function index() {
