@@ -379,12 +379,14 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Período:</label>
                         <select class="form-select" id="periodoSelect">
+                            <option value="0">Hoje</option>
                             <option value="7">Últimos 7 dias</option>
                             <option value="15">Últimos 15 dias</option>
                             <option value="30" selected>Últimos 30 dias</option>
                             <option value="60">Últimos 60 dias</option>
                             <option value="90">Últimos 90 dias</option>
                         </select>
+                        <small class="text-muted" id="periodoInfo"></small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Top Marcas:</label>
@@ -643,10 +645,33 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
             });
         }
         
+        // Função para atualizar texto informativo do período
+        function atualizarTextoPeriodo(periodo) {
+            const periodoInfo = document.getElementById('periodoInfo');
+            const hoje = new Date();
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const ano = hoje.getFullYear();
+            const dataFormatada = `${dia}/${mes}/${ano}`;
+            
+            if (periodo === '0' || periodo === 0) {
+                periodoInfo.textContent = `📅 Período atual: Hoje – ${dataFormatada}`;
+                periodoInfo.style.display = 'block';
+                periodoInfo.style.marginTop = '5px';
+            } else {
+                periodoInfo.textContent = `📅 Últimos ${periodo} dias`;
+                periodoInfo.style.display = 'block';
+                periodoInfo.style.marginTop = '5px';
+            }
+        }
+        
         // Atualizar dados dos gráficos - Visão Geral
         async function atualizarDados() {
             const periodo = document.getElementById('periodoSelect').value;
             const limite = document.getElementById('limiteSelect').value;
+            
+            // Atualizar texto informativo do período
+            atualizarTextoPeriodo(periodo);
             
             // Mostrar loading
             document.getElementById('loadingOverlay').style.display = 'flex';
@@ -749,8 +774,18 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
                     chartVendas.update('active');
                     
                     // Atualizar UI
+                    const periodo = document.getElementById('periodoSelect').value;
                     document.getElementById('chartVendasTitle').textContent = `Progresso de Vendas – ${result.ds_marca}`;
-                    document.getElementById('chartVendasSubtitle').textContent = `Acompanhamento diário nos últimos ${periodo} dias`;
+                    
+                    // Ajustar subtítulo baseado no período
+                    if (periodo === '0' || periodo === 0) {
+                        const hoje = new Date();
+                        const dataFormatada = hoje.toLocaleDateString('pt-BR');
+                        document.getElementById('chartVendasSubtitle').textContent = `Acompanhamento por hora – Hoje (${dataFormatada})`;
+                    } else {
+                        document.getElementById('chartVendasSubtitle').textContent = `Acompanhamento diário nos últimos ${periodo} dias`;
+                    }
+                    
                     document.getElementById('btnBackOverview').style.display = 'inline-block';
                     
                     // Mostrar estatísticas
