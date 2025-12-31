@@ -34,7 +34,15 @@ class UsuariosController extends Controller {
         // Se já está logado, redireciona
         if (Session::isValid()) {
             file_put_contents(__DIR__ . '/../login_debug.log', "REDIRECIONANDO: Usuário já está logado\n", FILE_APPEND);
-            $this->redirect('relatorios/empresa');
+            
+            // Se já tem empresa configurada, vai direto para o dashboard
+            if (Session::check('Config.database')) {
+                $this->redirect('relatorios/index');
+            } else {
+                // Caso contrário, vai para seleção de empresa
+                $this->redirect('relatorios/empresa');
+            }
+            return;
         }
         
         file_put_contents(__DIR__ . '/../login_debug.log', "Não está logado, continuando...\n", FILE_APPEND);
