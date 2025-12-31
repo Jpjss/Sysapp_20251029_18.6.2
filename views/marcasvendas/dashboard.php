@@ -379,6 +379,7 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Período:</label>
                         <select class="form-select" id="periodoSelect">
+                            <option value="0">Hoje</option>
                             <option value="7">Últimos 7 dias</option>
                             <option value="15">Últimos 15 dias</option>
                             <option value="30" selected>Últimos 30 dias</option>
@@ -416,6 +417,7 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
                     <div class="col-12">
                         <p class="last-update mb-0">
                             <i class="fas fa-clock"></i> Última atualização: <span id="lastUpdate">Carregando...</span>
+                            <span class="ms-3" id="periodoSelecionado" style="color: #666;"></span>
                         </p>
                     </div>
                 </div>
@@ -948,12 +950,31 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
         
         // Event Listeners
         document.getElementById('periodoSelect').addEventListener('change', () => {
+            atualizarPeriodoSelecionado();
             if (modoVisualizacao === 'overview') {
                 atualizarDados();
             } else if (marcaSelecionada) {
                 carregarHistoricoMarca(marcaSelecionada.cd_marca);
             }
         });
+        
+        // Função para atualizar o texto do período selecionado
+        function atualizarPeriodoSelecionado() {
+            const periodo = document.getElementById('periodoSelect').value;
+            const elementoPeriodo = document.getElementById('periodoSelecionado');
+            const hoje = new Date();
+            const dataFormatada = hoje.toLocaleDateString('pt-BR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            });
+            
+            if (periodo === '0') {
+                elementoPeriodo.innerHTML = `| <strong>Período selecionado:</strong> Hoje (${dataFormatada})`;
+            } else {
+                elementoPeriodo.innerHTML = `| <strong>Período selecionado:</strong> Últimos ${periodo} dias`;
+            }
+        }
         
         document.getElementById('limiteSelect').addEventListener('change', atualizarDados);
         document.getElementById('intervaloSelect').addEventListener('change', configurarIntervalo);
@@ -971,6 +992,7 @@ $pageTitle = 'Dashboard de Marcas - Vendas em Tempo Real';
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             inicializarGraficos();
+            atualizarPeriodoSelecionado();
             atualizarDados();
             configurarIntervalo();
         });

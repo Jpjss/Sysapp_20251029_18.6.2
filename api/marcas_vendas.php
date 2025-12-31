@@ -52,6 +52,15 @@ try {
     $limite = $_GET['limite'] ?? '10'; // Top 10 marcas
     $cd_filial = $_GET['cd_filial'] ?? null;
     
+    // Definir condição de data baseada no período
+    if ($periodo == '0') {
+        // Hoje: apenas o dia atual (00:00:00 até 23:59:59)
+        $condicaoData = "DATE(dm_venda.dt_emi_pedido) = CURRENT_DATE";
+    } else {
+        // Últimos X dias
+        $condicaoData = "dm_venda.dt_emi_pedido >= CURRENT_DATE - INTERVAL '$periodo days'";
+    }
+    
     // Construir query de marcas mais vendidas
     $sql = "
         SELECT 
@@ -64,7 +73,7 @@ try {
         INNER JOIN dm_orcamento_vendas_consolidadas dm_venda
             ON dm_venda.cd_cpl_tamanho = dm_produto.cd_cpl_tamanho
         WHERE 1=1
-            AND dm_venda.dt_emi_pedido >= CURRENT_DATE - INTERVAL '$periodo days'
+            AND $condicaoData
             AND dm_produto.cd_marca IS NOT NULL
             AND dm_produto.ds_marca IS NOT NULL
     ";

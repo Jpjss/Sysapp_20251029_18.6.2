@@ -61,6 +61,19 @@ try {
     
     // Parâmetros de filtro
     $periodo = $_GET['periodo'] ?? '30'; // Padrão: últimos 30 dias
+    
+    // Definir condição de data baseada no período
+    if ($periodo == '0') {
+        // Hoje: apenas o dia atual
+        $condicaoData = "DATE(dm_venda.dt_emi_pedido) = CURRENT_DATE";
+        $dateSeriesStart = "CURRENT_DATE";
+        $dateSeriesEnd = "CURRENT_DATE";
+    } else {
+        // Últimos X dias
+        $condicaoData = "dm_venda.dt_emi_pedido >= CURRENT_DATE - INTERVAL '$periodo days'";
+        $dateSeriesStart = "CURRENT_DATE - INTERVAL '{$periodo} days'";
+        $dateSeriesEnd = "CURRENT_DATE";
+    }
     $agrupamento = $_GET['agrupamento'] ?? 'dia'; // dia, semana, mes
     
     // Definir formato de agrupamento
@@ -97,8 +110,8 @@ try {
         WITH date_series AS (
             SELECT 
                 generate_series(
-                    CURRENT_DATE - INTERVAL '{$periodo} days',
-                    CURRENT_DATE,
+                    {$dateSeriesStart},
+                    {$dateSeriesEnd},
                     INTERVAL '{$intervalFormat}'
                 )::date AS data
         ),
@@ -113,7 +126,7 @@ try {
             INNER JOIN dm_orcamento_vendas_consolidadas dm_venda
                 ON dm_venda.cd_cpl_tamanho = dm_produto.cd_cpl_tamanho
             WHERE dm_produto.cd_marca = :cd_marca
-                AND dm_venda.dt_emi_pedido >= CURRENT_DATE - INTERVAL '{$periodo} days'
+                AND {$condicaoData}
             GROUP BY periodo, data_base
         )
         SELECT 
