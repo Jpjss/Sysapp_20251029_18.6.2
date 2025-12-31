@@ -25,6 +25,7 @@ class RelatoriosController extends Controller {
         // Verifica se tem empresa configurada
         if (!Session::check('Config.database')) {
             $this->redirect('relatorios/empresa');
+            return;
         }
         
         $stats = $this->Relatorio->getEstatisticas();
@@ -124,6 +125,7 @@ class RelatoriosController extends Controller {
                 );
                 
                 $this->redirect('relatorios/index');
+                return;
             }
         }
         
@@ -641,6 +643,7 @@ class RelatoriosController extends Controller {
         // Verifica se tem empresa configurada
         if (!Session::check('Config.database')) {
             $this->redirect('relatorios/empresa');
+            return;
         }
         
         // Busca lista de filiais
