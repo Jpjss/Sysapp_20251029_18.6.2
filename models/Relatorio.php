@@ -336,4 +336,370 @@ class Relatorio {
 
         return $this->db->fetchAll($sql);
     }
+    
+    /**
+     * Busca atendimentos detalhados por dia
+     */
+    public function getAtendimentosDetalhados($dt_inicio, $dt_fim) {
+        // Detecta se é banco de questionários ou ERP comercial
+        $temQuestionarios = $this->detectarDadosQuestionarios();
+        
+        if ($temQuestionarios) {
+            $campoData = $this->detectarCampoData();
+            
+            $sql = "
+                SELECT 
+                    DATE($campoData) as data,
+                    COUNT(*) as total_atendimentos,
+                    COUNT(DISTINCT cd_pessoa) as clientes_unicos,
+                    COALESCE(SUM(EXTRACT(EPOCH FROM (dt_fim - dt_inicio))/3600), 0)::NUMERIC(10,2) as tempo_total_horas,
+                    COALESCE(SUM(vl_atendimento), 0)::NUMERIC(14,2) as valor_total
+                FROM glb_questionario_resposta
+                WHERE $campoData >= :dt_inicio::date 
+                  AND $campoData <= :dt_fim::date
+                GROUP BY DATE($campoData)
+                ORDER BY data ASC
+            ";
+        } else {
+            // Banco ERP - usa dados de ped_vd
+            $sql = "
+                SELECT 
+                    DATE(dt_hr_ped) as data,
+                    COUNT(*) as total_atendimentos,
+                    COUNT(DISTINCT cd_pessoa) as clientes_unicos,
+                    0 as tempo_total_horas,
+                    COALESCE(SUM(vlr_vd), 0)::NUMERIC(14,2) as valor_total
+                FROM ped_vd
+                WHERE DATE(dt_hr_ped) >= :dt_inicio::date 
+                  AND DATE(dt_hr_ped) <= :dt_fim::date
+                GROUP BY DATE(dt_hr_ped)
+                ORDER BY data ASC
+            ";
+        }
+        
+        $result = $this->db->fetchAll($sql, [
+            ':dt_inicio' => $dt_inicio,
+            ':dt_fim' => $dt_fim
+        ]);
+        
+        // Formatar tempo total
+        if ($result) {
+            foreach ($result as &$row) {
+                $horas = floor($row['tempo_total_horas']);
+                $minutos = round(($row['tempo_total_horas'] - $horas) * 60);
+                $row['tempo_total_formatado'] = sprintf('%02d:%02d', $horas, $minutos);
+            }
+        }
+        
+        return $result ?? [];
+    }
+    
+    /**
+     * Busca totais de atendimentos no período
+     */
+    public function getTotaisAtendimentos($dt_inicio, $dt_fim) {
+        $temQuestionarios = $this->detectarDadosQuestionarios();
+        
+        if ($temQuestionarios) {
+            $campoData = $this->detectarCampoData();
+            
+            $sql = "
+                SELECT 
+                    COUNT(*) as total_atendimentos,
+                    COUNT(DISTINCT cd_pessoa) as clientes_unicos,
+                    COALESCE(SUM(EXTRACT(EPOCH FROM (dt_fim - dt_inicio))/3600), 0)::NUMERIC(10,2) as tempo_total_horas,
+                    COALESCE(SUM(vl_atendimento), 0)::NUMERIC(14,2) as valor_total
+                FROM glb_questionario_resposta
+                WHERE $campoData >= :dt_inicio::date 
+                  AND $campoData <= :dt_fim::date
+            ";
+        } else {
+            // Banco ERP
+            $sql = "
+                SELECT 
+                    COUNT(*) as total_atendimentos,
+                    COUNT(DISTINCT cd_pessoa) as clientes_unicos,
+                    0 as tempo_total_horas,
+                    COALESCE(SUM(vlr_vd), 0)::NUMERIC(14,2) as valor_total
+                FROM ped_vd
+                WHERE DATE(dt_hr_ped) >= :dt_inicio::date 
+                  AND DATE(dt_hr_ped) <= :dt_fim::date
+            ";
+        }
+        
+        $result = $this->db->fetchOne($sql, [
+            ':dt_inicio' => $dt_inicio,
+            ':dt_fim' => $dt_fim
+        ]);
+        
+        if ($result) {
+            // Formatar tempo total
+            $horas = floor($result['tempo_total_horas']);
+            $minutos = round(($result['tempo_total_horas'] - $horas) * 60);
+            $result['tempo_total_formatado'] = sprintf('%02d:%02d', $horas, $minutos);
+            
+            // Calcular tempo médio
+            if ($result['total_atendimentos'] > 0) {
+                $tempo_medio_horas = $result['tempo_total_horas'] / $result['total_atendimentos'];
+                $horas_medio = floor($tempo_medio_horas);
+                $minutos_medio = round(($tempo_medio_horas - $horas_medio) * 60);
+                $result['tempo_medio_formatado'] = sprintf('%02d:%02d', $horas_medio, $minutos_medio);
+            } else {
+                $result['tempo_medio_formatado'] = '00:00';
+            }
+            
+            // Calcular ticket médio
+            if ($result['total_atendimentos'] > 0) {
+                $result['ticket_medio'] = $result['valor_total'] / $result['total_atendimentos'];
+            } else {
+                $result['ticket_medio'] = 0;
+            }
+        }
+        
+        return $result ?? [
+            'total_atendimentos' => 0,
+            'clientes_unicos' => 0,
+            'tempo_total_horas' => 0,
+            'tempo_total_formatado' => '00:00',
+            'tempo_medio_formatado' => '00:00',
+            'valor_total' => 0,
+            'ticket_medio' => 0
+        ];
+    }
+    
+    /**
+     * Relatório Entrada x Vendas
+     * Retorna dados comparativos entre entradas de estoque e vendas por marca e filial
+     */
+    public function getEntradaVendas($filtros) {
+        // Extrai filtros
+        $vendaDtInicio = $filtros['venda_dt_inicio'];
+        $vendaDtFim = $filtros['venda_dt_fim'];
+        $entradaDtInicio = $filtros['entrada_dt_inicio'];
+        $entradaDtFim = $filtros['entrada_dt_fim'];
+        $filiais = $filtros['filiais'] ?? ['todas'];
+        $estPositivo = $filtros['est_positivo'] ?? false;
+        $estZerado = $filtros['est_zerado'] ?? false;
+        $estNegativo = $filtros['est_negativo'] ?? false;
+        
+        // Se nenhum filtro de estoque foi marcado, considera todos
+        if (!$estPositivo && !$estZerado && !$estNegativo) {
+            $estPositivo = true;
+            $estZerado = true;
+            $estNegativo = true;
+        }
+        
+        // Monta condição de filiais
+        $condicaoFiliais = '';
+        if (!in_array('todas', $filiais) && !empty($filiais)) {
+            $filiaisPlaceholder = implode(',', array_map(function($f) { return (int)$f; }, $filiais));
+            $condicaoFiliais = "AND f.cd_filial IN ($filiaisPlaceholder)";
+        }
+        
+        // Monta condição de estoque
+        $condicoesEstoque = [];
+        if ($estPositivo) $condicoesEstoque[] = 'est_atual.qtde_atual > 0';
+        if ($estZerado) $condicoesEstoque[] = 'est_atual.qtde_atual = 0';
+        if ($estNegativo) $condicoesEstoque[] = 'est_atual.qtde_atual < 0';
+        
+        $condicaoEstoque = '';
+        if (!empty($condicoesEstoque)) {
+            $condicaoEstoque = 'AND (' . implode(' OR ', $condicoesEstoque) . ')';
+        }
+        
+        // Query principal
+        $sql = "
+            WITH estoque_atual AS (
+                SELECT 
+                    p.cd_produto,
+                    p.cd_marca,
+                    p.cd_filial,
+                    COALESCE(SUM(me.qt_pd), 0) as qtde_atual,
+                    COALESCE(AVG(p.vl_custo), 0) as preco_custo_medio,
+                    COALESCE(AVG(p.vl_vd), 0) as preco_venda_medio
+                FROM glb_produto p
+                LEFT JOIN mov_estoque me ON me.cd_produto = p.cd_produto
+                GROUP BY p.cd_produto, p.cd_marca, p.cd_filial
+            ),
+            entradas AS (
+                SELECT 
+                    me.cd_produto,
+                    p.cd_marca,
+                    p.cd_filial,
+                    COALESCE(SUM(me.qt_pd), 0) as qtde_entradas
+                FROM mov_estoque me
+                INNER JOIN glb_produto p ON p.cd_produto = me.cd_produto
+                WHERE me.tp_mov = 'E'
+                  AND DATE(me.dt_hr_mov) >= :entrada_dt_inicio::date
+                  AND DATE(me.dt_hr_mov) <= :entrada_dt_fim::date
+                GROUP BY me.cd_produto, p.cd_marca, p.cd_filial
+            ),
+            vendas AS (
+                SELECT 
+                    pv.cd_produto,
+                    p.cd_marca,
+                    p.cd_filial,
+                    COALESCE(SUM(pv.qt_produto), 0) as qtde_vendida,
+                    COALESCE(SUM(pv.vl_total), 0) as valor_vendido
+                FROM ped_vd_produto pv
+                INNER JOIN ped_vd v ON v.cd_ped_vd = pv.cd_ped_vd
+                INNER JOIN glb_produto p ON p.cd_produto = pv.cd_produto
+                WHERE DATE(v.dt_hr_ped) >= :venda_dt_inicio::date
+                  AND DATE(v.dt_hr_ped) <= :venda_dt_fim::date
+                GROUP BY pv.cd_produto, p.cd_marca, p.cd_filial
+            )
+            SELECT 
+                f.nm_filial,
+                f.cd_filial,
+                m.nm_marca,
+                m.cd_marca,
+                COALESCE(est_atual.qtde_atual, 0) as estoque_atual,
+                COALESCE(ent.qtde_entradas, 0) as qtde_entradas,
+                COALESCE(vd.qtde_vendida, 0) as qtde_vendida,
+                COALESCE(est_atual.qtde_atual * est_atual.preco_custo_medio, 0) as valor_estoque,
+                COALESCE(vd.valor_vendido, 0) as valor_vendido,
+                COALESCE(est_atual.preco_custo_medio, 0) as preco_custo,
+                COALESCE(est_atual.preco_venda_medio, 0) as preco_venda
+            FROM glb_filial f
+            CROSS JOIN glb_marca m
+            LEFT JOIN estoque_atual est_atual ON est_atual.cd_marca = m.cd_marca AND est_atual.cd_filial = f.cd_filial
+            LEFT JOIN entradas ent ON ent.cd_marca = m.cd_marca AND ent.cd_filial = f.cd_filial
+            LEFT JOIN vendas vd ON vd.cd_marca = m.cd_marca AND vd.cd_filial = f.cd_filial
+            WHERE 1=1
+              $condicaoFiliais
+              $condicaoEstoque
+              AND (
+                  COALESCE(est_atual.qtde_atual, 0) != 0 
+                  OR COALESCE(ent.qtde_entradas, 0) != 0 
+                  OR COALESCE(vd.qtde_vendida, 0) != 0
+              )
+            ORDER BY f.nm_filial, m.nm_marca
+        ";
+        
+        $params = [
+            ':venda_dt_inicio' => $vendaDtInicio,
+            ':venda_dt_fim' => $vendaDtFim,
+            ':entrada_dt_inicio' => $entradaDtInicio,
+            ':entrada_dt_fim' => $entradaDtFim
+        ];
+        
+        $resultados = $this->db->fetchAll($sql, $params);
+        
+        // Organiza dados por filial
+        $dados = [];
+        $totaisGerais = [
+            'estoque_atual' => 0,
+            'qtde_entradas' => 0,
+            'qtde_vendida' => 0,
+            'valor_estoque' => 0,
+            'valor_vendido' => 0
+        ];
+        
+        foreach ($resultados as $row) {
+            $filial = $row['nm_filial'];
+            
+            if (!isset($dados[$filial])) {
+                $dados[$filial] = [
+                    'itens' => [],
+                    'subtotal' => [
+                        'estoque_atual' => 0,
+                        'qtde_entradas' => 0,
+                        'qtde_vendida' => 0,
+                        'valor_estoque' => 0,
+                        'valor_vendido' => 0
+                    ]
+                ];
+            }
+            
+            // Calcula relações e margem
+            $relEstoqueValor = $row['valor_vendido'] > 0 ? $row['valor_estoque'] / $row['valor_vendido'] : 0;
+            $relEstoqueQtde = $row['qtde_vendida'] > 0 ? $row['estoque_atual'] / $row['qtde_vendida'] : 0;
+            
+            // Margem = ((Preço Venda - Preço Custo) / Preço Venda) * 100
+            $margem = 0;
+            if ($row['preco_venda'] > 0) {
+                $margem = (($row['preco_venda'] - $row['preco_custo']) / $row['preco_venda']) * 100;
+            }
+            
+            $item = [
+                'marca' => $row['nm_marca'],
+                'estoque_atual' => (int)$row['estoque_atual'],
+                'qtde_entradas' => (int)$row['qtde_entradas'],
+                'qtde_vendida' => (int)$row['qtde_vendida'],
+                'valor_estoque' => (float)$row['valor_estoque'],
+                'valor_vendido' => (float)$row['valor_vendido'],
+                'rel_estoque_valor' => $relEstoqueValor,
+                'rel_estoque_qtde' => $relEstoqueQtde,
+                'preco_custo' => (float)$row['preco_custo'],
+                'preco_venda' => (float)$row['preco_venda'],
+                'margem' => $margem,
+                'perc_qtde_estoque' => 0, // Será calculado depois
+                'perc_qtde_venda' => 0,
+                'perc_valor_estoque' => 0,
+                'perc_valor_venda' => 0
+            ];
+            
+            $dados[$filial]['itens'][] = $item;
+            
+            // Acumula subtotais da filial
+            $dados[$filial]['subtotal']['estoque_atual'] += $item['estoque_atual'];
+            $dados[$filial]['subtotal']['qtde_entradas'] += $item['qtde_entradas'];
+            $dados[$filial]['subtotal']['qtde_vendida'] += $item['qtde_vendida'];
+            $dados[$filial]['subtotal']['valor_estoque'] += $item['valor_estoque'];
+            $dados[$filial]['subtotal']['valor_vendido'] += $item['valor_vendido'];
+            
+            // Acumula totais gerais
+            $totaisGerais['estoque_atual'] += $item['estoque_atual'];
+            $totaisGerais['qtde_entradas'] += $item['qtde_entradas'];
+            $totaisGerais['qtde_vendida'] += $item['qtde_vendida'];
+            $totaisGerais['valor_estoque'] += $item['valor_estoque'];
+            $totaisGerais['valor_vendido'] += $item['valor_vendido'];
+        }
+        
+        // Calcula percentuais
+        foreach ($dados as $filial => &$filialData) {
+            $subtotal = $filialData['subtotal'];
+            
+            // Calcula margem média do subtotal
+            if ($subtotal['valor_vendido'] > 0) {
+                $custoTotal = $subtotal['valor_vendido'] - ($subtotal['valor_estoque'] > 0 ? $subtotal['valor_estoque'] : 0);
+                $filialData['subtotal']['margem'] = (($subtotal['valor_vendido'] - $custoTotal) / $subtotal['valor_vendido']) * 100;
+            } else {
+                $filialData['subtotal']['margem'] = 0;
+            }
+            
+            foreach ($filialData['itens'] as &$item) {
+                // Percentuais em relação ao subtotal da filial
+                $item['perc_qtde_estoque'] = $subtotal['estoque_atual'] > 0 
+                    ? ($item['estoque_atual'] / $subtotal['estoque_atual']) * 100 
+                    : 0;
+                
+                $item['perc_qtde_venda'] = $subtotal['qtde_vendida'] > 0 
+                    ? ($item['qtde_vendida'] / $subtotal['qtde_vendida']) * 100 
+                    : 0;
+                
+                $item['perc_valor_estoque'] = $subtotal['valor_estoque'] > 0 
+                    ? ($item['valor_estoque'] / $subtotal['valor_estoque']) * 100 
+                    : 0;
+                
+                $item['perc_valor_venda'] = $subtotal['valor_vendido'] > 0 
+                    ? ($item['valor_vendido'] / $subtotal['valor_vendido']) * 100 
+                    : 0;
+            }
+        }
+        
+        // Calcula margem geral
+        if ($totaisGerais['valor_vendido'] > 0) {
+            $custoTotalGeral = $totaisGerais['valor_vendido'] - ($totaisGerais['valor_estoque'] > 0 ? $totaisGerais['valor_estoque'] : 0);
+            $totaisGerais['margem'] = (($totaisGerais['valor_vendido'] - $custoTotalGeral) / $totaisGerais['valor_vendido']) * 100;
+        } else {
+            $totaisGerais['margem'] = 0;
+        }
+        
+        return [
+            'dados' => $dados,
+            'totais' => $totaisGerais
+        ];
+    }
 }
+

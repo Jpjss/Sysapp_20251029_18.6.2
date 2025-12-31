@@ -200,6 +200,13 @@
             <span>📦 Estoque Detalhado</span>
         </a>
         
+        <a href="<?= BASE_URL ?>/relatorios/entrada_vendas" class="action-btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <span>📈 Entrada x Vendas</span>
+        </a>
+        
         <a href="<?= BASE_URL ?>/marcasvendas/dashboard" class="action-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>

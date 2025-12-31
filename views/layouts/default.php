@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= APP_NAME ?> - <?= $title ?? 'Sistema' ?></title>
-    <link rel="stylesheet" href="<?= BASE_URL ?>/public/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/css/style.css?v=2025123001">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         * {
@@ -348,7 +348,7 @@
                             </svg>
                             Atendimentos
                         </a>
-                        <a href="<?= BASE_URL ?>/relatorios/atendimentos">
+                        <a href="<?= BASE_URL ?>/relatorios/lista">
                             <svg class="menu-icon" style="display:inline-block; vertical-align:middle; margin-right:4px; width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="18" y1="20" x2="18" y2="10"></line>
                                 <line x1="12" y1="20" x2="12" y2="4"></line>

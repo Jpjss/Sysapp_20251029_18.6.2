@@ -61,23 +61,20 @@ try {
     
     // Parâmetros de filtro
     $periodo = $_GET['periodo'] ?? '30'; // Padrão: últimos 30 dias
-    
-    // Definir condição de data baseada no período
-    if ($periodo == '0') {
-        // Hoje: apenas o dia atual
-        $condicaoData = "DATE(dm_venda.dt_emi_pedido) = CURRENT_DATE";
-        $dateSeriesStart = "CURRENT_DATE";
-        $dateSeriesEnd = "CURRENT_DATE";
-    } else {
-        // Últimos X dias
-        $condicaoData = "dm_venda.dt_emi_pedido >= CURRENT_DATE - INTERVAL '$periodo days'";
-        $dateSeriesStart = "CURRENT_DATE - INTERVAL '{$periodo} days'";
-        $dateSeriesEnd = "CURRENT_DATE";
-    }
     $agrupamento = $_GET['agrupamento'] ?? 'dia'; // dia, semana, mes
+    
+    // Se período = 0 (Hoje), força agrupamento por hora
+    if ($periodo === '0' || $periodo === 0) {
+        $periodo = 0;
+        $agrupamento = 'hora'; // Agrupamento especial para o dia atual
+    }
     
     // Definir formato de agrupamento
     switch ($agrupamento) {
+        case 'hora':
+            $dateFormat = 'HH24:00';
+            $intervalFormat = '1 hour';
+            break;
         case 'semana':
             $dateFormat = 'YYYY-"Sem"IW';
             $intervalFormat = '1 week';
@@ -105,40 +102,78 @@ try {
     $marcaInfo = $stmtMarca->fetch(PDO::FETCH_ASSOC);
     $ds_marca = $marcaInfo['ds_marca'] ?? "Marca {$cd_marca}";
     
-    // Construir query de histórico
-    $sql = "
-        WITH date_series AS (
+    // Construir query de histórico baseado no período
+    if ($periodo == 0) {
+        // Período "Hoje" - agrupa por hora
+        $sql = "
+            WITH hour_series AS (
+                SELECT 
+                    generate_series(
+                        CURRENT_DATE,
+                        CURRENT_DATE + INTERVAL '23 hours',
+                        INTERVAL '1 hour'
+                    )::timestamp AS hora_inicio
+            ),
+            vendas_marca AS (
+                SELECT 
+                    date_trunc('hour', dm_venda.dt_emi_pedido) as hora_inicio,
+                    COUNT(DISTINCT dm_venda.cd_pedido) as total_vendas,
+                    SUM(COALESCE(dm_venda.qtde_produto, 0)) as quantidade_vendida,
+                    SUM(COALESCE(dm_venda.vl_tot_it - dm_venda.vl_devol_proporcional, 0))::NUMERIC(14,2) as valor_total
+                FROM dm_produto
+                INNER JOIN dm_orcamento_vendas_consolidadas dm_venda
+                    ON dm_venda.cd_cpl_tamanho = dm_produto.cd_cpl_tamanho
+                WHERE dm_produto.cd_marca = :cd_marca
+                    AND dm_venda.dt_emi_pedido >= CURRENT_DATE
+                    AND dm_venda.dt_emi_pedido < CURRENT_DATE + INTERVAL '1 day'
+                GROUP BY hora_inicio
+            )
             SELECT 
-                generate_series(
-                    {$dateSeriesStart},
-                    {$dateSeriesEnd},
-                    INTERVAL '{$intervalFormat}'
-                )::date AS data
-        ),
-        vendas_marca AS (
+                hs.hora_inicio as data,
+                TO_CHAR(hs.hora_inicio, 'HH24:00') as periodo,
+                COALESCE(vm.total_vendas, 0) as total_vendas,
+                COALESCE(vm.quantidade_vendida, 0) as quantidade_vendida,
+                COALESCE(vm.valor_total, 0)::NUMERIC(14,2) as valor_total
+            FROM hour_series hs
+            LEFT JOIN vendas_marca vm ON hs.hora_inicio = vm.hora_inicio
+            ORDER BY hs.hora_inicio ASC
+        ";
+    } else {
+        // Período normal - agrupa por dia/semana/mês
+        $sql = "
+            WITH date_series AS (
+                SELECT 
+                    generate_series(
+                        CURRENT_DATE - INTERVAL '{$periodo} days',
+                        CURRENT_DATE,
+                        INTERVAL '{$intervalFormat}'
+                    )::date AS data
+            ),
+            vendas_marca AS (
+                SELECT 
+                    TO_CHAR(dm_venda.dt_emi_pedido, '{$dateFormat}') as periodo,
+                    dm_venda.dt_emi_pedido::date as data_base,
+                    COUNT(DISTINCT dm_venda.cd_pedido) as total_vendas,
+                    SUM(COALESCE(dm_venda.qtde_produto, 0)) as quantidade_vendida,
+                    SUM(COALESCE(dm_venda.vl_tot_it - dm_venda.vl_devol_proporcional, 0))::NUMERIC(14,2) as valor_total
+                FROM dm_produto
+                INNER JOIN dm_orcamento_vendas_consolidadas dm_venda
+                    ON dm_venda.cd_cpl_tamanho = dm_produto.cd_cpl_tamanho
+                WHERE dm_produto.cd_marca = :cd_marca
+                    AND dm_venda.dt_emi_pedido >= CURRENT_DATE - INTERVAL '{$periodo} days'
+                GROUP BY periodo, data_base
+            )
             SELECT 
-                TO_CHAR(dm_venda.dt_emi_pedido, '{$dateFormat}') as periodo,
-                dm_venda.dt_emi_pedido::date as data_base,
-                COUNT(DISTINCT dm_venda.cd_pedido) as total_vendas,
-                SUM(COALESCE(dm_venda.qtde_produto, 0)) as quantidade_vendida,
-                SUM(COALESCE(dm_venda.vl_tot_it - dm_venda.vl_devol_proporcional, 0))::NUMERIC(14,2) as valor_total
-            FROM dm_produto
-            INNER JOIN dm_orcamento_vendas_consolidadas dm_venda
-                ON dm_venda.cd_cpl_tamanho = dm_produto.cd_cpl_tamanho
-            WHERE dm_produto.cd_marca = :cd_marca
-                AND {$condicaoData}
-            GROUP BY periodo, data_base
-        )
-        SELECT 
-            ds.data,
-            TO_CHAR(ds.data, '{$dateFormat}') as periodo,
-            COALESCE(vm.total_vendas, 0) as total_vendas,
-            COALESCE(vm.quantidade_vendida, 0) as quantidade_vendida,
-            COALESCE(vm.valor_total, 0)::NUMERIC(14,2) as valor_total
-        FROM date_series ds
-        LEFT JOIN vendas_marca vm ON TO_CHAR(ds.data, '{$dateFormat}') = vm.periodo
-        ORDER BY ds.data ASC
-    ";
+                ds.data,
+                TO_CHAR(ds.data, '{$dateFormat}') as periodo,
+                COALESCE(vm.total_vendas, 0) as total_vendas,
+                COALESCE(vm.quantidade_vendida, 0) as quantidade_vendida,
+                COALESCE(vm.valor_total, 0)::NUMERIC(14,2) as valor_total
+            FROM date_series ds
+            LEFT JOIN vendas_marca vm ON TO_CHAR(ds.data, '{$dateFormat}') = vm.periodo
+            ORDER BY ds.data ASC
+        ";
+    }
     
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':cd_marca', $cd_marca, PDO::PARAM_STR);
@@ -154,6 +189,10 @@ try {
     foreach ($historico as $item) {
         // Formatar label de acordo com agrupamento
         switch ($agrupamento) {
+            case 'hora':
+                // Para período "Hoje", mostra apenas a hora
+                $labels[] = $item['periodo'];
+                break;
             case 'semana':
                 $labels[] = $item['periodo'];
                 break;

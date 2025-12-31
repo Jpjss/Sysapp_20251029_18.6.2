@@ -4914,15 +4914,15 @@ WHERE email_usuario = '$email'";
     }
 
     public function sku_sincronizado() {
-        return $this->query("select coalesce(count(*), 0) as qtde_sku_sincronizado_hoje, min(dt_hr_cad)::time as primeira_sincronizacao_hoje, max(dt_hr_cad)::time as ultima_sincronizacao_hoje from est_produto_cpl_tamanho_ecommerce where dt_hr_cad::date = current_date");
+        return $this->query("select coalesce(count(*), 0) as qtde_sku_sincronizado_hoje, coalesce(min(dt_hr_cad)::time::text, '-') as primeira_sincronizacao_hoje, coalesce(max(dt_hr_cad)::time::text, '-') as ultima_sincronizacao_hoje from est_produto_cpl_tamanho_ecommerce where dt_hr_cad::date = current_date");
     }
 
     public function sku_sincronizado_estoque() {
-        return $this->query("select coalesce(count(*), 0) as qtde_sku_sincronizado_estoque_hoje, min(dt_hr_exportacao)::time as primeira_sincronizacao_estoque_hoje, max(dt_hr_exportacao)::time as ultima_sincronizacao_estoque_hoje from estoque_pendencia_exportacao_ecommerce where dt_hr_exportacao::date = current_date");
+        return $this->query("select coalesce(count(*), 0) as qtde_sku_sincronizado_estoque_hoje, coalesce(min(dt_hr_exportacao)::time::text, '-') as primeira_sincronizacao_estoque_hoje, coalesce(max(dt_hr_exportacao)::time::text, '-') as ultima_sincronizacao_estoque_hoje from estoque_pendencia_exportacao_ecommerce where dt_hr_exportacao::date = current_date");
     }
 
     public function sku_sincronizado_preco() {
-        return $this->query("select coalesce(count(*), 0) as qtde_sku_sincronizado_preco_hoje, min(dt_hr_exportacao)::time as primeira_sincronizacao_preco_hoje, max(dt_hr_exportacao)::time as ultima_sincronizacao_preco_hoje from preco_pendencia_exportacao_ecommerce where dt_hr_exportacao::date = current_date");
+        return $this->query("select coalesce(count(*), 0) as qtde_sku_sincronizado_preco_hoje, coalesce(min(dt_hr_exportacao)::time::text, '-') as primeira_sincronizacao_preco_hoje, coalesce(max(dt_hr_exportacao)::time::text, '-') as ultima_sincronizacao_preco_hoje from preco_pendencia_exportacao_ecommerce where dt_hr_exportacao::date = current_date");
     }
 
     public function acompanhamento_ecommerce_cancelados($dados) {
