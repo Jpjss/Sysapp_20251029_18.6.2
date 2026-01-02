@@ -38,9 +38,13 @@ if (preg_match('/^\/([^\/]+\.php)$/', $uri, $matches)) {
 // Remove a primeira barra e define a URL
 $url = ltrim($uri, '/');
 
+// DEBUG: Log do roteamento
+file_put_contents(__DIR__ . '/login_debug.log', "[router.php] URI: $uri | URL: $url | METHOD: {$_SERVER['REQUEST_METHOD']}\n", FILE_APPEND);
+
 // Se a URL não está vazia, define $_GET['url']
 if (!empty($url)) {
     $_GET['url'] = $url;
+    file_put_contents(__DIR__ . '/login_debug.log', "[router.php] Setting \$_GET['url'] = $url\n", FILE_APPEND);
 }
 
 require_once __DIR__ . '/index.php';

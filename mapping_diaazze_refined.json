@@ -1,0 +1,122 @@
+{
+    "summary": {
+        "tables_count": 1197
+    },
+    "mapping": {
+        "clientes": {
+            "table": "dm_cliente",
+            "fields": [
+                "cd_pessoa",
+                "cpf",
+                "email"
+            ],
+            "detected_pk": "cd_emp",
+            "possible_fks": {
+                "cd_emp": "dm_est_produto_ped_compra_cpl_pendencia_itens_temp",
+                "cd_pessoa": "_erp_importacao_pessoa_reseq_lj_2",
+                "cd_regiao": "prc_regiao_filial",
+                "cd_filial": "_weder_tabelas_revisar_cd_filial"
+            }
+        },
+        "produtos": {
+            "table": "produtos",
+            "fields": [],
+            "detected_pk": "cd_ctr_ean",
+            "possible_fks": {
+                "cd_cpl_tamanho": "dm_produto_extrato_diario_cpl_tamanho_entrada_estoque_itens"
+            }
+        },
+        "vendas": {
+            "table": "ped_vd",
+            "fields": [
+                "cd_ped",
+                "dt_hr_ped",
+                "cd_pessoa_cartao_campo_antigo"
+            ],
+            "detected_pk": "cd_emp",
+            "possible_fks": {
+                "cd_emp": "dm_est_produto_ped_compra_cpl_pendencia_itens_temp",
+                "cd_filial": "_weder_tabelas_revisar_cd_filial",
+                "cd_ped": "__ped_vd_produto_saida",
+                "cd_vend": "cota_cotas_sub_periodo_vendedor",
+                "cd_cli": "_glb_pessoa_cli_20230411",
+                "cd_cartao_fidelidade": "glb_pessoa_cartao_fidelidade"
+            }
+        },
+        "venda_item": {
+            "table": "est_inventario_item",
+            "fields": [],
+            "detected_pk": "cd_inventario_item",
+            "possible_fks": {
+                "cd_usu_cad": "dav_desconto_backup_cd_usu_cad_zero"
+            }
+        },
+        "estoque": {
+            "table": "prc_filial",
+            "fields": [
+                "qtd_min_dias_desc",
+                "cd_filial"
+            ],
+            "detected_pk": "cd_emp",
+            "possible_fks": {
+                "cd_emp": "dm_est_produto_ped_compra_cpl_pendencia_itens_temp",
+                "cd_filial": "_weder_tabelas_revisar_cd_filial",
+                "cd_usu": "_flh_func_segu_usu"
+            }
+        },
+        "contas_receber": {
+            "table": "erp_importacao_receber",
+            "fields": [
+                "situacao_parcela",
+                "cd_pessoa"
+            ],
+            "detected_pk": "cd_emp",
+            "possible_fks": {
+                "cd_emp": "dm_est_produto_ped_compra_cpl_pendencia_itens_temp",
+                "cd_filial": "_weder_tabelas_revisar_cd_filial",
+                "cd_pedido": "dav_cabecalho_est_produto_pedido_vendas_cpl",
+                "cd_pessoa": "_erp_importacao_pessoa_reseq_lj_2"
+            }
+        },
+        "pagamentos": {
+            "table": "dav_pagamentos",
+            "fields": [],
+            "detected_pk": "cd_emp",
+            "possible_fks": {
+                "cd_emp": "dm_est_produto_ped_compra_cpl_pendencia_itens_temp",
+                "cd_filial": "_weder_tabelas_revisar_cd_filial",
+                "cd_dav": "dav_cabecalho",
+                "cd_seq": "_erp_importacao_pessoa_reseq_lj_2",
+                "cd_cond_pgto": "glb_cond_pgto"
+            }
+        },
+        "nota_fiscal": {
+            "table": "pdv_nf",
+            "fields": [
+                "cd_nf",
+                "nr_nf",
+                "dt_emissao"
+            ],
+            "detected_pk": "cd_filial",
+            "possible_fks": {
+                "cd_filial": "_weder_tabelas_revisar_cd_filial",
+                "cd_nf": "bc_deposito_conf",
+                "cd_pessoa": "_erp_importacao_pessoa_reseq_lj_2",
+                "cd_cidade": "glb_cidade",
+                "cd_vendedor": "cota_cotas_sub_periodo_vendedor",
+                "cd_usu": "_flh_func_segu_usu"
+            }
+        },
+        "questionarios": {
+            "table": "glb_questionario",
+            "fields": [
+                "cd_questionario"
+            ],
+            "detected_pk": "cd_questionario",
+            "possible_fks": {
+                "cd_questionario": "glb_questionario_glb_questionario_parametro",
+                "cd_usu_cad": "dav_desconto_backup_cd_usu_cad_zero"
+            }
+        }
+    }
+}

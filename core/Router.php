@@ -14,6 +14,8 @@ class Router {
     public function dispatch() {
         $url = $this->parseUrl();
         
+        file_put_contents(__DIR__ . '/../login_debug.log', "[ROUTER] URL parsed: " . json_encode($url) . "\n", FILE_APPEND);
+        
         // Determina o controller
         if (isset($url[0]) && !empty($url[0])) {
             $this->controller = strtolower($url[0]);
@@ -25,6 +27,8 @@ class Router {
             $this->action = strtolower($url[1]);
             unset($url[1]);
         }
+        
+        file_put_contents(__DIR__ . '/../login_debug.log', "[ROUTER] Dispatching to: " . $this->controller . "::" . $this->action . "\n", FILE_APPEND);
         
         // Parâmetros restantes
         $this->params = $url ? array_values($url) : [];
@@ -81,9 +85,19 @@ class Router {
             $host = $_SERVER['HTTP_HOST'];
             
             // Remove barras extras
-            $url = '/' . trim($url, '/');
-            
-            $url = $protocol . '://' . $host . $url;
+            $path = '/' . trim($url, '/');
+
+            // Redirecionamento compatível com servidores sem rewrite (ex: PHP dev server)
+            $script = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '/index.php';
+
+            // Preferir redirecionamento relativo para manter cookies/sessões no mesmo host
+            if (basename($script) === 'index.php') {
+                // Usa caminho relativo: /index.php?url=relatorios/empresa
+                $url = $script . '?url=' . ltrim($path, '/');
+            } else {
+                // Fallback para caminho relativo limpo
+                $url = $path;
+            }
         }
         
         header('Location: ' . $url);

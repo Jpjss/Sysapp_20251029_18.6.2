@@ -1,0 +1,63 @@
+{
+    "summary": {
+        "tables_count": 1197
+    },
+    "mapping": {
+        "clientes": {
+            "table": "dm_cliente",
+            "fields": [
+                "cd_pessoa",
+                "cpf",
+                "email"
+            ]
+        },
+        "produtos": {
+            "table": "produtos",
+            "fields": []
+        },
+        "vendas": {
+            "table": "ped_vd",
+            "fields": [
+                "cd_ped",
+                "dt_hr_ped",
+                "cd_pessoa_cartao_campo_antigo"
+            ]
+        },
+        "venda_item": {
+            "table": "est_inventario_item",
+            "fields": []
+        },
+        "estoque": {
+            "table": "prc_filial",
+            "fields": [
+                "qtd_min_dias_desc",
+                "cd_filial"
+            ]
+        },
+        "contas_receber": {
+            "table": "erp_importacao_receber",
+            "fields": [
+                "situacao_parcela",
+                "cd_pessoa"
+            ]
+        },
+        "pagamentos": {
+            "table": "dav_pagamentos",
+            "fields": []
+        },
+        "nota_fiscal": {
+            "table": "pdv_nf",
+            "fields": [
+                "cd_nf",
+                "nr_nf",
+                "dt_emissao"
+            ]
+        },
+        "questionarios": {
+            "table": "glb_questionario",
+            "fields": [
+                "cd_questionario"
+            ]
+        }
+    }
+}

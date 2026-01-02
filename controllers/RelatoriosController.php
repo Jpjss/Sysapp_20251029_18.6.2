@@ -97,6 +97,7 @@ class RelatoriosController extends Controller {
      * Seleção de empresa (quando usuário tem múltiplas empresas)
      */
     public function empresa() {
+        file_put_contents(__DIR__ . '/../login_debug.log', "\n[EMPRESA] Método empresa() foi chamado! Method: " . $_SERVER['REQUEST_METHOD'] . "\n", FILE_APPEND);
         $this->requireAuth();
         
         $empresas = Session::read('Dados.database');
@@ -121,6 +122,9 @@ class RelatoriosController extends Controller {
             }
             
             if ($empresaSelecionada) {
+                // Debug: log antes de gravar na sessão
+                file_put_contents(__DIR__ . '/../login_debug.log', "[EMPRESA] BEFORE WRITE - session_id: " . session_id() . " | _COOKIE: " . json_encode(isset($_COOKIE) ? $_COOKIE : []) . " | SESSION BEFORE: " . print_r(isset($_SESSION) ? $_SESSION : [], true) . "\n", FILE_APPEND);
+
                 // Configura empresa na sessão
                 Session::write('Config.database', $empresaSelecionada['nome_banco']);
                 Session::write('Config.databasename', $empresaSelecionada['nome_banco']);
@@ -129,6 +133,9 @@ class RelatoriosController extends Controller {
                 Session::write('Config.password', Security::decrypt($empresaSelecionada['senha_banco']));
                 Session::write('Config.porta', $empresaSelecionada['porta_banco']);
                 Session::write('Config.empresa', $empresaSelecionada['nome_empresa']);
+
+                // Debug: log após gravar na sessão
+                file_put_contents(__DIR__ . '/../login_debug.log', "[EMPRESA] AFTER WRITE - session_id: " . session_id() . " | _COOKIE: " . json_encode(isset($_COOKIE) ? $_COOKIE : []) . " | SESSION AFTER: " . print_r(isset($_SESSION) ? $_SESSION : [], true) . "\n", FILE_APPEND);
                 
                 // Reconecta ao banco da empresa
                 $result = $this->db->connect(
@@ -654,9 +661,13 @@ class RelatoriosController extends Controller {
      */
     public function entrada_vendas() {
         $this->requireAuth();
+        // Log inicial para depuração de sessão/headers/POST
+        @file_put_contents(__DIR__ . '/../login_debug.log', "[entrada_vendas] START - " . date('Y-m-d H:i:s') . " | session_id: " . session_id() . " | _COOKIE: " . json_encode(isset($_COOKIE) ? $_COOKIE : []) . " | Session Config.exists: " . (Session::check('Config.database') ? 'SIM' : 'NÃO') . " | Config: " . print_r(Session::read('Config'), true) . " | POST: " . print_r(
+            isset($_POST) ? $_POST : [], true) . "\n", FILE_APPEND);
         
         // Verifica se tem empresa configurada
         if (!Session::check('Config.database')) {
+            @file_put_contents(__DIR__ . '/../login_debug.log', "[entrada_vendas] NO CONFIG - redirecting to empresa\n", FILE_APPEND);
             $this->redirect('relatorios/empresa');
             return;
         }
@@ -687,10 +698,16 @@ class RelatoriosController extends Controller {
                 $filtros['filiais'] = ['todas'];
             }
             
+            // Debug temporário
+            error_log("Filtros: " . print_r($filtros, true));
+            
             // Busca dados
             $resultado = $this->Relatorio->getEntradaVendas($filtros);
             $dados = $resultado['dados'];
             $totais = $resultado['totais'];
+            
+            // Debug temporário
+            error_log("Dados retornados: " . count($dados) . " filiais");
             
             // Informações do período para exibir no cabeçalho
             $periodoInfo = [

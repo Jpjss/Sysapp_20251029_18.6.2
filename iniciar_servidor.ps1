@@ -8,7 +8,7 @@ Get-Process php -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 2
 
 # Navega para o diretório correto
-$projectPath = "c:\Users\jp088\Desktop\Projetos\sysapp novo\Sysapp_20251029_18.6.2"
+$projectPath = "c:\Users\Lenovo01\OneDrive\Área de Trabalho\Projeto\Sysapp 2025\Sysapp_20251029_18.6.2"
 Set-Location $projectPath
 Write-Host "Diretório: $projectPath" -ForegroundColor Green
 

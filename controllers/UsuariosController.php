@@ -31,9 +31,9 @@ class UsuariosController extends Controller {
         file_put_contents(__DIR__ . '/../login_debug.log', "POST email: " . ($_POST['email'] ?? 'não definido') . "\n", FILE_APPEND);
         file_put_contents(__DIR__ . '/../login_debug.log', "Session::isValid(): " . (Session::isValid() ? 'TRUE' : 'FALSE') . "\n", FILE_APPEND);
         
-        // Se já está logado, redireciona
-        if (Session::isValid()) {
-            file_put_contents(__DIR__ . '/../login_debug.log', "REDIRECIONANDO: Usuário já está logado\n", FILE_APPEND);
+        // Se já está logado e tentando acessar a tela de login (não é POST), redireciona
+        if (Session::isValid() && !$this->isPost()) {
+            file_put_contents(__DIR__ . '/../login_debug.log', "REDIRECIONANDO: Usuário já está logado (GET)\n", FILE_APPEND);
             
             // Se já tem empresa configurada, vai direto para o dashboard
             if (Session::check('Config.database')) {
@@ -45,7 +45,7 @@ class UsuariosController extends Controller {
             return;
         }
         
-        file_put_contents(__DIR__ . '/../login_debug.log', "Não está logado, continuando...\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../login_debug.log', "Não está logado ou é POST, continuando...\n", FILE_APPEND);
         
         $this->layout = 'login';
         
