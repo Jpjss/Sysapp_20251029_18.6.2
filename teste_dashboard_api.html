@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste Dashboard - API de Vendas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .test-box {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teste de Conexão - Dashboard de Vendas</h1>
+        
+        <div class="test-box info">
+            <strong>Este teste verifica:</strong><br>
+            1. Se você está logado<br>
+            2. Se a empresa está selecionada<br>
+            3. Se a API de marcas vendas está respondendo<br>
+            4. Se há dados de vendas disponíveis
+        </div>
+        
+        <button onclick="testarAPI()">▶️ Executar Teste</button>
+        <button onclick="abrirDashboard()">📊 Abrir Dashboard</button>
+        <button onclick="location.reload()">🔄 Recarregar</button>
+        
+        <div id="resultado"></div>
+    </div>
+    
+    <script>
+        async function testarAPI() {
+            const resultDiv = document.getElementById('resultado');
+            resultDiv.innerHTML = '<div class="test-box info">⏳ Testando conexão com a API...</div>';
+            
+            try {
+                // Teste 1: API de Marcas Vendas
+                const response = await fetch('/api/marcas_vendas.php?periodo=30&limite=10');
+                const data = await response.json();
+                
+                let html = '';
+                
+                if (response.ok && data.success) {
+                    html += '<div class="test-box success">';
+                    html += '<h2>✅ API Funcionando Corretamente!</h2>';
+                    html += `<p><strong>Período:</strong> ${data.periodo} dias</p>`;
+                    html += `<p><strong>Timestamp:</strong> ${data.timestamp}</p>`;
+                    html += `<p><strong>Marcas encontradas:</strong> ${data.marcas_detalhadas.length}</p>`;
+                    html += '</div>';
+                    
+                    // Mostrar tabela de marcas
+                    if (data.marcas_detalhadas.length > 0) {
+                        html += '<h3>📊 Top Marcas Mais Vendidas</h3>';
+                        html += '<table>';
+                        html += '<thead><tr>';
+                        html += '<th>Código</th><th>Marca</th><th>Vendas</th><th>Quantidade</th><th>Valor Total</th>';
+                        html += '</tr></thead><tbody>';
+                        
+                        data.marcas_detalhadas.forEach(marca => {
+                            html += '<tr>';
+                            html += `<td>${marca.cd_marca}</td>`;
+                            html += `<td><strong>${marca.ds_marca}</strong></td>`;
+                            html += `<td>${parseInt(marca.total_vendas).toLocaleString('pt-BR')}</td>`;
+                            html += `<td>${parseInt(marca.quantidade_vendida).toLocaleString('pt-BR')}</td>`;
+                            html += `<td>R$ ${parseFloat(marca.valor_total).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>`;
+                            html += '</tr>';
+                        });
+                        
+                        html += '</tbody></table>';
+                    }
+                    
+                    // Mostrar JSON completo
+                    html += '<h3>📄 Resposta JSON da API</h3>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    
+                    html += '<div class="test-box success">';
+                    html += '<h3>✅ Conclusão</h3>';
+                    html += '<p>A API está funcionando perfeitamente! Os dados de vendas estão sendo retornados corretamente.</p>';
+                    html += '<p><strong>Se o dashboard não está mostrando os dados, o problema está no JavaScript do frontend.</strong></p>';
+                    html += '<button onclick="abrirDashboard()">📊 Abrir Dashboard Agora</button>';
+                    html += '</div>';
+                    
+                } else {
+                    html += '<div class="test-box error">';
+                    html += '<h2>❌ Erro na API</h2>';
+                    html += `<p><strong>Erro:</strong> ${data.error || 'Erro desconhecido'}</p>`;
+                    html += `<p><strong>Mensagem:</strong> ${data.message || 'N/A'}</p>`;
+                    
+                    if (response.status === 401) {
+                        html += '<p><strong>Você não está logado!</strong></p>';
+                        html += '<a href="/index.php?url=usuarios/login"><button>🔐 Fazer Login</button></a>';
+                    } else if (response.status === 400 && data.error && data.error.includes('empresa')) {
+                        html += '<p><strong>Nenhuma empresa selecionada!</strong></p>';
+                        html += '<a href="/index.php?url=relatorios/empresa"><button>🏢 Selecionar Empresa</button></a>';
+                    }
+                    
+                    html += '<h3>📄 Resposta completa:</h3>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    html += '</div>';
+                }
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-box error">
+                        <h2>❌ Erro ao conectar com a API</h2>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                        <p>Verifique se o servidor está rodando e se você está logado.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function abrirDashboard() {
+            window.location.href = '/index.php?url=marcasvendas/dashboard';
+        }
+        
+        // Executar teste automaticamente ao carregar
+        window.onload = () => {
+            testarAPI();
+        };
+    </script>
+</body>
+</html>

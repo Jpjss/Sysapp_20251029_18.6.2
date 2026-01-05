@@ -34,45 +34,66 @@ class Relatorio {
     }
     
     /**
-     * Busca estatísticas gerais - USANDO PED_VD
+     * Busca estatísticas gerais - USANDO TABELAS REAIS DO ERP
      */
     public function getEstatisticas() {
         $stats = [];
         
-        // Total de clientes
-        $sql = "SELECT COUNT(*) as total FROM glb_pessoa WHERE tp_pessoa = 2";
-        $result = $this->db->fetchOne($sql);
-        $stats['total_clientes'] = $result ? (int)$result['total'] : 0;
+        // Total de clientes - verificar se a tabela existe
+        try {
+            $sql = "SELECT COUNT(DISTINCT cd_pessoa) as total 
+                    FROM dm_orcamento_vendas_consolidadas";
+            $result = $this->db->fetchOne($sql);
+            $stats['total_clientes'] = $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            $stats['total_clientes'] = 0;
+        }
         
-        // Sistema ERP comercial - usa dados de vendas de ped_vd
+        // Sistema ERP comercial - usa dados de vendas
         $stats['total_questionarios'] = 0;
         
         // Total de vendas
-        $sql = "SELECT COUNT(*) as total, COALESCE(SUM(vlr_vd), 0)::NUMERIC(14,2) as valor_total 
-                FROM ped_vd 
-                WHERE sts_ped = 1";
-        $result = $this->db->fetchOne($sql);
-        $stats['total_respostas'] = $result ? (int)$result['total'] : 0;
-        $stats['valor_total_vendas'] = $result ? (float)$result['valor_total'] : 0;
+        try {
+            $sql = "SELECT COUNT(DISTINCT cd_pedido) as total, 
+                           COALESCE(SUM(vl_tot_it - vl_devol_proporcional), 0)::NUMERIC(14,2) as valor_total 
+                    FROM dm_orcamento_vendas_consolidadas";
+            $result = $this->db->fetchOne($sql);
+            $stats['total_respostas'] = $result ? (int)$result['total'] : 0;
+            $stats['valor_total_vendas'] = $result ? (float)$result['valor_total'] : 0;
+        } catch (Exception $e) {
+            $stats['total_respostas'] = 0;
+            $stats['valor_total_vendas'] = 0;
+        }
         
         // Vendas hoje
-        $sql = "SELECT COUNT(*) as total, COALESCE(SUM(vlr_vd), 0)::NUMERIC(14,2) as valor_hoje 
-                FROM ped_vd 
-                WHERE DATE(dt_hr_ped) = CURRENT_DATE 
-                AND sts_ped = 1";
-        $result = $this->db->fetchOne($sql);
-        $stats['atendimentos_hoje'] = $result ? (int)$result['total'] : 0;
-        $stats['valor_vendas_hoje'] = $result ? (float)$result['valor_hoje'] : 0;
+        try {
+            $sql = "SELECT COUNT(DISTINCT cd_pedido) as total, 
+                           COALESCE(SUM(vl_tot_it - vl_devol_proporcional), 0)::NUMERIC(14,2) as valor_hoje 
+                    FROM dm_orcamento_vendas_consolidadas 
+                    WHERE dt_emi_pedido >= CURRENT_DATE 
+                    AND dt_emi_pedido < CURRENT_DATE + INTERVAL '1 day'";
+            $result = $this->db->fetchOne($sql);
+            $stats['atendimentos_hoje'] = $result ? (int)$result['total'] : 0;
+            $stats['valor_vendas_hoje'] = $result ? (float)$result['valor_hoje'] : 0;
+        } catch (Exception $e) {
+            $stats['atendimentos_hoje'] = 0;
+            $stats['valor_vendas_hoje'] = 0;
+        }
         
         // Vendas no mês
-        $sql = "SELECT COUNT(*) as total, COALESCE(SUM(vlr_vd), 0)::NUMERIC(14,2) as valor_mes 
-                FROM ped_vd 
-                WHERE EXTRACT(MONTH FROM dt_hr_ped) = EXTRACT(MONTH FROM CURRENT_DATE)
-                AND EXTRACT(YEAR FROM dt_hr_ped) = EXTRACT(YEAR FROM CURRENT_DATE)
-                AND sts_ped = 1";
-        $result = $this->db->fetchOne($sql);
-        $stats['atendimentos_mes'] = $result ? (int)$result['total'] : 0;
-        $stats['valor_vendas_mes'] = $result ? (float)$result['valor_mes'] : 0;
+        try {
+            $sql = "SELECT COUNT(DISTINCT cd_pedido) as total, 
+                           COALESCE(SUM(vl_tot_it - vl_devol_proporcional), 0)::NUMERIC(14,2) as valor_mes 
+                    FROM dm_orcamento_vendas_consolidadas 
+                    WHERE EXTRACT(MONTH FROM dt_emi_pedido) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM dt_emi_pedido) = EXTRACT(YEAR FROM CURRENT_DATE)";
+            $result = $this->db->fetchOne($sql);
+            $stats['atendimentos_mes'] = $result ? (int)$result['total'] : 0;
+            $stats['valor_vendas_mes'] = $result ? (float)$result['valor_mes'] : 0;
+        } catch (Exception $e) {
+            $stats['atendimentos_mes'] = 0;
+            $stats['valor_vendas_mes'] = 0;
+        }
         
         return $stats;
     }
