@@ -447,4 +447,42 @@ class Usuario {
         
         return pg_query($conn, $sql);
     }
+    
+    /**
+     * Busca lista de vendedores para filtros
+     */
+    public function getVendedores() {
+        try {
+            $sql = "SELECT cd_usu, nm_usu 
+                    FROM segu_usu 
+                    WHERE nm_usu IS NOT NULL 
+                      AND nm_usu != ''
+                    ORDER BY nm_usu";
+            
+            $result = $this->db->fetchAll($sql);
+            return $result ? $result : [];
+        } catch (Exception $e) {
+            error_log("Erro em getVendedores: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Busca lista de filiais para filtros
+     */
+    public function getFiliais() {
+        try {
+            $sql = "SELECT cd_filial, 
+                           COALESCE(nm_fant, rz_filial, 'Filial ' || cd_filial) as nm_filial
+                    FROM prc_filial 
+                    ORDER BY nm_filial";
+            
+            $result = $this->db->fetchAll($sql);
+            return $result ? $result : [];
+        } catch (Exception $e) {
+            error_log("Erro em getFiliais: " . $e->getMessage());
+            return [];
+        }
+    }
+
 }

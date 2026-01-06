@@ -681,12 +681,12 @@ class RelatoriosController extends Controller {
         
         // Se foi submetido o formulário
         if ($this->isPost() && isset($_POST['submit']) && $_POST['submit'] === 'visualizar') {
-            // Coleta filtros
+            // Coleta filtros (defaults para outubro/2025 - período com dados)
             $filtros = [
-                'venda_dt_inicio' => $_POST['venda_dt_inicio'] ?? date('Y-m-01'),
-                'venda_dt_fim' => $_POST['venda_dt_fim'] ?? date('Y-m-d'),
-                'entrada_dt_inicio' => $_POST['entrada_dt_inicio'] ?? date('Y-m-01'),
-                'entrada_dt_fim' => $_POST['entrada_dt_fim'] ?? date('Y-m-d'),
+                'venda_dt_inicio' => $_POST['venda_dt_inicio'] ?? '2025-10-01',
+                'venda_dt_fim' => $_POST['venda_dt_fim'] ?? '2025-10-07',
+                'entrada_dt_inicio' => $_POST['entrada_dt_inicio'] ?? '2025-10-01',
+                'entrada_dt_fim' => $_POST['entrada_dt_fim'] ?? '2025-10-07',
                 'filiais' => $_POST['filiais'] ?? ['todas'],
                 'est_positivo' => isset($_POST['est_positivo']),
                 'est_zerado' => isset($_POST['est_zerado']),
@@ -1026,6 +1026,148 @@ class RelatoriosController extends Controller {
         exit;
     }
     
+    /**
+     * Relatório de Vendas por Vendedor
+     */
+    public function vendas_vendedor() {
+        try {
+            error_log("[vendas_vendedor] === INICIANDO ===");
+            
+            $this->requireAuth();
+            error_log("[vendas_vendedor] Auth OK");
+            
+            // Verifica se tem empresa configurada
+            if (!Session::check('Config.database')) {
+                error_log("[vendas_vendedor] Sem empresa configurada, redirecionando");
+                $this->redirect('relatorios/empresa');
+                return;
+            }
+            
+            error_log("[vendas_vendedor] Empresa configurada OK");
+            
+            // Inicializa variáveis
+            $dados = [];
+            $totais = [
+                'total_vendas' => 0,
+                'qtde_vendida' => 0,
+                'valor_total' => 0,
+                'ticket_medio' => 0,
+                'clientes_atendidos' => 0
+            ];
+            $periodoInfo = null;
+            $vendedores = [];
+            $filiais = [];
+            
+            error_log("[vendas_vendedor] Variáveis inicializadas");
+            
+            // Busca lista de vendedores e filiais para filtros ANTES do POST
+            try {
+                error_log("[vendas_vendedor] Buscando vendedores...");
+                $vendedores = $this->Usuario->getVendedores();
+                if ($vendedores === false) $vendedores = [];
+                error_log("[vendas_vendedor] Vendedores: " . count($vendedores));
+            } catch (Exception $e) {
+                error_log("[vendas_vendedor] ERRO getVendedores: " . $e->getMessage());
+                $vendedores = [];
+            }
+            
+            try {
+                error_log("[vendas_vendedor] Buscando filiais...");
+                $filiais = $this->Usuario->getFiliais();
+                if ($filiais === false) $filiais = [];
+                error_log("[vendas_vendedor] Filiais: " . count($filiais));
+            } catch (Exception $e) {
+                error_log("[vendas_vendedor] ERRO getFiliais: " . $e->getMessage());
+                $filiais = [];
+            }
+            
+            // Processa formulário se foi submetido
+            if (isset($_POST['submit'])) {
+                error_log("[vendas_vendedor] Processando POST");
+                
+                try {
+                    // Coleta filtros
+                    $filtros = [
+                        'dt_inicio' => $_POST['dt_inicio'] ?? '2025-10-01',
+                        'dt_fim' => $_POST['dt_fim'] ?? '2025-10-07',
+                        'vendedores' => $_POST['vendedores'] ?? [],
+                        'filiais' => $_POST['filiais'] ?? []
+                    ];
+                    
+                    error_log("[vendas_vendedor] Filtros: dt_inicio={$filtros['dt_inicio']}, dt_fim={$filtros['dt_fim']}, vendedores=" . count($filtros['vendedores']) . ", filiais=" . count($filtros['filiais']));
+                    
+                    // Busca dados
+                    error_log("[vendas_vendedor] Chamando getVendasPorVendedor...");
+                    $resultado = $this->Relatorio->getVendasPorVendedor($filtros);
+                    
+                    if (is_array($resultado) && isset($resultado['dados']) && isset($resultado['totais'])) {
+                        $dados = $resultado['dados'];
+                        $totais = $resultado['totais'];
+                        error_log("[vendas_vendedor] Dados OK: " . count($dados) . " filiais");
+                    } else {
+                        error_log("[vendas_vendedor] Resultado inválido: " . json_encode($resultado));
+                        $dados = [];
+                        $totais = [
+                            'total_vendas' => 0,
+                            'qtde_vendida' => 0,
+                            'valor_total' => 0,
+                            'ticket_medio' => 0,
+                            'clientes_atendidos' => 0
+                        ];
+                    }
+                    
+                    $periodoInfo = [
+                        'inicio' => date('d/m/Y', strtotime($filtros['dt_inicio'])),
+                        'fim' => date('d/m/Y', strtotime($filtros['dt_fim']))
+                    ];
+                    
+                } catch (Exception $e) {
+                    error_log("[vendas_vendedor] ERRO ao processar: " . $e->getMessage());
+                    error_log("[vendas_vendedor] Stack: " . $e->getTraceAsString());
+                    $dados = [];
+                    $totais = [
+                        'total_vendas' => 0,
+                        'qtde_vendida' => 0,
+                        'valor_total' => 0,
+                        'ticket_medio' => 0,
+                        'clientes_atendidos' => 0
+                    ];
+                }
+            }
+            
+            error_log("[vendas_vendedor] Preparando para renderizar - dados: " . count($dados) . ", vendedores: " . count($vendedores) . ", filiais: " . count($filiais));
+            
+            // Garante que todas as variáveis existem
+            $dados = $dados ?? [];
+            $totais = $totais ?? [];
+            $periodoInfo = $periodoInfo ?? null;
+            $vendedores = $vendedores ?? [];
+            $filiais = $filiais ?? [];
+            
+            $this->set(compact('dados', 'totais', 'periodoInfo', 'vendedores', 'filiais'));
+            
+            error_log("[vendas_vendedor] Chamando render...");
+            $this->render();
+            error_log("[vendas_vendedor] === FINALIZADO COM SUCESSO ===");
+            
+        } catch (Exception $e) {
+            error_log("[vendas_vendedor] === ERRO FATAL ===");
+            error_log("[vendas_vendedor] Mensagem: " . $e->getMessage());
+            error_log("[vendas_vendedor] Arquivo: " . $e->getFile() . ":" . $e->getLine());
+            error_log("[vendas_vendedor] Stack: " . $e->getTraceAsString());
+            
+            // Exibe erro amigável
+            echo "<!DOCTYPE html><html><head><title>Erro</title></head><body>";
+            echo "<h1>Erro ao carregar relatório</h1>";
+            echo "<p><strong>Erro:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+            echo "<p><strong>Arquivo:</strong> " . htmlspecialchars($e->getFile()) . " (linha " . $e->getLine() . ")</p>";
+            echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+            echo "<p><a href='" . BASE_URL . "/relatorios/lista'>Voltar para Relatórios</a></p>";
+            echo "</body></html>";
+            exit;
+        }
+    }
+
     /**
      * Formata data de dd/mm/yyyy para yyyy-mm-dd
      */

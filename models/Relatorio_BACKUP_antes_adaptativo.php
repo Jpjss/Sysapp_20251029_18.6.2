@@ -1,6 +1,6 @@
-﻿<?php
+<?php
 /**
- * Model de RelatÃ³rio - CORRIGIDO COM TABELAS REAIS
+ * Model de Relatório - CORRIGIDO COM TABELAS REAIS
  */
 
 class Relatorio {
@@ -14,10 +14,10 @@ class Relatorio {
         require_once __DIR__ . '/../helpers/DatabaseStructureDetector.php';
         $this->structureDetector = new DatabaseStructureDetector($this->db);
 
-        // Log inicial da criaÃ§Ã£o da instÃ¢ncia
+        // Log inicial da criação da instância
         @file_put_contents(__DIR__ . '/../login_debug.log', "[" . date('Y-m-d H:i:s') . "] Relatorio::__construct ENTER\n", FILE_APPEND);
 
-        // Reconecta ao banco da empresa se estiver configurado na sessÃ£o
+        // Reconecta ao banco da empresa se estiver configurado na sessão
         if (Session::check('Config.database')) {
             $host = Session::read('Config.host');
             $database = Session::read('Config.database');
@@ -36,10 +36,10 @@ class Relatorio {
                 $this->connected = false;
             }
         } else {
-            // SE NÃƒO HOUVER SESSÃƒO, CONECTAR COM CONFIGURAÃ‡ÃƒO PADRÃƒO DO database.php
+            // SE NÃO HOUVER SESSÃO, CONECTAR COM CONFIGURAÇÃO PADRÃO DO database.php
             try {
                 @file_put_contents(__DIR__ . '/../login_debug.log', "[" . date('Y-m-d H:i:s') . "] Relatorio::__construct connecting with DEFAULT config\n", FILE_APPEND);
-                $this->db->connect(); // Usa configuraÃ§Ã£o padrÃ£o da classe Database
+                $this->db->connect(); // Usa configuração padrão da classe Database
                 @file_put_contents(__DIR__ . '/../login_debug.log', "[" . date('Y-m-d H:i:s') . "] Relatorio::__construct connected with DEFAULT\n", FILE_APPEND);
                 $this->connected = true;
             } catch (Throwable $e) {
@@ -51,7 +51,7 @@ class Relatorio {
     }
     
     /**
-     * Busca estatÃ­sticas gerais - CORRIGIDO CONFORME CONSULTAS_RELATORIOS.md
+     * Busca estatísticas gerais - CORRIGIDO CONFORME CONSULTAS_RELATORIOS.md
      */
     public function getEstatisticas() {
         $stats = [];
@@ -100,7 +100,7 @@ class Relatorio {
             $stats['valor_vendas_hoje'] = 0;
         }
         
-        // Vendas no mÃªs - Query #1 do CONSULTAS_RELATORIOS.md
+        // Vendas no mês - Query #1 do CONSULTAS_RELATORIOS.md
         try {
             $sql = "SELECT COUNT(DISTINCT cd_pedido) as total, 
                            COALESCE(SUM(vl_tot_it - vl_devol_proporcional), 0)::NUMERIC(14,2) as valor_mes 
@@ -120,7 +120,7 @@ class Relatorio {
     }
     
     /**
-     * Busca vendas por perÃ­odo - Query #2 do CONSULTAS_RELATORIOS.md
+     * Busca vendas por período - Query #2 do CONSULTAS_RELATORIOS.md
      */
     public function getAtendimentosPorPeriodo($dt_inicio, $dt_fim) {
         try {
@@ -138,7 +138,7 @@ class Relatorio {
                 ':dt_fim' => $dt_fim
             ]) ?: [];
         } catch (Exception $e) {
-            error_log("Erro ao buscar atendimentos por perÃ­odo: " . $e->getMessage());
+            error_log("Erro ao buscar atendimentos por período: " . $e->getMessage());
             return [];
         }
     }
@@ -168,7 +168,7 @@ class Relatorio {
     }
     
     /**
-     * Busca filiais disponÃ­veis
+     * Busca filiais disponíveis
      */
     public function getFiliais() {
         $sql = "SELECT cd_filial, 
@@ -181,7 +181,7 @@ class Relatorio {
     }
     
     /**
-     * RelatÃ³rio de Estoque Detalhado por FamÃ­lia/Grupo
+     * Relatório de Estoque Detalhado por Família/Grupo
      */
     public function estoque_detalhado($parametros) {
         $dt_referencia = $parametros['dt_referencia'];
@@ -291,7 +291,7 @@ class Relatorio {
     }
     
     /**
-     * Busca totais de vendas no perÃ­odo - Query #8 do CONSULTAS_RELATORIOS.md
+     * Busca totais de vendas no período - Query #8 do CONSULTAS_RELATORIOS.md
      */
     public function getTotaisAtendimentos($dt_inicio, $dt_fim) {
         try {
@@ -346,20 +346,20 @@ class Relatorio {
     }
     
     /**
-     * RelatÃ³rio Entrada x Vendas - ADAPTATIVO
+     * Relatório Entrada x Vendas - ADAPTATIVO
      * Detecta automaticamente a estrutura do banco e usa a query apropriada
      */
     public function getEntradaVendas($filtros) {
         // Detectar estrutura do banco
         $structure = $this->structureDetector->detectStructure();
         
-        // Usar query conforme estrutura disponÃ­vel
+        // Usar query conforme estrutura disponível
         if ($structure['version'] === 'NEW') {
             return $this->getEntradaVendasNew($filtros);
         } elseif ($structure['version'] === 'OLD') {
             return $this->getEntradaVendasOld($filtros);
         } else {
-            throw new Exception('Estrutura de banco de dados nÃ£o reconhecida');
+            throw new Exception('Estrutura de banco de dados não reconhecida');
         }
     }
     
@@ -371,7 +371,7 @@ class Relatorio {
         $vendaDtFim = $filtros['venda_dt_fim'];
         $filiais = $filtros['filiais'] ?? ['todas'];
         
-        // Monta condiÃ§Ã£o de filiais
+        // Monta condição de filiais
         $condicaoFiliais = '';
         if (!in_array('todas', $filiais) && !empty($filiais)) {
             $filiaisPlaceholder = implode(',', array_map(function($f) { return (int)$f; }, $filiais));
@@ -450,7 +450,7 @@ class Relatorio {
         $vendaDtFim = $filtros['venda_dt_fim'];
         $filiais = $filtros['filiais'] ?? ['todas'];
         
-        // Monta condiÃ§Ã£o de filiais
+        // Monta condição de filiais
         $condicaoFiliais = '';
         if (!in_array('todas', $filiais) && !empty($filiais)) {
             $filiaisPlaceholder = implode(',', array_map(function($f) { return (int)$f; }, $filiais));
@@ -525,61 +525,26 @@ class Relatorio {
             $resultados = [];
         }
         
-        // Organiza dados por filial e marca
+        // Organiza dados por filial
         $dados = [];
         $totaisGerais = [
             'estoque_atual' => 0,
             'qtde_entradas' => 0,
             'qtde_vendida' => 0,
             'valor_estoque' => 0,
-            'valor_vendido' => 0,
-            'margem' => 0
+            'valor_vendido' => 0
         ];
         
         foreach ($resultados as $row) {
             $nmFilial = $row['nm_filial'];
             
             if (!isset($dados[$nmFilial])) {
-                $dados[$nmFilial] = [
-                    'itens' => [],
-                    'subtotal' => [
-                        'estoque_atual' => 0,
-                        'qtde_entradas' => 0,
-                        'qtde_vendida' => 0,
-                        'valor_estoque' => 0,
-                        'valor_vendido' => 0,
-                        'margem' => 0
-                    ]
-                ];
+                $dados[$nmFilial] = [];
             }
             
-            // Adiciona item (marca)
-            $dados[$nmFilial]['itens'][] = [
-                'marca' => $row['marca'],
-                'estoque_atual' => (float)$row['estoque_atual'],
-                'qtde_entradas' => (float)$row['qtde_entradas'],
-                'perc_qtde_estoque' => (float)$row['perc_qtde_estoque'],
-                'qtde_vendida' => (float)$row['qtde_vendida'],
-                'perc_qtde_venda' => (float)$row['perc_qtde_venda'],
-                'valor_estoque' => (float)$row['valor_estoque'],
-                'perc_valor_estoque' => (float)$row['perc_valor_estoque'],
-                'valor_vendido' => (float)$row['valor_vendido'],
-                'perc_valor_venda' => (float)$row['perc_valor_venda'],
-                'rel_estoque_valor' => (float)$row['rel_estoque_valor'],
-                'rel_estoque_qtde' => (float)$row['rel_estoque_qtde'],
-                'preco_custo' => (float)$row['preco_custo'],
-                'preco_venda' => (float)$row['preco_venda'],
-                'margem' => (float)$row['margem']
-            ];
+            $dados[$nmFilial][] = $row;
             
-            // Acumula subtotais da filial
-            $dados[$nmFilial]['subtotal']['estoque_atual'] += (float)$row['estoque_atual'];
-            $dados[$nmFilial]['subtotal']['qtde_entradas'] += (float)$row['qtde_entradas'];
-            $dados[$nmFilial]['subtotal']['qtde_vendida'] += (float)$row['qtde_vendida'];
-            $dados[$nmFilial]['subtotal']['valor_estoque'] += (float)$row['valor_estoque'];
-            $dados[$nmFilial]['subtotal']['valor_vendido'] += (float)$row['valor_vendido'];
-            
-            // Acumula totais gerais
+            // Acumula totais
             $totaisGerais['estoque_atual'] += (float)$row['estoque_atual'];
             $totaisGerais['qtde_entradas'] += (float)$row['qtde_entradas'];
             $totaisGerais['qtde_vendida'] += (float)$row['qtde_vendida'];
@@ -587,250 +552,268 @@ class Relatorio {
             $totaisGerais['valor_vendido'] += (float)$row['valor_vendido'];
         }
         
-        // Calcula margem média para subtotais e total geral
-        foreach ($dados as $filial => &$filialData) {
-            if ($filialData['subtotal']['valor_estoque'] > 0) {
-                $filialData['subtotal']['margem'] = 
-                    (($filialData['subtotal']['valor_vendido'] - $filialData['subtotal']['valor_estoque']) / 
-                    $filialData['subtotal']['valor_estoque']) * 100;
-            }
-        }
-        
-        if ($totaisGerais['valor_estoque'] > 0) {
-            $totaisGerais['margem'] = 
-                (($totaisGerais['valor_vendido'] - $totaisGerais['valor_estoque']) / 
-                $totaisGerais['valor_estoque']) * 100;
-        }
-        
         return [
             'dados' => $dados,
             'totais' => $totaisGerais
         ];
     }
-    
-    /**
-     * Relatório de Vendas por Vendedor - Adaptativo
-     */
-    public function getVendasPorVendedor($filtros) {
-        // Detecta estrutura do banco
-        $version = $this->structureDetector->detectVersion();
+        // Marca de entrada no método para debug imediato
+        @file_put_contents(__DIR__ . '/../login_debug.log', "[" . date('Y-m-d H:i:s') . "] EntradaVendas ENTER\n", FILE_APPEND);
+
+        $vendaDtInicio = $filtros['venda_dt_inicio'];
+        $vendaDtFim = $filtros['venda_dt_fim'];
+        $entradaDtInicio = $filtros['entrada_dt_inicio'];
+        $entradaDtFim = $filtros['entrada_dt_fim'];
+        $filiais = $filtros['filiais'] ?? ['todas'];
+        $estPositivo = $filtros['est_positivo'] ?? false;
+        $estZerado = $filtros['est_zerado'] ?? false;
+        $estNegativo = $filtros['est_negativo'] ?? false;
         
-        if ($version === 'NEW') {
-            return $this->getVendasPorVendedorNew($filtros);
-        } elseif ($version === 'OLD') {
-            return $this->getVendasPorVendedorOld($filtros);
+        if (!$estPositivo && !$estZerado && !$estNegativo) {
+            $estPositivo = true;
+            $estZerado = true;
+            $estNegativo = true;
         }
         
-        return ['dados' => [], 'totais' => []];
-    }
-    
-    /**
-     * Vendas por Vendedor - Estrutura NOVA (dm_*)
-     */
-    private function getVendasPorVendedorNew($filtros) {
-        $params = [
-            ':dt_inicio' => $filtros['dt_inicio'],
-            ':dt_fim' => $filtros['dt_fim']
-        ];
+        // Monta condição de filiais
+        $condicaoFiliais = '';
+        if (!in_array('todas', $filiais) && !empty($filiais)) {
+            $filiaisPlaceholder = implode(',', array_map(function($f) { return (int)$f; }, $filiais));
+            $condicaoFiliais = "AND f.cd_filial IN ($filiaisPlaceholder)";
+        }
         
-        // Filtros opcionais - Remove "todos" e "todas" do array
-        $vendedoresFiltrados = array_values(array_filter(
-            $filtros['vendedores'] ?? [],
-            function($v) { return $v !== 'todos'; }
-        ));
-        
-        $filiaisFiltradas = array_values(array_filter(
-            $filtros['filiais'] ?? [],
-            function($f) { return $f !== 'todas'; }
-        ));
-        
-        $condicaoVendedores = "";
-        if (!empty($vendedoresFiltrados)) {
-            $vendedoresPlaceholder = implode(',', array_map(function($i) { return ":vendedor_$i"; }, range(0, count($vendedoresFiltrados) - 1)));
-            $condicaoVendedores = "AND v.cd_usu_cad IN ($vendedoresPlaceholder)";
-            foreach ($vendedoresFiltrados as $i => $vendedor) {
-                $params[":vendedor_$i"] = $vendedor;
+        // Monta condição de estoque - AJUSTADA para não filtrar se estoque estiver vazio
+        // Se todas as 3 opções estão marcadas, não aplica filtro (mostra tudo)
+        $condicaoEstoque = '';
+        if (!($estPositivo && $estZerado && $estNegativo)) {
+            // Se nem todas estão marcadas, aplica filtro específico
+            $condicoesEstoque = [];
+            if ($estPositivo) $condicoesEstoque[] = 'COALESCE(est.qtde_atual, 0) > 0';
+            if ($estZerado) $condicoesEstoque[] = 'COALESCE(est.qtde_atual, 0) = 0';
+            if ($estNegativo) $condicoesEstoque[] = 'COALESCE(est.qtde_atual, 0) < 0';
+            
+            if (!empty($condicoesEstoque)) {
+                $condicaoEstoque = 'AND (' . implode(' OR ', $condicoesEstoque) . ')';
             }
         }
+        // Se todas estão marcadas, $condicaoEstoque fica vazio = sem filtro
         
-        $condicaoFiliais = "";
-        if (!empty($filiaisFiltradas)) {
-            $filiaisPlaceholder = implode(',', array_map(function($i) { return ":filial_$i"; }, range(0, count($filiaisFiltradas) - 1)));
-            $condicaoFiliais = "AND v.cd_filial IN ($filiaisPlaceholder)";
-            foreach ($filiaisFiltradas as $i => $filial) {
-                $params[":filial_$i"] = $filial;
-            }
-        }
-        
+        // Query principal - BASEADA EM VENDAS (não em estoque)
         $sql = "
+            WITH vendas_periodo AS (
+                -- Vendas por marca e filial no período
+                SELECT 
+                    p.cd_marca,
+                    p.ds_marca,
+                    v.cd_filial,
+                    COALESCE(SUM(v.qtde_produto), 0) as qtde_vendida,
+                    COALESCE(SUM(v.vl_tot_it - v.vl_devol_proporcional), 0) as valor_vendido,
+                    COALESCE(AVG(v.vl_tot_it / NULLIF(v.qtde_produto, 0)), 0) as preco_medio
+                FROM dm_orcamento_vendas_consolidadas v
+                INNER JOIN dm_produto p ON p.cd_cpl_tamanho = v.cd_cpl_tamanho
+                WHERE DATE(v.dt_emi_pedido) >= :venda_dt_inicio::date
+                  AND DATE(v.dt_emi_pedido) <= :venda_dt_fim::date
+                  AND p.cd_marca IS NOT NULL
+                  AND p.ds_marca IS NOT NULL
+                GROUP BY p.cd_marca, p.ds_marca, v.cd_filial
+            ),
+            estoque_atual AS (
+                -- Estoque atual por marca e filial (opcional)
+                SELECT 
+                    p.cd_marca,
+                    est.cd_filial,
+                    COALESCE(SUM(est.qtde_estoque), 0) as qtde_atual,
+                    COALESCE(AVG(est.vlr_custo), 0) as preco_custo_medio
+                FROM dm_estoque_atual est
+                INNER JOIN dm_produto p ON p.cd_cpl_tamanho = est.cd_cpl_tamanho
+                WHERE p.cd_marca IS NOT NULL
+                  AND est.ativo = 1
+                GROUP BY p.cd_marca, est.cd_filial
+            ),
+            filiais_ativas AS (
+                -- Filiais ativas
+                SELECT cd_filial, 
+                       COALESCE(nm_fant, rz_filial, 'Filial ' || cd_filial) as nm_filial
+                FROM prc_filial
+                WHERE sts_filial = 1
+                $condicaoFiliais
+            )
             SELECT 
-                u.cd_usu,
-                u.nm_usu as vendedor,
-                COALESCE(f.nm_fant, f.rz_filial, 'Filial ' || f.cd_filial) as nm_filial,
-                COUNT(DISTINCT v.cd_pedido) as total_vendas,
-                SUM(v.qtde_produto) as qtde_vendida,
-                COALESCE(SUM(v.vl_tot_it - v.vl_devol_proporcional), 0) as valor_total,
-                COALESCE(AVG(v.vl_tot_it - v.vl_devol_proporcional), 0) as ticket_medio,
-                COUNT(DISTINCT v.cd_pessoa) as clientes_atendidos
-            FROM dm_orcamento_vendas_consolidadas v
-            INNER JOIN segu_usu u ON u.cd_usu = v.cd_usu_cad
-            INNER JOIN prc_filial f ON f.cd_filial = v.cd_filial
-            WHERE DATE(v.dt_emi_pedido) >= :dt_inicio::date
-              AND DATE(v.dt_emi_pedido) <= :dt_fim::date
-              $condicaoVendedores
-              $condicaoFiliais
-            GROUP BY u.cd_usu, u.nm_usu, f.cd_filial, COALESCE(f.nm_fant, f.rz_filial, 'Filial ' || f.cd_filial)
-            ORDER BY valor_total DESC, total_vendas DESC
+                f.nm_filial,
+                f.cd_filial,
+                vd.ds_marca as nm_marca,
+                vd.cd_marca,
+                COALESCE(est.qtde_atual, 0) as estoque_atual,
+                0 as qtde_entradas,
+                vd.qtde_vendida,
+                COALESCE(est.qtde_atual * est.preco_custo_medio, 0)::NUMERIC(14,2) as valor_estoque,
+                vd.valor_vendido::NUMERIC(14,2) as valor_vendido,
+                COALESCE(est.preco_custo_medio, 0)::NUMERIC(14,2) as preco_custo,
+                vd.preco_medio::NUMERIC(14,2) as preco_venda
+            FROM vendas_periodo vd
+            INNER JOIN filiais_ativas f ON f.cd_filial = vd.cd_filial
+            LEFT JOIN estoque_atual est ON est.cd_marca = vd.cd_marca AND est.cd_filial = vd.cd_filial
+            ORDER BY f.nm_filial, vd.ds_marca, vd.qtde_vendida DESC
+            LIMIT 1000
         ";
         
-        return $this->executeVendasVendedor($sql, $params);
-    }
-    
-    /**
-     * Vendas por Vendedor - Estrutura ANTIGA (ped_vd)
-     */
-    private function getVendasPorVendedorOld($filtros) {
         $params = [
-            ':dt_inicio' => $filtros['dt_inicio'],
-            ':dt_fim' => $filtros['dt_fim']
+            ':venda_dt_inicio' => $vendaDtInicio,
+            ':venda_dt_fim' => $vendaDtFim
         ];
         
-        // Filtros opcionais - Remove "todos" e "todas" do array
-        $vendedoresFiltrados = array_values(array_filter(
-            $filtros['vendedores'] ?? [],
-            function($v) { return $v !== 'todos'; }
-        ));
+        // Debug: log da query
+        error_log("SQL Entrada x Vendas: " . $sql);
+        error_log("Params: " . print_r($params, true));
+        @file_put_contents(__DIR__ . '/../login_debug.log', "[" . date('Y-m-d H:i:s') . "] EntradaVendas SQL prepared\n", FILE_APPEND);
+        @file_put_contents(__DIR__ . '/../login_debug.log', "Params: " . print_r($params, true) . "\n", FILE_APPEND);
         
-        $filiaisFiltradas = array_values(array_filter(
-            $filtros['filiais'] ?? [],
-            function($f) { return $f !== 'todas'; }
-        ));
-        
-        $condicaoVendedores = "";
-        if (!empty($vendedoresFiltrados)) {
-            $vendedoresPlaceholder = implode(',', array_map(function($i) { return ":vendedor_$i"; }, range(0, count($vendedoresFiltrados) - 1)));
-            $condicaoVendedores = "AND v.cd_usu IN ($vendedoresPlaceholder)";
-            foreach ($vendedoresFiltrados as $i => $vendedor) {
-                $params[":vendedor_$i"] = $vendedor;
-            }
-        }
-        
-        $condicaoFiliais = "";
-        if (!empty($filiaisFiltradas)) {
-            $filiaisPlaceholder = implode(',', array_map(function($i) { return ":filial_$i"; }, range(0, count($filiaisFiltradas) - 1)));
-            $condicaoFiliais = "AND v.cd_filial IN ($filiaisPlaceholder)";
-            foreach ($filiaisFiltradas as $i => $filial) {
-                $params[":filial_$i"] = $filial;
-            }
-        }
-        
-        $sql = "
-            SELECT 
-                u.cd_usu,
-                u.nm_usu as vendedor,
-                COALESCE(f.nm_filial, 'Filial ' || f.cd_filial) as nm_filial,
-                COUNT(DISTINCT v.cd_ped) as total_vendas,
-                SUM(vpi.qtde_produto) as qtde_vendida,
-                COALESCE(SUM(v.vl_ped), 0) as valor_total,
-                COALESCE(AVG(v.vl_ped), 0) as ticket_medio,
-                COUNT(DISTINCT v.cd_pess) as clientes_atendidos
-            FROM ped_vd v
-            INNER JOIN ped_vd_itens vpi ON vpi.cd_ped = v.cd_ped AND vpi.cd_filial = v.cd_filial
-            INNER JOIN segu_usu u ON u.cd_usu = v.cd_usu
-            LEFT JOIN prc_filial f ON f.cd_filial = v.cd_filial
-            WHERE DATE(v.dt_ped) >= :dt_inicio::date
-              AND DATE(v.dt_ped) <= :dt_fim::date
-              $condicaoVendedores
-              $condicaoFiliais
-            GROUP BY u.cd_usu, u.nm_usu, f.cd_filial, COALESCE(f.nm_filial, 'Filial ' || f.cd_filial)
-            ORDER BY valor_total DESC, total_vendas DESC
-        ";
-        
-        return $this->executeVendasVendedor($sql, $params);
-    }
-    
-    /**
-     * Executa query e organiza resultados de vendas por vendedor
-     */
-    private function executeVendasVendedor($sql, $params) {
         try {
+            @file_put_contents(__DIR__ . '/../login_debug.log', "[" . date('Y-m-d H:i:s') . "] EntradaVendas BEFORE fetchAll\n", FILE_APPEND);
             $resultados = $this->db->fetchAll($sql, $params);
-        } catch (Exception $e) {
-            error_log("Erro em getVendasPorVendedor: " . $e->getMessage());
-            $resultados = [];
+            @file_put_contents(__DIR__ . '/../login_debug.log', "[" . date('Y-m-d H:i:s') . "] EntradaVendas AFTER fetchAll\n", FILE_APPEND);
+        } catch (Throwable $e) {
+            $errMsg = sprintf("[%s] EntradaVendas EXCEPTION: %s\nTrace:\n%s\n", date('Y-m-d H:i:s'), $e->getMessage(), $e->getTraceAsString());
+            @file_put_contents(__DIR__ . '/../login_debug.log', $errMsg, FILE_APPEND);
+            error_log("EntradaVendas EXCEPTION: " . $e->getMessage());
+            $resultados = false;
         }
-        
+
+        // Debug: verifica se houve erro
+
         if ($resultados === false) {
+            error_log("ERRO ao executar query de Entrada x Vendas");
+            @file_put_contents(__DIR__ . '/../login_debug.log', "[" . date('Y-m-d H:i:s') . "] EntradaVendas: resultado false\n", FILE_APPEND);
+            // Evita foreach em false
             $resultados = [];
+        } else {
+            error_log("Query retornou " . count($resultados) . " linhas");
         }
+
+        // Log temporário adicional em login_debug.log (facilita debug local)
+        $cnt = is_array($resultados) ? count($resultados) : 0;
+        $msg = sprintf("[%s] EntradaVendas result: %d linhas | params: %s\n", date('Y-m-d H:i:s'), $cnt, json_encode($params));
+        @file_put_contents(__DIR__ . '/../login_debug.log', $msg, FILE_APPEND);
         
-        // Organiza dados por filial e vendedor
-        $dados = [];
-        $totaisGerais = [
-            'total_vendas' => 0,
+        try {
+            // Organiza dados por filial
+            $dados = [];
+            $totaisGerais = [
+            'estoque_atual' => 0,
+            'qtde_entradas' => 0,
             'qtde_vendida' => 0,
-            'valor_total' => 0,
-            'clientes_atendidos' => 0,
-            'ticket_medio' => 0
+            'valor_estoque' => 0,
+            'valor_vendido' => 0
         ];
-        
-        $totalVendasGeral = 0;
-        $totalValorGeral = 0;
         
         foreach ($resultados as $row) {
-            $nmFilial = $row['nm_filial'];
+            $filial = $row['nm_filial'];
             
-            if (!isset($dados[$nmFilial])) {
-                $dados[$nmFilial] = [
+            if (!isset($dados[$filial])) {
+                $dados[$filial] = [
                     'itens' => [],
                     'subtotal' => [
-                        'total_vendas' => 0,
+                        'estoque_atual' => 0,
+                        'qtde_entradas' => 0,
                         'qtde_vendida' => 0,
-                        'valor_total' => 0,
-                        'clientes_atendidos' => 0,
-                        'ticket_medio' => 0
+                        'valor_estoque' => 0,
+                        'valor_vendido' => 0
                     ]
                 ];
             }
             
-            // Adiciona item (vendedor)
-            $dados[$nmFilial]['itens'][] = [
-                'vendedor' => $row['vendedor'],
-                'total_vendas' => (int)$row['total_vendas'],
+            $relEstoqueValor = $row['valor_vendido'] > 0 ? $row['valor_estoque'] / $row['valor_vendido'] : 0;
+            $relEstoqueQtde = $row['qtde_vendida'] > 0 ? $row['estoque_atual'] / $row['qtde_vendida'] : 0;
+            
+            $margem = 0;
+            if ($row['preco_venda'] > 0) {
+                $margem = (($row['preco_venda'] - $row['preco_custo']) / $row['preco_venda']) * 100;
+            }
+            
+            $item = [
+                'marca' => $row['nm_marca'],
+                'estoque_atual' => (int)$row['estoque_atual'],
+                'qtde_entradas' => (int)$row['qtde_entradas'],
                 'qtde_vendida' => (int)$row['qtde_vendida'],
-                'valor_total' => (float)$row['valor_total'],
-                'ticket_medio' => (float)$row['ticket_medio'],
-                'clientes_atendidos' => (int)$row['clientes_atendidos']
+                'valor_estoque' => (float)$row['valor_estoque'],
+                'valor_vendido' => (float)$row['valor_vendido'],
+                'rel_estoque_valor' => $relEstoqueValor,
+                'rel_estoque_qtde' => $relEstoqueQtde,
+                'preco_custo' => (float)$row['preco_custo'],
+                'preco_venda' => (float)$row['preco_venda'],
+                'margem' => $margem,
+                'perc_qtde_estoque' => 0,
+                'perc_qtde_venda' => 0,
+                'perc_valor_estoque' => 0,
+                'perc_valor_venda' => 0
             ];
             
-            // Acumula subtotais da filial
-            $dados[$nmFilial]['subtotal']['total_vendas'] += (int)$row['total_vendas'];
-            $dados[$nmFilial]['subtotal']['qtde_vendida'] += (int)$row['qtde_vendida'];
-            $dados[$nmFilial]['subtotal']['valor_total'] += (float)$row['valor_total'];
-            $dados[$nmFilial]['subtotal']['clientes_atendidos'] += (int)$row['clientes_atendidos'];
+            $dados[$filial]['itens'][] = $item;
             
-            // Acumula para cálculo de ticket médio da filial
-            $totalVendasGeral += (int)$row['total_vendas'];
-            $totalValorGeral += (float)$row['valor_total'];
+            $dados[$filial]['subtotal']['estoque_atual'] += $item['estoque_atual'];
+            $dados[$filial]['subtotal']['qtde_entradas'] += $item['qtde_entradas'];
+            $dados[$filial]['subtotal']['qtde_vendida'] += $item['qtde_vendida'];
+            $dados[$filial]['subtotal']['valor_estoque'] += $item['valor_estoque'];
+            $dados[$filial]['subtotal']['valor_vendido'] += $item['valor_vendido'];
             
-            // Acumula totais gerais
-            $totaisGerais['total_vendas'] += (int)$row['total_vendas'];
-            $totaisGerais['qtde_vendida'] += (int)$row['qtde_vendida'];
-            $totaisGerais['valor_total'] += (float)$row['valor_total'];
-            $totaisGerais['clientes_atendidos'] += (int)$row['clientes_atendidos'];
+            $totaisGerais['estoque_atual'] += $item['estoque_atual'];
+            $totaisGerais['qtde_entradas'] += $item['qtde_entradas'];
+            $totaisGerais['qtde_vendida'] += $item['qtde_vendida'];
+            $totaisGerais['valor_estoque'] += $item['valor_estoque'];
+            $totaisGerais['valor_vendido'] += $item['valor_vendido'];
+        }
+        } catch (Throwable $e) {
+            $errMsg = sprintf("[%s] EntradaVendas PROCESSING EXCEPTION: %s\nTrace:\n%s\n", date('Y-m-d H:i:s'), $e->getMessage(), $e->getTraceAsString());
+            @file_put_contents(__DIR__ . '/../login_debug.log', $errMsg, FILE_APPEND);
+            error_log("EntradaVendas PROCESSING EXCEPTION: " . $e->getMessage());
+            return [
+                'dados' => [],
+                'totais' => [
+                    'estoque_atual' => 0,
+                    'qtde_entradas' => 0,
+                    'qtde_vendida' => 0,
+                    'valor_estoque' => 0,
+                    'valor_vendido' => 0,
+                    'margem' => 0
+                ]
+            ];
         }
         
-        // Calcula ticket médio para subtotais e total geral
-        foreach ($dados as &$filialData) {
-            if ($filialData['subtotal']['total_vendas'] > 0) {
-                $filialData['subtotal']['ticket_medio'] = 
-                    $filialData['subtotal']['valor_total'] / $filialData['subtotal']['total_vendas'];
+        // Calcula percentuais
+        foreach ($dados as $filial => &$filialData) {
+            $subtotal = $filialData['subtotal'];
+            
+            if ($subtotal['valor_vendido'] > 0) {
+                $custoTotal = $subtotal['valor_vendido'] - ($subtotal['valor_estoque'] > 0 ? $subtotal['valor_estoque'] : 0);
+                $filialData['subtotal']['margem'] = (($subtotal['valor_vendido'] - $custoTotal) / $subtotal['valor_vendido']) * 100;
+            } else {
+                $filialData['subtotal']['margem'] = 0;
+            }
+            
+            foreach ($filialData['itens'] as &$item) {
+                $item['perc_qtde_estoque'] = $subtotal['estoque_atual'] > 0 
+                    ? ($item['estoque_atual'] / $subtotal['estoque_atual']) * 100 
+                    : 0;
+                
+                $item['perc_qtde_venda'] = $subtotal['qtde_vendida'] > 0 
+                    ? ($item['qtde_vendida'] / $subtotal['qtde_vendida']) * 100 
+                    : 0;
+                
+                $item['perc_valor_estoque'] = $subtotal['valor_estoque'] > 0 
+                    ? ($item['valor_estoque'] / $subtotal['valor_estoque']) * 100 
+                    : 0;
+                
+                $item['perc_valor_venda'] = $subtotal['valor_vendido'] > 0 
+                    ? ($item['valor_vendido'] / $subtotal['valor_vendido']) * 100 
+                    : 0;
             }
         }
         
-        if ($totaisGerais['total_vendas'] > 0) {
-            $totaisGerais['ticket_medio'] = 
-                $totaisGerais['valor_total'] / $totaisGerais['total_vendas'];
+        if ($totaisGerais['valor_vendido'] > 0) {
+            $custoTotalGeral = $totaisGerais['valor_vendido'] - ($totaisGerais['valor_estoque'] > 0 ? $totaisGerais['valor_estoque'] : 0);
+            $totaisGerais['margem'] = (($totaisGerais['valor_vendido'] - $custoTotalGeral) / $totaisGerais['valor_vendido']) * 100;
+        } else {
+            $totaisGerais['margem'] = 0;
         }
         
         return [
@@ -838,5 +821,4 @@ class Relatorio {
             'totais' => $totaisGerais
         ];
     }
-
 }
