@@ -1,0 +1,192 @@
+{
+    "data_analise": "2026-01-05 23:41:04",
+    "total_tabelas": 6,
+    "tabelas_vendas_analisadas": 4,
+    "tabelas_produtos_analisadas": 0,
+    "mapeamento": {
+        "tabela_vendas": "sysapp_config_empresas",
+        "tabela_produtos": null,
+        "campos_vendas": [],
+        "campos_produtos": []
+    },
+    "detalhes_vendas": {
+        "sysapp_config_empresas": {
+            "total_colunas": 9,
+            "total_registros": 1,
+            "campos_encontrados": [],
+            "score": 0,
+            "colunas": [
+                {
+                    "column_name": "cd_empresa",
+                    "data_type": "integer",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "nm_empresa",
+                    "data_type": "character varying",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "ds_host",
+                    "data_type": "character varying",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "ds_banco",
+                    "data_type": "character varying",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "ds_usuario",
+                    "data_type": "character varying",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "ds_senha",
+                    "data_type": "character varying",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "ds_porta",
+                    "data_type": "character varying",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "fg_ativo",
+                    "data_type": "character",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "dt_cadastro",
+                    "data_type": "timestamp without time zone",
+                    "is_nullable": "YES"
+                }
+            ]
+        },
+        "sysapp_config_user": {
+            "total_colunas": 9,
+            "total_registros": 1,
+            "campos_encontrados": [],
+            "score": 0,
+            "colunas": [
+                {
+                    "column_name": "cd_usuario",
+                    "data_type": "integer",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "cd_usu_erp",
+                    "data_type": "integer",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "nm_usuario",
+                    "data_type": "character varying",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "ds_login",
+                    "data_type": "character varying",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "ds_senha",
+                    "data_type": "character varying",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "ds_email",
+                    "data_type": "character varying",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "fg_ativo",
+                    "data_type": "character",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "dt_cadastro",
+                    "data_type": "timestamp without time zone",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "dt_atualizacao",
+                    "data_type": "timestamp without time zone",
+                    "is_nullable": "YES"
+                }
+            ]
+        },
+        "sysapp_config_user_empresas": {
+            "total_colunas": 5,
+            "total_registros": 1,
+            "campos_encontrados": [],
+            "score": 0,
+            "colunas": [
+                {
+                    "column_name": "cd_config",
+                    "data_type": "integer",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "cd_usuario",
+                    "data_type": "integer",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "cd_empresa",
+                    "data_type": "integer",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "fg_ativo",
+                    "data_type": "character",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "dt_cadastro",
+                    "data_type": "timestamp without time zone",
+                    "is_nullable": "YES"
+                }
+            ]
+        },
+        "sysapp_config_user_empresas_interfaces": {
+            "total_colunas": 6,
+            "total_registros": 5,
+            "campos_encontrados": [],
+            "score": 0,
+            "colunas": [
+                {
+                    "column_name": "cd_permissao",
+                    "data_type": "integer",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "cd_usuario",
+                    "data_type": "integer",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "cd_empresa",
+                    "data_type": "integer",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "cd_interface",
+                    "data_type": "integer",
+                    "is_nullable": "NO"
+                },
+                {
+                    "column_name": "fg_ativo",
+                    "data_type": "character",
+                    "is_nullable": "YES"
+                },
+                {
+                    "column_name": "dt_cadastro",
+                    "data_type": "timestamp without time zone",
+                    "is_nullable": "YES"
+                }
+            ]
+        }
+    },
+    "detalhes_produtos": []
+}
