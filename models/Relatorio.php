@@ -406,11 +406,10 @@ class Relatorio {
             $condicaoEstoque = 'AND (' . implode(' OR ', $condicoesEstoque) . ')';
         }
         
-        // Query principal usando tabelas REAIS
+        // Query principal usando tabelas REAIS - OTIMIZADA com LEFT JOIN ao invés de CROSS JOIN
         $sql = "
             WITH estoque_atual AS (
                 SELECT 
-                    p.cd_produto,
                     p.cd_marca,
                     est.cd_filial,
                     COALESCE(SUM(est.qtde_estoque), 0) as qtde_atual,
@@ -419,11 +418,11 @@ class Relatorio {
                 FROM est_produto p
                 INNER JOIN est_produto_cpl_tamanho tam ON tam.cd_produto = p.cd_produto
                 INNER JOIN est_produto_cpl_tamanho_prc_filial_estoque est ON est.cd_cpl_tamanho = tam.cd_cpl_tamanho
-                GROUP BY p.cd_produto, p.cd_marca, est.cd_filial
+                WHERE p.cd_marca IS NOT NULL
+                GROUP BY p.cd_marca, est.cd_filial
             ),
             vendas AS (
                 SELECT 
-                    pvt.cd_produto,
                     p.cd_marca,
                     pv.cd_filial,
                     COALESCE(SUM(pvt.qtde_produto), 0) as qtde_vendida,
@@ -434,7 +433,13 @@ class Relatorio {
                 WHERE DATE(pv.dt_hr_ped) >= :venda_dt_inicio::date
                   AND DATE(pv.dt_hr_ped) <= :venda_dt_fim::date
                   AND pv.sts_ped = 1
-                GROUP BY pvt.cd_produto, p.cd_marca, pv.cd_filial
+                  AND p.cd_marca IS NOT NULL
+                GROUP BY p.cd_marca, pv.cd_filial
+            ),
+            marcas_com_dados AS (
+                SELECT DISTINCT cd_marca, cd_filial FROM estoque_atual
+                UNION
+                SELECT DISTINCT cd_marca, cd_filial FROM vendas
             )
             SELECT 
                 COALESCE(f.nm_fant, f.nm_filial, 'Filial ' || f.cd_filial) as nm_filial,
@@ -448,12 +453,14 @@ class Relatorio {
                 COALESCE(vd.valor_vendido, 0)::NUMERIC(14,2) as valor_vendido,
                 COALESCE(est_atual.preco_custo_medio, 0)::NUMERIC(14,2) as preco_custo,
                 COALESCE(est_atual.preco_venda_medio, 0)::NUMERIC(14,2) as preco_venda
-            FROM prc_filial f
-            CROSS JOIN est_produto_marca m
+            FROM marcas_com_dados mcd
+            INNER JOIN prc_filial f ON f.cd_filial = mcd.cd_filial
+            INNER JOIN est_produto_marca m ON m.cd_marca = mcd.cd_marca
             LEFT JOIN estoque_atual est_atual ON est_atual.cd_marca = m.cd_marca AND est_atual.cd_filial = f.cd_filial
             LEFT JOIN vendas vd ON vd.cd_marca = m.cd_marca AND vd.cd_filial = f.cd_filial
             WHERE f.sts_filial = 1
               $condicaoFiliais
+              $condicaoEstoque
             ORDER BY f.nm_fant, m.ds_marca
             LIMIT 1000
         ";

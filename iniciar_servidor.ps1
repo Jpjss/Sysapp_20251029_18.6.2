@@ -7,10 +7,8 @@ Write-Host "Parando processos PHP existentes..." -ForegroundColor Yellow
 Get-Process php -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 2
 
-# Navega para o diretório correto
-$projectPath = "c:\Users\Lenovo01\OneDrive\Área de Trabalho\Projeto\Sysapp 2025\Sysapp_20251029_18.6.2"
-Set-Location $projectPath
-Write-Host "Diretório: $projectPath" -ForegroundColor Green
+# Usa o diretório atual ao invés de definir caminho explícito
+Write-Host "Diretório: $(Get-Location)" -ForegroundColor Green
 
 # Limpa o cache de arquivos
 Write-Host "Limpando cache..." -ForegroundColor Yellow

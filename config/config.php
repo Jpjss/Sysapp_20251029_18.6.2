@@ -3,6 +3,11 @@
  * Configurações Gerais do Sistema
  */
 
+// Configurações de performance
+ini_set('max_execution_time', '300'); // 5 minutos
+ini_set('memory_limit', '512M');
+ini_set('max_input_time', '300');
+
 // Configurações de sessão
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
