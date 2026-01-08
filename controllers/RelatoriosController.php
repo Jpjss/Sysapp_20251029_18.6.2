@@ -51,6 +51,20 @@ class RelatoriosController extends Controller {
         $dt_fim = date('Y-m-d');
         $atendimentosPeriodo = $this->Relatorio->getAtendimentosPorPeriodo($dt_inicio, $dt_fim);
         
+        // Se não houver dados, cria array com zeros para os últimos 7 dias
+        if (empty($atendimentosPeriodo)) {
+            $atendimentosPeriodo = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $data = date('Y-m-d', strtotime("-$i days"));
+                $atendimentosPeriodo[] = [
+                    'data' => $data,
+                    'total' => 0,
+                    'clientes_unicos' => 0,
+                    'valor_total' => 0
+                ];
+            }
+        }
+        
         $this->set([
             'stats' => $stats,
             'topClientes' => $topClientes,
@@ -82,6 +96,20 @@ class RelatoriosController extends Controller {
         $dt_inicio = date('Y-m-d', strtotime('-7 days'));
         $dt_fim = date('Y-m-d');
         $atendimentosPeriodo = $this->Relatorio->getAtendimentosPorPeriodo($dt_inicio, $dt_fim);
+        
+        // Se não houver dados, cria array com zeros para os últimos 7 dias
+        if (empty($atendimentosPeriodo)) {
+            $atendimentosPeriodo = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $data = date('Y-m-d', strtotime("-$i days"));
+                $atendimentosPeriodo[] = [
+                    'data' => $data,
+                    'total' => 0,
+                    'clientes_unicos' => 0,
+                    'valor_total' => 0
+                ];
+            }
+        }
         
         echo json_encode([
             'success' => true,

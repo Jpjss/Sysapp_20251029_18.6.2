@@ -105,17 +105,45 @@ class Relatorio {
         $dt_inicio = $this->db->escape($dt_inicio);
         $dt_fim = $this->db->escape($dt_fim);
         
-        $sql = "SELECT DATE(pv.dt_hr_ped) as data, 
-                       COUNT(*) as total,
-                       COUNT(DISTINCT pv.cd_pessoa) as clientes_unicos,
-                       COALESCE(SUM(pv.vlr_vd), 0)::NUMERIC(14,2) as valor_total
-                FROM ped_vd pv
-                WHERE DATE(pv.dt_hr_ped) BETWEEN '$dt_inicio' AND '$dt_fim'
-                AND pv.sts_ped = 1
-                GROUP BY DATE(pv.dt_hr_ped)
-                ORDER BY DATE(pv.dt_hr_ped)";
+        // Tenta primeiro com a tabela dm_orcamento_vendas_consolidadas (mais comum em sistemas ERP)
+        try {
+            $sql = "SELECT DATE(dm_venda.dt_emi_pedido) as data, 
+                           COUNT(DISTINCT dm_venda.cd_pedido) as total,
+                           COUNT(DISTINCT dm_venda.cd_pessoa) as clientes_unicos,
+                           COALESCE(SUM(dm_venda.vl_tot_it - dm_venda.vl_devol_proporcional), 0)::NUMERIC(14,2) as valor_total
+                    FROM dm_orcamento_vendas_consolidadas dm_venda
+                    WHERE DATE(dm_venda.dt_emi_pedido) BETWEEN '$dt_inicio' AND '$dt_fim'
+                    GROUP BY DATE(dm_venda.dt_emi_pedido)
+                    ORDER BY DATE(dm_venda.dt_emi_pedido)";
+            
+            $result = $this->db->fetchAll($sql);
+            
+            // Se retornou dados, usa esse resultado
+            if ($result && count($result) > 0) {
+                return $result;
+            }
+        } catch (Exception $e) {
+            error_log("Erro ao buscar dados de dm_orcamento_vendas_consolidadas: " . $e->getMessage());
+        }
         
-        return $this->db->fetchAll($sql);
+        // Se não encontrou dados ou deu erro, tenta com a tabela ped_vd (fallback)
+        try {
+            $sql = "SELECT DATE(pv.dt_hr_ped) as data, 
+                           COUNT(*) as total,
+                           COUNT(DISTINCT pv.cd_pessoa) as clientes_unicos,
+                           COALESCE(SUM(pv.vlr_vd), 0)::NUMERIC(14,2) as valor_total
+                    FROM ped_vd pv
+                    WHERE DATE(pv.dt_hr_ped) BETWEEN '$dt_inicio' AND '$dt_fim'
+                    AND pv.sts_ped = 1
+                    GROUP BY DATE(pv.dt_hr_ped)
+                    ORDER BY DATE(pv.dt_hr_ped)";
+            
+            return $this->db->fetchAll($sql);
+        } catch (Exception $e) {
+            error_log("Erro ao buscar dados de ped_vd: " . $e->getMessage());
+            // Retorna array vazio se ambas as tentativas falharem
+            return [];
+        }
     }
     
     /**
@@ -132,18 +160,47 @@ class Relatorio {
         $result = $this->db->fetchOne($sql_detect);
         $campoNome = ($result && $result['column_name'] === 'nm_fant') ? 'nm_fant' : 'nm_pessoa';
         
-        $sql = "SELECT p.cd_pessoa, p.$campoNome as nm_fant, 
-                       COUNT(*) as total_atendimentos,
-                       MAX(pv.dt_hr_ped) as ultimo_atendimento,
-                       COALESCE(SUM(pv.vlr_vd), 0)::NUMERIC(14,2) as valor_total
-                FROM ped_vd pv
-                INNER JOIN glb_pessoa p ON pv.cd_pessoa = p.cd_pessoa
-                WHERE pv.sts_ped = 1
-                GROUP BY p.cd_pessoa, p.$campoNome
-                ORDER BY valor_total DESC
-                LIMIT $limit";
+        // Tenta primeiro com dm_orcamento_vendas_consolidadas
+        try {
+            $sql = "SELECT p.cd_pessoa, p.$campoNome as nm_fant, 
+                           COUNT(DISTINCT dm_venda.cd_pedido) as total_atendimentos,
+                           MAX(dm_venda.dt_emi_pedido) as ultimo_atendimento,
+                           COALESCE(SUM(dm_venda.vl_tot_it - dm_venda.vl_devol_proporcional), 0)::NUMERIC(14,2) as valor_total
+                    FROM dm_orcamento_vendas_consolidadas dm_venda
+                    INNER JOIN glb_pessoa p ON dm_venda.cd_pessoa = p.cd_pessoa
+                    GROUP BY p.cd_pessoa, p.$campoNome
+                    HAVING COUNT(DISTINCT dm_venda.cd_pedido) > 0
+                    ORDER BY valor_total DESC
+                    LIMIT $limit";
+            
+            $result = $this->db->fetchAll($sql);
+            
+            // Se retornou dados, usa esse resultado
+            if ($result && count($result) > 0) {
+                return $result;
+            }
+        } catch (Exception $e) {
+            error_log("Erro ao buscar top clientes de dm_orcamento_vendas_consolidadas: " . $e->getMessage());
+        }
         
-        return $this->db->fetchAll($sql);
+        // Fallback para ped_vd
+        try {
+            $sql = "SELECT p.cd_pessoa, p.$campoNome as nm_fant, 
+                           COUNT(*) as total_atendimentos,
+                           MAX(pv.dt_hr_ped) as ultimo_atendimento,
+                           COALESCE(SUM(pv.vlr_vd), 0)::NUMERIC(14,2) as valor_total
+                    FROM ped_vd pv
+                    INNER JOIN glb_pessoa p ON pv.cd_pessoa = p.cd_pessoa
+                    WHERE pv.sts_ped = 1
+                    GROUP BY p.cd_pessoa, p.$campoNome
+                    ORDER BY valor_total DESC
+                    LIMIT $limit";
+            
+            return $this->db->fetchAll($sql);
+        } catch (Exception $e) {
+            error_log("Erro ao buscar top clientes de ped_vd: " . $e->getMessage());
+            return [];
+        }
     }
     
     /**

@@ -659,8 +659,34 @@ class UsuariosController extends Controller {
                     }
                 }
                 
+                // ✨ CONFIGURAÇÃO AUTOMÁTICA DO BANCO DO CLIENTE ✨
+                require_once BASE_PATH . '/core/DatabaseSetup.php';
+                
+                $setupConfig = [
+                    'host' => $testHost,
+                    'database' => $testDb,
+                    'user' => $testUser,
+                    'password' => $testPass,
+                    'port' => $testPort
+                ];
+                
+                $setupResult = DatabaseSetup::setupNewDatabase($setupConfig, $cd_empresa);
+                
+                $message = 'Banco de dados cadastrado com sucesso!';
+                if ($setupResult['success']) {
+                    $message .= ' Configurações automáticas aplicadas.';
+                    error_log("DatabaseSetup executado com sucesso para empresa $cd_empresa");
+                } else {
+                    $message .= ' Algumas configurações podem não ter sido aplicadas.';
+                    error_log("DatabaseSetup com avisos para empresa $cd_empresa: " . print_r($setupResult, true));
+                }
+                
                 header('Content-Type: application/json');
-                echo json_encode(['success' => true, 'message' => 'Banco de dados cadastrado com sucesso!']);
+                echo json_encode([
+                    'success' => true, 
+                    'message' => $message,
+                    'setup_log' => $setupResult['log'] ?? []
+                ]);
             } else {
                 $dbError = pg_last_error($this->db->getConnection());
                 error_log("Falha ao salvar empresa. Erro PostgreSQL: " . $dbError);

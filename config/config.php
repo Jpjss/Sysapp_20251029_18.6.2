@@ -40,3 +40,11 @@ $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
 $baseDir = ($scriptDir === '/' || $scriptDir === '\\') ? '' : $scriptDir;
 
 define('BASE_URL', $protocol . '://' . $host . $baseDir);
+
+// Auto-carrega classes do core
+spl_autoload_register(function ($className) {
+    $coreFile = BASE_PATH . '/core/' . $className . '.php';
+    if (file_exists($coreFile)) {
+        require_once $coreFile;
+    }
+});
