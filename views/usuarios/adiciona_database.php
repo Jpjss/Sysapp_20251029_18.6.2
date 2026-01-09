@@ -35,7 +35,7 @@
         .database-icon {
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 100%);
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -124,7 +124,7 @@
         }
 
         .form-group input:focus {
-            border-color: #3b82f6;
+            border-color: var(--accent-1);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
@@ -213,7 +213,7 @@
         }
 
         .btn-primary {
-            background: #3b82f6;
+            background: var(--accent-1);
             color: white;
         }
 
@@ -284,7 +284,7 @@
             width: 50px;
             height: 50px;
             border: 4px solid rgba(59, 130, 246, 0.2);
-            border-top-color: #3b82f6;
+            border-top-color: var(--accent-1);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
@@ -366,7 +366,7 @@
             margin-top: 1rem;
             padding: 0.875rem 1rem;
             background-color: rgba(59, 130, 246, 0.08);
-            border-left: 3px solid #3b82f6;
+            border-left: 3px solid var(--accent-1);
             border-radius: 4px;
             line-height: 1.5;
         }

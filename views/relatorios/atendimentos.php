@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-3) 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -46,7 +46,7 @@
         .page-header .icon {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-3) 100%);
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -80,7 +80,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-3) 100%);
             color: white;
         }
 
@@ -155,7 +155,7 @@
 
         .form-control:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent-1);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
@@ -242,7 +242,7 @@
         }
 
         table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-3) 100%);
             color: white;
         }
 
@@ -457,7 +457,7 @@
         <!-- Cards de Resumo -->
         <div class="summary-cards">
             <div class="summary-card">
-                <div class="card-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                <div class="card-icon" style="background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 100%);">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 11l3 3L22 4"></path>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>

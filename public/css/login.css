@@ -36,6 +36,48 @@ body {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
+/* Decorative background for the login form panel (uses JPG placed in public/images/) */
+.login-form-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.login-form-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("../images/wla-stand.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.08; /* subtle decorative opacity */
+  filter: saturate(0.75) blur(0.6px) contrast(0.95);
+  pointer-events: none;
+}
+
+.login-form-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(255,255,255,0.88); /* overlay to keep form readable */
+}
+
+.login-form-container > * {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .login-form-container::before { opacity: 0.04; filter: none; background-position: center 30%; }
+}
+
+@media (max-width: 420px) {
+  .login-form-container::before { display: none; }
+  .login-form-container::after { background: rgba(255,255,255,0.96); }
+}
+
 .login img {
   max-width: 200px;
   height: auto;

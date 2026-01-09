@@ -4,10 +4,28 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Dark palette aligned with the login blues */
+  --bg-900: #0b1226;
+  --bg-800: #0f172a;
+  --bg-700: #111827;
+  --surface-1: #0f1c35;
+  --surface-2: #13223d;
+  --border-1: #1f2a44;
+  --border-2: #233356;
+  --text-primary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent: var(--accent-1, #3b82f6);
+  --accent-strong: var(--accent-2, #2563eb);
+  --accent-soft: var(--accent-3, #60a5fa);
+  --accent-glow: rgba(59, 130, 246, 0.25);
+  --card-shadow: 0 10px 30px rgba(12, 24, 56, 0.55);
+}
+
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: var(--bg-900);
+  color: var(--text-primary);
   line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -871,4 +889,186 @@ body {
 
 [data-theme="light"] .report-card p {
   color: #64748b;
+}
+
+/* Dark theme alignment with login palette (excludes the login page) */
+body {
+  background: var(--bg-900);
+  color: var(--text-primary);
+}
+
+.main-header {
+  background: linear-gradient(135deg, rgba(19, 31, 61, 0.95), rgba(11, 18, 38, 0.95));
+  border-bottom: 1px solid var(--border-2);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.main-nav a {
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.main-nav a:hover {
+  background: rgba(59, 130, 246, 0.14);
+  color: #ffffff;
+}
+
+.main-nav a.active {
+  background: rgba(59, 130, 246, 0.2);
+  color: #ffffff;
+}
+
+.page-header {
+  background: linear-gradient(135deg, #131f3d 0%, #0b1226 100%);
+  border: 1px solid var(--border-2);
+  box-shadow: var(--card-shadow);
+}
+
+.page-header h2 {
+  color: #f8fafc;
+}
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+  box-shadow: var(--card-shadow);
+}
+
+.form-control {
+  background: var(--bg-800);
+  border: 1px solid var(--border-1);
+  color: var(--text-primary);
+}
+
+.form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: var(--bg-800);
+}
+
+.checkbox-group {
+  background: var(--surface-2);
+  border-color: var(--border-1);
+}
+
+.checkbox-label:hover {
+  background: rgba(59, 130, 246, 0.12);
+  color: #f8fafc;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #f8fafc;
+  box-shadow: 0 8px 22px rgba(59, 130, 246, 0.35);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--accent-strong), #1d4ed8);
+}
+
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-1);
+}
+
+.btn-secondary:hover {
+  background: #182540;
+  border-color: var(--border-2);
+}
+
+.btn-info {
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+  color: #f8fafc;
+}
+
+.btn-info:hover {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+}
+
+.table {
+  background: var(--surface-1);
+}
+
+.table thead {
+  background: #121c34;
+}
+
+.table th {
+  color: var(--text-primary);
+}
+
+.table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.table-info {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: var(--text-primary);
+}
+
+.pagination .page-link {
+  background: var(--bg-800);
+  border: 1px solid var(--border-1);
+}
+
+.pagination .page-link:hover {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: var(--accent);
+  color: #f8fafc;
+}
+
+.pagination .page-link.active {
+  background: var(--accent);
+  color: #f8fafc;
+  border-color: var(--accent);
+}
+
+.flash-message {
+  background: #0f1c35;
+  border: 1px solid var(--border-1);
+}
+
+.stat-card,
+.action-btn {
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+  box-shadow: var(--card-shadow);
+}
+
+.stat-icon {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(37, 99, 235, 0.12));
+  color: #f8fafc;
+}
+
+.action-btn:hover {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: var(--accent);
+}
+
+.action-btn svg {
+  color: var(--accent);
+}
+
+.empresa-badge {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+.observacao-item,
+.historico-item {
+  border-left-color: var(--accent);
+}
+
+.report-icon {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(37, 99, 235, 0.2));
+}
+
+.report-card {
+  background: #111c34;
+  border-color: var(--border-1);
+}
+
+.report-card:hover {
+  border-color: rgba(59, 130, 246, 0.25);
 }

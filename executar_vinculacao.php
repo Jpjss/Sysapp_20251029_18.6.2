@@ -16,7 +16,7 @@ $resultado = ob_get_clean();
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-3) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -60,7 +60,7 @@ $resultado = ob_get_clean();
         .btn {
             display: inline-block;
             padding: 12px 24px;
-            background: #667eea;
+            background: var(--accent-1);
             color: white;
             text-decoration: none;
             border-radius: 6px;

@@ -89,6 +89,6 @@ if ($user) {
 
 // 4. Link para login
 echo "<h2>4. Acessar Sistema</h2>";
-echo "<p><a href='/usuarios/login' style='padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px;'>Ir para Login</a></p>";
+echo "<p><a href='/usuarios/login' style='padding: 10px 20px; background: var(--accent-1); color: white; text-decoration: none; border-radius: 5px;'>Ir para Login</a></p>";
 
 ?>

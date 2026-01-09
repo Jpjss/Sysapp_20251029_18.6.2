@@ -5,8 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= APP_NAME ?> - <?= $title ?? 'Sistema' ?></title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/css/style.css?v=2025123001">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/css/theme.css?v=1">
+    <!-- SYSTEC Premium Dark Theme - Sobrescreve estilos para tema escuro corporativo -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/css/theme-dark.css?v=<?= time() ?>">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        /* ======================================== */
+        /* RESET DE CONFLITOS COM style.css */
+        /* ======================================== */
+
+        /* Remove apenas estilos conflitantes de layout, mantendo cores originais */
+        .main-header {
+            padding: 0 !important; /* Remove padding do style.css */
+            /* background e color mantidos originais */
+        }
+
+        .main-header .container {
+            padding: 0 !important; /* Remove padding do container */
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+
+        .logo h1 {
+            font-size: inherit !important; /* Herda tamanho do nosso CSS */
+            font-weight: inherit !important; /* Herda peso do nosso CSS */
+            /* color mantida original */
+        }
+
+        .main-nav {
+            display: flex !important;
+            gap: inherit !important;
+            align-items: center !important;
+        }
+
+        .main-nav a {
+            /* color mantida original */
+            text-decoration: none !important;
+            padding: inherit !important;
+            border-radius: inherit !important;
+            transition: inherit !important;
+        }
+
+        .main-nav a:hover {
+            /* background e color mantidos originais */
+        }
+
+        .user-info {
+            /* color mantida original */
+            margin-right: 0 !important;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,7 +64,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f8fafc;
+            background: var(--page-bg, #f8fafc);
             min-height: 100vh;
         }
 
@@ -25,36 +74,42 @@
             flex-direction: column;
         }
 
-        /* Modern Header */
+        /* Modern Header - OTIMIZADO PARA COMPACTO */
         .main-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+            background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-3) 100%);
+            box-shadow: 0 2px 12px rgba(102, 126, 234, 0.12);
             position: sticky;
             top: 0;
             z-index: 1000;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
+            height: 56px; /* ALTURA FIXA COMPACTA */
+            min-height: 56px;
+            max-height: 56px;
         }
 
         .main-header .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 32px;
+            gap: 24px; /* GAP REDUZIDO */
+            height: 100%;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px; /* GAP REDUZIDO */
+            flex-shrink: 0;
         }
 
         .logo h1 {
             margin: 0;
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 18px; /* FONTE REDUZIDA */
+            font-weight: 600; /* PESO REDUZIDO */
+            letter-spacing: -0.02em;
         }
 
         .logo a {
@@ -62,9 +117,22 @@
             text-decoration: none !important;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 16px 0;
-            transition: opacity 0.3s;
+            gap: 8px;
+            padding: 0; /* PADDING REMOVIDO */
+            transition: opacity 0.2s;
+            height: 100%;
+            align-items: center;
+        }
+
+        /* Logo image sizing (moved from inline style) */
+        .logo a img {
+            height: 50px; /* ajustado para 50px conforme solicitado */
+            max-height: 50px;
+            width: auto;
+            object-fit: contain;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
         }
 
         .logo a:hover {
@@ -72,63 +140,80 @@
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
+            width: 28px; /* TAMANHO REDUZIDO */
+            height: 28px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
+            flex-shrink: 0;
         }
 
-        /* Navigation */
+        /* Navigation - OTIMIZADA */
         .main-nav {
             display: flex;
             align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 4px; /* GAP MÍNIMO */
+            flex-wrap: nowrap; /* SEM WRAP */
+            flex: 1;
+            justify-content: center;
+            height: 100%;
         }
 
         .main-nav a {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
+            padding: 8px 12px; /* PADDING REDUZIDO */
+            border-radius: 6px;
+            font-size: 13px; /* FONTE MENOR */
+            font-weight: 500; /* PESO REDUZIDO */
+            transition: all 0.2s;
             white-space: nowrap;
             position: relative;
+            height: 40px; /* ALTURA FIXA */
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .main-nav a:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.12);
             color: white;
-            transform: translateY(-1px);
+            transform: translateY(0); /* SEM TRANSFORM */
         }
 
         .main-nav a.active {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.18);
             color: white;
+            font-weight: 600;
         }
 
-        /* User Info */
+        .main-nav a svg {
+            width: 14px !important; /* ÍCONE MENOR */
+            height: 14px !important;
+            flex-shrink: 0;
+        }
+
+        /* User Info - COMPACTA */
         .user-section {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-left: 8px;
+            gap: 8px; /* GAP REDUZIDO */
+            padding: 6px 10px; /* PADDING REDUZIDO */
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin-left: 16px;
+            height: 40px; /* ALTURA FIXA */
+            flex-shrink: 0;
         }
 
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 28px; /* TAMANHO REDUZIDO */
+            height: 28px;
             background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
             border-radius: 50%;
             display: flex;
@@ -136,29 +221,30 @@
             justify-content: center;
             color: white;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 12px; /* FONTE MENOR */
+            flex-shrink: 0;
         }
 
         .user-info {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 1px; /* GAP MÍNIMO */
         }
 
         .user-name {
             color: white;
-            font-size: 14px;
+            font-size: 13px; /* FONTE MENOR */
             font-weight: 600;
-            line-height: 1;
+            line-height: 1.2;
         }
 
         .user-role {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 12px;
-            line-height: 1;
+            font-size: 11px; /* FONTE MENOR */
+            line-height: 1.2;
         }
 
-        /* Dropdown Menu */
+        /* Dropdown Menu - OTIMIZADO */
         .user-menu {
             position: relative;
         }
@@ -170,19 +256,21 @@
             cursor: pointer;
             display: flex;
             align-items: center;
+            height: 100%;
         }
 
         .user-menu-dropdown {
             position: absolute;
-            top: calc(100% + 8px);
+            top: calc(100% + 6px);
             right: 0;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            padding: 8px;
-            min-width: 200px;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            padding: 6px;
+            min-width: 180px; /* LARGURA REDUZIDA */
             display: none;
-            animation: slideDown 0.2s ease;
+            animation: slideDown 0.15s ease;
+            z-index: 1001;
         }
 
         .user-menu:hover .user-menu-dropdown {
@@ -192,7 +280,7 @@
         @keyframes slideDown {
             from {
                 opacity: 0;
-                transform: translateY(-8px);
+                transform: translateY(-4px);
             }
             to {
                 opacity: 1;
@@ -203,13 +291,13 @@
         .user-menu-dropdown a {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
+            gap: 8px;
+            padding: 8px 10px; /* PADDING REDUZIDO */
             color: #334155;
             text-decoration: none;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.2s;
+            border-radius: 6px;
+            font-size: 13px; /* FONTE MENOR */
+            transition: all 0.15s;
         }
 
         .user-menu-dropdown a:hover {
@@ -221,27 +309,87 @@
         .user-menu-dropdown .divider {
             height: 1px;
             background: #e2e8f0;
-            margin: 8px 0;
+            margin: 6px 0; /* MARGIN REDUZIDO */
         }
 
         .menu-icon {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             stroke-width: 2;
+            flex-shrink: 0;
         }
 
-        /* Mobile Menu Toggle */
+        /* Mobile Menu Toggle - OTIMIZADO */
         .mobile-menu-toggle {
             display: none;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 8px;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px; /* PADDING REDUZIDO */
+            border-radius: 6px;
             cursor: pointer;
             color: white;
+            height: 40px;
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
-        @media (max-width: 1024px) {
+        .mobile-menu-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ======================================== */
+        /* RESPONSIVIDADE OTIMIZADA - ALTURA COMPACTA */
+        /* ======================================== */
+
+        /* Tablet (1024px - 1199px) */
+        @media (max-width: 1199px) and (min-width: 1024px) {
+            .main-header .container {
+                padding: 0 16px;
+                gap: 20px;
+            }
+
+            .main-nav {
+                gap: 2px; /* GAP MÍNIMO */
+            }
+
+            .main-nav a {
+                padding: 6px 10px; /* PADDING REDUZIDO */
+                font-size: 12px; /* FONTE MENOR */
+                gap: 4px;
+            }
+
+            .main-nav a svg {
+                width: 12px !important;
+                height: 12px !important;
+            }
+
+            .logo h1 {
+                font-size: 16px; /* FONTE MENOR */
+            }
+
+            .logo-icon {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        /* Mobile Large (768px - 1023px) */
+        @media (max-width: 1023px) and (min-width: 768px) {
+            .main-header {
+                height: 52px; /* ALTURA REDUZIDA PARA MOBILE */
+                min-height: 52px;
+                max-height: 52px;
+            }
+
+            .main-header .container {
+                padding: 0 16px;
+                gap: 16px;
+            }
+
             .main-nav {
                 display: none;
                 position: absolute;
@@ -250,9 +398,10 @@
                 right: 0;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 flex-direction: column;
-                padding: 16px;
-                gap: 8px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                padding: 12px 16px;
+                gap: 4px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
             }
 
             .main-nav.active {
@@ -261,25 +410,162 @@
 
             .main-nav a {
                 width: 100%;
-                padding: 12px 16px;
+                padding: 10px 12px;
+                font-size: 14px;
+                justify-content: flex-start;
             }
 
             .mobile-menu-toggle {
-                display: block;
+                display: flex;
             }
 
             .user-section {
                 margin-left: 0;
             }
+
+            .logo h1 {
+                font-size: 16px;
+            }
+
+            .logo-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .user-section {
+                height: 36px;
+                padding: 4px 8px;
+            }
+
+            .user-avatar {
+                width: 24px;
+                height: 24px;
+                font-size: 11px;
+            }
+
+            .user-name {
+                font-size: 12px;
+            }
+
+            .user-role {
+                font-size: 10px;
+            }
         }
 
-        @media (max-width: 768px) {
+        /* Mobile Small (≤767px) */
+        @media (max-width: 767px) {
+            .main-header {
+                height: 48px; /* ALTURA MÍNIMA PARA MOBILE */
+                min-height: 48px;
+                max-height: 48px;
+            }
+
             .main-header .container {
-                padding: 0 16px;
+                padding: 0 12px;
+                gap: 12px;
+            }
+
+            .logo {
+                gap: 6px;
             }
 
             .logo h1 {
-                font-size: 20px;
+                font-size: 15px;
+                display: none; /* ESCONDE TEXTO DO LOGO EM TELAS MUITO PEQUENAS */
+            }
+
+            .logo-icon {
+                width: 32px; /* ÍCONE MAIOR PARA MELHOR TOQUE */
+                height: 32px;
+            }
+
+            .main-nav {
+                padding: 10px 12px;
+                gap: 2px;
+            }
+
+            .main-nav a {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .mobile-menu-toggle {
+                width: 36px;
+                height: 36px;
+                padding: 4px;
+            }
+
+            .mobile-menu-toggle svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .user-section {
+                height: 32px;
+                padding: 3px 6px;
+                margin-left: 8px;
+                gap: 6px;
+            }
+
+            .user-avatar {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+
+            .user-info {
+                display: none; /* ESCONDE INFO DO USUÁRIO EM TELAS PEQUENAS */
+            }
+
+            .user-menu-dropdown {
+                min-width: 160px;
+                right: -8px;
+            }
+
+            .user-menu-dropdown a {
+                padding: 6px 8px;
+                font-size: 12px;
+                gap: 6px;
+            }
+        }
+
+        /* Extra Small Mobile (≤480px) */
+        @media (max-width: 480px) {
+            .main-header {
+                height: 44px; /* ALTURA ULTRA-COMPACTA */
+                min-height: 44px;
+                max-height: 44px;
+            }
+
+            .main-header .container {
+                padding: 0 8px;
+                gap: 8px;
+            }
+
+            .logo-icon {
+                width: 28px;
+                height: 28px;
+            }
+
+            .mobile-menu-toggle {
+                width: 32px;
+                height: 32px;
+            }
+
+            .user-section {
+                height: 28px;
+                padding: 2px 4px;
+                margin-left: 4px;
+            }
+
+            .user-avatar {
+                width: 18px;
+                height: 18px;
+                font-size: 9px;
+            }
+            /* Reduce logo size on very small screens */
+            .logo a img {
+                height: 48px;
             }
         }
     </style>
@@ -291,13 +577,7 @@
             <div class="container">
                 <div class="logo">
                     <a href="<?= BASE_URL ?>/relatorios/index">
-                        <div class="logo-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                            </svg>
-                        </div>
-                        <h1><?= APP_NAME ?></h1>
+                        <img src="<?= BASE_URL ?>/public/images/systec-logo-branca.png" alt="<?= APP_NAME ?>">
                     </a>
                 </div>
 

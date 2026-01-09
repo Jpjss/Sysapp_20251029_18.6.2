@@ -66,7 +66,7 @@
     justify-content: center;
     align-items: center;
     padding: 24px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-3) 100%);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -102,7 +102,7 @@
     justify-content: center;
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-3) 100%);
     border-radius: 20px;
     color: white;
     margin-bottom: 24px;

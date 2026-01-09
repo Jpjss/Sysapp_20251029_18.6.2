@@ -1,0 +1,36 @@
+:root {
+  /* Core palette pulled from the login screen blues */
+  --accent-1: #3b82f6; /* bright blue */
+  --accent-2: #2563eb; /* deep blue */
+  --accent-3: #60a5fa; /* soft sky blue */
+
+  --panel-bg-start: rgba(18, 32, 72, 0.85);
+  --panel-bg-end: rgba(10, 20, 50, 0.9);
+  --panel-border: rgba(120, 170, 255, 0.35);
+
+  --input-bg: rgba(255, 255, 255, 0.12);
+  --input-border: rgba(130, 170, 255, 0.3);
+
+  --button-grad-start: #3b82f6;
+  --button-grad-end: #2563eb;
+
+  --text: #ffffff;
+  --muted: rgba(148, 163, 184, 0.8);
+}
+
+/* Helper classes that other components can use */
+.brand-accent-gradient {
+  background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-3) 100%);
+}
+
+.panel-bg {
+  background: linear-gradient(180deg, var(--panel-bg-start), var(--panel-bg-end));
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--button-grad-start), var(--button-grad-end));
+  color: var(--text);
+}
+
+/* Small utilities */
+.text-muted { color: var(--muted); }

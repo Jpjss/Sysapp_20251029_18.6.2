@@ -636,7 +636,7 @@
 
 .log-item.info {
     background: rgba(59, 130, 246, 0.1);
-    border-left: 3px solid #3b82f6;
+    border-left: 3px solid var(--accent-1);
     color: #93c5fd;
 }
 
@@ -708,7 +708,7 @@
 
 .stat-total svg { color: #6366f1; }
 .stat-success svg { color: #22c55e; }
-.stat-info svg { color: #3b82f6; }
+.stat-info svg { color: var(--accent-1); }
 .stat-error svg { color: #ef4444; }
 
 .stat-info {

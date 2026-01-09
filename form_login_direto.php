@@ -9,7 +9,7 @@
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
-        button { background: #667eea; color: white; padding: 12px 30px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; width: 100%; }
+        button { background: var(--accent-1); color: white; padding: 12px 30px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; width: 100%; }
         button:hover { background: #5568d3; }
         .result { margin-top: 20px; padding: 15px; border-radius: 4px; }
         .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }

@@ -1,0 +1,1173 @@
+/**
+ * ============================================
+ * THEME-DARK.CSS - SYSTEC Premium Dark Theme
+ * ============================================
+ * Tema escuro corporativo com estética futurista
+ * Baseado na identidade visual da tela de login
+ * ============================================
+ */
+
+/* ========================================
+   PALETA OFICIAL (extraída do login)
+   ======================================== */
+:root {
+  /* Backgrounds */
+  --bg-main: #070b1a;
+  --bg-secondary: #0c1533;
+  --bg-tertiary: #0a1230;
+  --bg-glass: rgba(20, 35, 90, 0.45);
+  --bg-glass-strong: rgba(15, 28, 70, 0.65);
+  --bg-glass-light: rgba(30, 50, 120, 0.25);
+
+  /* Primary Colors */
+  --primary: #5b7cfa;
+  --primary-hover: #6d8bff;
+  --primary-soft: #4a6be8;
+  --accent: #7a6cff;
+  --accent-soft: #8b7fff;
+
+  /* Text Colors */
+  --text-main: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #aab0d8;
+  --text-subtle: #7c85b3;
+
+  /* Borders & Effects */
+  --border-glass: rgba(120, 140, 255, 0.25);
+  --border-strong: rgba(90, 120, 255, 0.4);
+  --border-subtle: rgba(100, 130, 255, 0.15);
+
+  /* Shadows & Glows */
+  --shadow-glow: 0 0 25px rgba(90, 120, 255, 0.25);
+  --shadow-glow-strong: 0 0 40px rgba(90, 120, 255, 0.35);
+  --shadow-card: 0 8px 32px rgba(5, 10, 30, 0.6);
+  --shadow-hover: 0 12px 40px rgba(90, 120, 255, 0.2);
+
+  /* Gradients */
+  --gradient-bg: radial-gradient(ellipse at top, #0e1a4f 0%, #050814 70%);
+  --gradient-header: linear-gradient(180deg, #0b1433 0%, #080e24 100%);
+  --gradient-sidebar: linear-gradient(180deg, #050814 0%, #0a1230 100%);
+  --gradient-card: linear-gradient(135deg, rgba(20, 40, 100, 0.5) 0%, rgba(15, 25, 60, 0.4) 100%);
+  --gradient-button: linear-gradient(135deg, #5b7cfa 0%, #7a6cff 100%);
+  --gradient-button-hover: linear-gradient(135deg, #6d8bff 0%, #8b7fff 100%);
+
+  /* Status Colors */
+  --success: #2dd4bf;
+  --success-bg: rgba(45, 212, 191, 0.12);
+  --error: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.12);
+  --warning: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.12);
+  --info: #60a5fa;
+  --info-bg: rgba(96, 165, 250, 0.12);
+}
+
+/* ========================================
+   BACKGROUND GERAL
+   ======================================== */
+html {
+  background: var(--bg-main);
+}
+
+body {
+  background: var(--gradient-bg) !important;
+  background-attachment: fixed !important;
+  color: var(--text-main) !important;
+  min-height: 100vh;
+}
+
+.wrapper {
+  background: transparent;
+}
+
+/* ========================================
+   HEADER / TOPBAR
+   ======================================== */
+.main-header {
+  background: var(--gradient-header) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--border-glass) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+header,
+.navbar,
+nav.main-nav {
+  background: transparent !important;
+}
+
+/* Logo */
+.logo h1,
+.logo a {
+  color: var(--text-main) !important;
+}
+
+.logo-icon {
+  background: rgba(90, 120, 255, 0.2) !important;
+  border: 1px solid var(--border-glass) !important;
+}
+
+/* Navigation Links */
+.main-nav a {
+  color: var(--text-muted) !important;
+  border-radius: 10px !important;
+  transition: all 0.25s ease !important;
+}
+
+.main-nav a:hover {
+  background: rgba(90, 120, 255, 0.15) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-glow) !important;
+}
+
+.main-nav a.active {
+  background: rgba(90, 120, 255, 0.2) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-glow) !important;
+}
+
+.main-nav a svg {
+  color: var(--primary) !important;
+}
+
+/* User Section */
+.user-section {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid var(--border-glass) !important;
+}
+
+.user-avatar {
+  background: var(--gradient-button) !important;
+  box-shadow: 0 4px 12px rgba(90, 120, 255, 0.3) !important;
+}
+
+.user-name {
+  color: var(--text-main) !important;
+}
+
+.user-role {
+  color: var(--text-muted) !important;
+}
+
+/* Dropdown Menu */
+.user-menu-dropdown {
+  background: var(--bg-glass-strong) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-card) !important;
+  border-radius: 14px !important;
+}
+
+.user-menu-dropdown a {
+  color: var(--text-secondary) !important;
+}
+
+.user-menu-dropdown a:hover {
+  background: rgba(90, 120, 255, 0.12) !important;
+  color: var(--text-main) !important;
+}
+
+/* ========================================
+   SIDEBAR (se existir)
+   ======================================== */
+.sidebar,
+aside {
+  background: var(--gradient-sidebar) !important;
+  border-right: 1px solid var(--border-glass) !important;
+}
+
+.sidebar a,
+aside a {
+  color: var(--text-muted) !important;
+  border-radius: 10px !important;
+  transition: all 0.25s ease !important;
+}
+
+.sidebar a:hover,
+aside a:hover,
+.sidebar a.active,
+aside a.active {
+  background: rgba(90, 120, 255, 0.15) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-glow) !important;
+}
+
+/* ========================================
+   MAIN CONTENT
+   ======================================== */
+.main-content {
+  background: transparent !important;
+}
+
+.container {
+  background: transparent !important;
+}
+
+/* ========================================
+   PAGE HEADER
+   ======================================== */
+.page-header {
+  background: var(--gradient-card) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.page-header h2 {
+  color: var(--text-main) !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ========================================
+   CARDS (glassmorphism)
+   ======================================== */
+.card {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--shadow-card) !important;
+  color: var(--text-main) !important;
+  transition: all 0.3s ease !important;
+}
+
+.card:hover {
+  border-color: var(--border-strong) !important;
+  box-shadow: var(--shadow-hover) !important;
+}
+
+.card h3,
+.card h4,
+.card h5 {
+  color: var(--text-main) !important;
+}
+
+.card p {
+  color: var(--text-muted) !important;
+}
+
+/* ========================================
+   STAT CARDS (Dashboard)
+   ======================================== */
+.stat-card {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--shadow-card) !important;
+  transition: all 0.3s ease !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: var(--border-strong) !important;
+  box-shadow: var(--shadow-hover) !important;
+}
+
+.stat-icon {
+  background: var(--bg-glass-light) !important;
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-glow) !important;
+}
+
+.stat-content h3 {
+  color: var(--text-main) !important;
+}
+
+.stat-content p {
+  color: var(--text-muted) !important;
+}
+
+/* ========================================
+   REPORT CARDS
+   ======================================== */
+.report-card {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--shadow-card) !important;
+  transition: all 0.3s ease !important;
+}
+
+.report-card:hover {
+  transform: translateY(-6px) !important;
+  border-color: var(--border-strong) !important;
+  box-shadow: var(--shadow-glow-strong) !important;
+}
+
+.report-card h4 {
+  color: var(--text-main) !important;
+}
+
+.report-card p {
+  color: var(--text-muted) !important;
+}
+
+.report-icon {
+  background: var(--bg-glass-light) !important;
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-glow) !important;
+}
+
+/* ========================================
+   QUICK ACTIONS
+   ======================================== */
+.action-btn {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 14px !important;
+  color: var(--text-main) !important;
+  transition: all 0.25s ease !important;
+}
+
+.action-btn:hover {
+  background: rgba(90, 120, 255, 0.18) !important;
+  border-color: var(--border-strong) !important;
+  box-shadow: var(--shadow-glow) !important;
+  transform: translateY(-3px) !important;
+}
+
+.action-btn svg {
+  color: var(--primary) !important;
+}
+
+.action-btn span {
+  color: var(--text-main) !important;
+}
+
+/* ========================================
+   TABELAS
+   ======================================== */
+.table-wrapper {
+  background: transparent !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+.table {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+.table thead {
+  background: rgba(90, 120, 255, 0.15) !important;
+}
+
+.table th {
+  color: var(--text-main) !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--border-glass) !important;
+  background: rgba(90, 120, 255, 0.12) !important;
+}
+
+.table td {
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.table tbody tr {
+  transition: all 0.2s ease !important;
+}
+
+.table tbody tr:hover {
+  background: rgba(90, 120, 255, 0.08) !important;
+}
+
+.table-info {
+  background: var(--bg-glass-light) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-main) !important;
+  border-radius: 12px !important;
+}
+
+/* ========================================
+   FORMULÁRIOS
+   ======================================== */
+.form-group label {
+  color: var(--text-secondary) !important;
+}
+
+.form-control,
+input,
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 12px !important;
+  transition: all 0.25s ease !important;
+}
+
+.form-control:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(91, 124, 250, 0.25) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-subtle) !important;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+  background: var(--bg-glass-light) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 14px !important;
+}
+
+.checkbox-label {
+  color: var(--text-secondary) !important;
+}
+
+.checkbox-label:hover {
+  background: rgba(90, 120, 255, 0.12) !important;
+  color: var(--text-main) !important;
+}
+
+.form-text {
+  color: var(--text-subtle) !important;
+}
+
+/* ========================================
+   BOTÕES
+   ======================================== */
+.btn {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  transition: all 0.25s ease !important;
+}
+
+.btn-primary {
+  background: var(--gradient-button) !important;
+  border: none !important;
+  color: var(--text-main) !important;
+  box-shadow: 0 8px 24px rgba(90, 120, 255, 0.35) !important;
+}
+
+.btn-primary:hover {
+  background: var(--gradient-button-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 32px rgba(100, 130, 255, 0.45) !important;
+}
+
+.btn-secondary {
+  background: var(--bg-glass) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-secondary) !important;
+}
+
+.btn-secondary:hover {
+  background: rgba(90, 120, 255, 0.15) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--text-main) !important;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3) !important;
+}
+
+.btn-danger:hover {
+  box-shadow: 0 12px 32px rgba(239, 68, 68, 0.4) !important;
+}
+
+.btn-info {
+  background: linear-gradient(135deg, var(--info) 0%, #3b82f6 100%) !important;
+  box-shadow: 0 8px 24px rgba(96, 165, 250, 0.3) !important;
+}
+
+.btn-info:hover {
+  box-shadow: 0 12px 32px rgba(96, 165, 250, 0.4) !important;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success) 0%, #14b8a6 100%) !important;
+  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.3) !important;
+}
+
+.btn-success:hover {
+  box-shadow: 0 12px 32px rgba(45, 212, 191, 0.4) !important;
+}
+
+/* ========================================
+   BADGES
+   ======================================== */
+.badge,
+.empresa-badge {
+  background: var(--gradient-button) !important;
+  color: var(--text-main) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 14px rgba(90, 120, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.badge-success {
+  background: linear-gradient(135deg, var(--success) 0%, #14b8a6 100%) !important;
+  box-shadow: 0 4px 14px rgba(45, 212, 191, 0.3) !important;
+}
+
+.badge-danger {
+  background: linear-gradient(135deg, var(--error) 0%, #dc2626 100%) !important;
+  box-shadow: 0 4px 14px rgba(248, 113, 113, 0.3) !important;
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%) !important;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.3) !important;
+}
+
+/* ========================================
+   FLASH MESSAGES / ALERTS
+   ======================================== */
+.flash-message {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 14px !important;
+}
+
+.flash-error,
+.alert-error {
+  background: var(--error-bg) !important;
+  border-color: rgba(248, 113, 113, 0.4) !important;
+  color: var(--error) !important;
+}
+
+.flash-success,
+.alert-success {
+  background: var(--success-bg) !important;
+  border-color: rgba(45, 212, 191, 0.4) !important;
+  color: var(--success) !important;
+}
+
+.flash-info,
+.alert-info {
+  background: var(--info-bg) !important;
+  border-color: rgba(96, 165, 250, 0.4) !important;
+  color: var(--info) !important;
+}
+
+.flash-warning,
+.alert-warning {
+  background: var(--warning-bg) !important;
+  border-color: rgba(251, 191, 36, 0.4) !important;
+  color: var(--warning) !important;
+}
+
+/* ========================================
+   PAGINAÇÃO
+   ======================================== */
+.pagination {
+  gap: 6px !important;
+}
+
+.page-link {
+  background: var(--bg-glass) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-secondary) !important;
+  border-radius: 10px !important;
+  transition: all 0.25s ease !important;
+}
+
+.page-link:hover {
+  background: rgba(90, 120, 255, 0.15) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-glow) !important;
+}
+
+.page-link.active {
+  background: var(--gradient-button) !important;
+  border-color: var(--primary) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-glow) !important;
+}
+
+/* ========================================
+   HISTÓRICO / OBSERVAÇÕES
+   ======================================== */
+.historico-item,
+.observacao-item {
+  background: var(--bg-glass-light) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-left: 4px solid var(--primary) !important;
+  border-radius: 14px !important;
+}
+
+.hist-header {
+  border-bottom-color: var(--border-subtle) !important;
+}
+
+.hist-header strong {
+  color: var(--text-main) !important;
+}
+
+.hist-date,
+.hist-user,
+.obs-header {
+  color: var(--text-muted) !important;
+}
+
+.hist-content,
+.obs-content {
+  color: var(--text-secondary) !important;
+}
+
+/* ========================================
+   FILTER FORM
+   ======================================== */
+.filter-form {
+  background: var(--bg-glass-light) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 14px !important;
+}
+
+/* ========================================
+   INFO GRID
+   ======================================== */
+.info-item strong {
+  color: var(--text-muted) !important;
+}
+
+.info-item span {
+  color: var(--text-secondary) !important;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+.main-footer {
+  background: var(--gradient-header) !important;
+  border-top: 1px solid var(--border-glass) !important;
+  color: var(--text-muted) !important;
+}
+
+/* ========================================
+   SCROLLBAR CUSTOMIZADA
+   ======================================== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: 5px;
+  border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--primary-hover) 0%, var(--accent-soft) 100%);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--bg-secondary);
+}
+
+/* ========================================
+   SELECTION
+   ======================================== */
+::selection {
+  background: rgba(91, 124, 250, 0.4);
+  color: var(--text-main);
+}
+
+/* ========================================
+   LINKS GERAIS
+   ======================================== */
+a {
+  color: var(--primary);
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+/* ========================================
+   CHARTS (Chart.js containers)
+   ======================================== */
+.chart-container,
+canvas {
+  background: transparent !important;
+}
+
+/* ========================================
+   MODALS
+   ======================================== */
+.modal-content,
+.modal {
+  background: var(--bg-glass-strong) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-glow-strong) !important;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-glass) !important;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-glass) !important;
+}
+
+.modal-title {
+  color: var(--text-main) !important;
+}
+
+/* ========================================
+   ANIMATIONS & TRANSITIONS
+   ======================================== */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: var(--shadow-glow);
+  }
+  50% {
+    box-shadow: var(--shadow-glow-strong);
+  }
+}
+
+.glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* Subtle fade-in for cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card,
+.stat-card,
+.report-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+@media (max-width: 768px) {
+  .card,
+  .stat-card,
+  .report-card {
+    border-radius: 14px !important;
+  }
+
+  .page-header {
+    border-radius: 14px !important;
+  }
+
+  .btn {
+    border-radius: 10px !important;
+  }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.glass-bg {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.neon-border {
+  border: 1px solid var(--border-glass) !important;
+}
+
+.glow-shadow {
+  box-shadow: var(--shadow-glow) !important;
+}
+
+.text-glow {
+  text-shadow: 0 0 20px rgba(91, 124, 250, 0.5);
+}
+
+/* ========================================
+   TELA SELECIONAR EMPRESA - LAYOUT REFINADO
+   ======================================== */
+
+/* Container principal - Background mais suave */
+.empresa-selection {
+  background: linear-gradient(160deg, #0a1628 0%, #0d1f3c 40%, #0a1628 100%) !important;
+  padding: 20px !important;
+  min-height: calc(100vh - 56px) !important; /* Desconta header */
+}
+
+/* Container central - Largura otimizada */
+.empresa-container {
+  background: var(--bg-glass-strong) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 24px !important;
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(90, 120, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  padding: 40px 48px !important;
+  
+  /* LARGURA OTIMIZADA - Mais aproveitamento horizontal */
+  max-width: 1100px !important;
+  width: calc(100% - 40px) !important;
+  margin: 0 auto !important;
+  
+  /* Animação suave */
+  animation: fadeInScale 0.5s ease-out !important;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header da página */
+.empresa-header {
+  margin-bottom: 36px !important;
+  padding-bottom: 28px !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.empresa-icon {
+  width: 72px !important;
+  height: 72px !important;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important;
+  border-radius: 18px !important;
+  box-shadow: 
+    0 12px 35px rgba(91, 124, 250, 0.4),
+    0 0 25px rgba(122, 108, 255, 0.2) !important;
+  margin-bottom: 20px !important;
+}
+
+.empresa-header h1 {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: var(--text-main) !important;
+  margin-bottom: 6px !important;
+  letter-spacing: -0.02em !important;
+}
+
+.empresa-header p {
+  font-size: 15px !important;
+  color: var(--text-muted) !important;
+}
+
+/* Grid de empresas - Otimizado */
+.empresas-grid {
+  display: grid !important;
+  /* Desktop: 3 colunas / Notebook: 2 colunas automático */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 20px !important;
+  margin-bottom: 32px !important;
+  
+  /* Melhor distribuição */
+  justify-content: center !important;
+}
+
+/* Cards de empresa - Tema escuro glassmorphism */
+.empresa-card .card-content {
+  background: rgba(15, 28, 60, 0.6) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  min-height: 150px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.empresa-card:hover .card-content {
+  border-color: var(--primary) !important;
+  background: rgba(25, 45, 90, 0.7) !important;
+  transform: translateY(-6px) !important;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(91, 124, 250, 0.15) !important;
+}
+
+.empresa-card input[type="radio"]:checked + .card-content {
+  border-color: var(--primary) !important;
+  background: linear-gradient(135deg, rgba(91, 124, 250, 0.15) 0%, rgba(122, 108, 255, 0.1) 100%) !important;
+  box-shadow: 
+    0 12px 35px rgba(91, 124, 250, 0.25),
+    0 0 40px rgba(91, 124, 250, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Ícone do card */
+.card-icon {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important;
+  box-shadow: 0 8px 20px rgba(91, 124, 250, 0.35) !important;
+}
+
+/* Título do card */
+.card-body h3 {
+  color: var(--text-main) !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+}
+
+/* Badge do banco */
+.empresa-card .badge {
+  background: rgba(91, 124, 250, 0.2) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-glass) !important;
+  font-size: 11px !important;
+  padding: 4px 10px !important;
+}
+
+/* Check icon */
+.check-icon {
+  background: var(--primary) !important;
+  box-shadow: 0 4px 15px rgba(91, 124, 250, 0.5) !important;
+}
+
+/* Botão Continuar */
+.btn-continuar {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 16px 32px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--text-main) !important;
+  box-shadow: 
+    0 10px 30px rgba(91, 124, 250, 0.4),
+    0 0 20px rgba(122, 108, 255, 0.15) !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-continuar:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 
+    0 15px 40px rgba(91, 124, 250, 0.5),
+    0 0 30px rgba(122, 108, 255, 0.25) !important;
+}
+
+/* ========================================
+   RESPONSIVIDADE - TELA SELECIONAR EMPRESA
+   ======================================== */
+
+/* Desktop grande (1400px+) - 3 ou 4 colunas */
+@media (min-width: 1400px) {
+  .empresa-container {
+    max-width: 1200px !important;
+    padding: 48px 56px !important;
+  }
+  
+  .empresas-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 24px !important;
+  }
+}
+
+/* Desktop médio (1200px - 1399px) - 3 colunas */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .empresa-container {
+    max-width: 1000px !important;
+  }
+  
+  .empresas-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Notebook / Tablet landscape (992px - 1199px) - 2 colunas */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .empresa-container {
+    max-width: 900px !important;
+    padding: 36px 40px !important;
+  }
+  
+  .empresas-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 18px !important;
+  }
+}
+
+/* Notebook pequeno (768px - 991px) - 2 colunas */
+@media (min-width: 768px) and (max-width: 991px) {
+  .empresa-selection {
+    padding: 16px !important;
+  }
+  
+  .empresa-container {
+    max-width: 720px !important;
+    padding: 32px 36px !important;
+  }
+  
+  .empresas-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  .empresa-header h1 {
+    font-size: 24px !important;
+  }
+  
+  .empresa-icon {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
+
+/* Tablet portrait (576px - 767px) - 2 colunas compactas */
+@media (min-width: 576px) and (max-width: 767px) {
+  .empresa-selection {
+    padding: 12px !important;
+    background: linear-gradient(180deg, #0a1628 0%, #0d1f3c 100%) !important;
+  }
+  
+  .empresa-container {
+    max-width: 100% !important;
+    width: calc(100% - 24px) !important;
+    padding: 28px 24px !important;
+    border-radius: 20px !important;
+  }
+  
+  .empresas-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+  
+  .empresa-card .card-content {
+    padding: 18px !important;
+    min-height: 130px !important;
+  }
+  
+  .card-icon {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .card-body h3 {
+    font-size: 14px !important;
+  }
+}
+
+/* Mobile (até 575px) - 1 coluna */
+@media (max-width: 575px) {
+  .empresa-selection {
+    padding: 10px !important;
+    background: linear-gradient(180deg, #0a1628 0%, #0d1f3c 100%) !important;
+    align-items: flex-start !important;
+    padding-top: 20px !important;
+  }
+  
+  .empresa-container {
+    max-width: 100% !important;
+    width: calc(100% - 20px) !important;
+    padding: 24px 20px !important;
+    border-radius: 18px !important;
+    margin: 0 auto !important;
+  }
+  
+  .empresa-header {
+    margin-bottom: 24px !important;
+    padding-bottom: 20px !important;
+  }
+  
+  .empresa-icon {
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 14px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .empresa-header h1 {
+    font-size: 22px !important;
+  }
+  
+  .empresa-header p {
+    font-size: 14px !important;
+  }
+  
+  .empresas-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .empresa-card .card-content {
+    padding: 20px !important;
+    min-height: auto !important;
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  
+  .card-icon {
+    width: 44px !important;
+    height: 44px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .card-body {
+    flex: 1 !important;
+  }
+  
+  .card-body h3 {
+    font-size: 15px !important;
+  }
+  
+  .btn-continuar {
+    padding: 14px 24px !important;
+    font-size: 15px !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* Zoom 90% - 125% - Ajustes finos */
+@media (min-resolution: 1.1dppx) and (max-resolution: 1.25dppx) {
+  .empresa-container {
+    max-width: 1050px !important;
+  }
+}
+
+@media (min-resolution: 1.25dppx) and (max-resolution: 1.5dppx) {
+  .empresa-container {
+    max-width: 950px !important;
+    padding: 36px 42px !important;
+  }
+  
+  .empresas-grid {
+    gap: 16px !important;
+  }
+}

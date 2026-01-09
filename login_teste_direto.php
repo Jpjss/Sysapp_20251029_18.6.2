@@ -10,7 +10,7 @@
         .info { background: #e3f2fd; padding: 15px; border-radius: 4px; margin: 15px 0; }
         .success { background: #c8e6c9; padding: 15px; border-radius: 4px; margin: 15px 0; color: #2e7d32; }
         .error { background: #ffcdd2; padding: 15px; border-radius: 4px; margin: 15px 0; color: #c62828; }
-        a { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 4px; }
+        a { display: inline-block; margin-top: 20px; padding: 10px 20px; background: var(--accent-1); color: white; text-decoration: none; border-radius: 4px; }
     </style>
 </head>
 <body>

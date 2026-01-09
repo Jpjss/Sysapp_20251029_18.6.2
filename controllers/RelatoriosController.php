@@ -517,7 +517,7 @@ class RelatoriosController extends Controller {
         .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid var(--accent-1);
             padding-bottom: 20px;
         }
         .header h1 {
@@ -540,7 +540,7 @@ class RelatoriosController extends Controller {
             margin-bottom: 30px;
         }
         table thead {
-            background: #667eea;
+            background: var(--accent-1);
             color: white;
         }
         table th, table td {
@@ -563,7 +563,7 @@ class RelatoriosController extends Controller {
             font-size: 12px;
         }
         .btn-print {
-            background: #667eea;
+            background: var(--accent-1);
             color: white;
             border: none;
             padding: 12px 24px;
@@ -809,7 +809,7 @@ class RelatoriosController extends Controller {
         h1 { text-align: center; color: #333; font-size: 16pt; margin-bottom: 5px; }
         .info { text-align: center; color: #666; font-size: 8pt; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 8pt; }
-        th { background: #667eea; color: white; padding: 6px 4px; text-align: left; font-weight: bold; }
+        th { background: var(--accent-1); color: white; padding: 6px 4px; text-align: left; font-weight: bold; }
         td { padding: 5px 4px; border-bottom: 1px solid #ddd; }
         th.right, td.right { text-align: right; }
         .filial-header { background: #f1f5f9; font-weight: bold; }

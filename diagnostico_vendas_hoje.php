@@ -15,14 +15,14 @@ echo "<html><head><meta charset='utf-8'><title>Diagnóstico Vendas Hoje</title>"
 echo "<style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
     h1 { color: #333; }
-    h2 { color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+    h2 { color: var(--accent-1); border-bottom: 2px solid var(--accent-1); padding-bottom: 10px; }
     .success { background: #e8f5e9; padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0; }
     .error { background: #ffebee; padding: 15px; border-left: 4px solid #f44336; margin: 10px 0; }
     .warning { background: #fff3cd; padding: 15px; border-left: 4px solid #f59e0b; margin: 10px 0; }
     .info { background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0; }
     pre { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; }
     table { border-collapse: collapse; width: 100%; margin: 10px 0; background: white; }
-    th { background: #667eea; color: white; padding: 10px; text-align: left; }
+    th { background: var(--accent-1); color: white; padding: 10px; text-align: left; }
     td { padding: 8px; border: 1px solid #ddd; }
     tr:nth-child(even) { background: #f8f9fa; }
 </style></head><body>";
@@ -234,7 +234,7 @@ try {
         echo "</div>";
     }
     
-    echo "<br><a href='/relatorios/index' style='padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; display: inline-block;'>← Voltar ao Dashboard</a>";
+    echo "<br><a href='/relatorios/index' style='padding: 10px 20px; background: var(--accent-1); color: white; text-decoration: none; border-radius: 5px; display: inline-block;'>← Voltar ao Dashboard</a>";
     
 } catch (PDOException $e) {
     echo "<div class='error'>";

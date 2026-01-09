@@ -33,11 +33,11 @@ Session::start();
         }
         h1 {
             color: #333;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid var(--accent-1);
             padding-bottom: 10px;
         }
         h2 {
-            color: #667eea;
+            color: var(--accent-1);
             margin-top: 30px;
         }
         .status {
@@ -76,7 +76,7 @@ Session::start();
             border-bottom: 1px solid #ddd;
         }
         th {
-            background: #667eea;
+            background: var(--accent-1);
             color: white;
             font-weight: 600;
         }
@@ -106,7 +106,7 @@ Session::start();
         }
         .btn {
             padding: 10px 20px;
-            background: #667eea;
+            background: var(--accent-1);
             color: white;
             border: none;
             border-radius: 5px;

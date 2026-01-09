@@ -90,7 +90,7 @@ echo "<div style='background: #f0f0f0; padding: 20px; border-radius: 5px;'>";
 echo "<p><strong>Status:</strong> Sistema pronto para uso ✅</p>";
 echo "<p><strong>Login:</strong> admin</p>";
 echo "<p><strong>Senha:</strong> admin123</p>";
-echo "<p><a href='/usuarios/login' style='display: inline-block; margin-top: 10px; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px;'>Ir para Login</a></p>";
+echo "<p><a href='/usuarios/login' style='display: inline-block; margin-top: 10px; padding: 10px 20px; background: var(--accent-1); color: white; text-decoration: none; border-radius: 5px;'>Ir para Login</a></p>";
 echo "</div>";
 
 echo "</body></html>";
